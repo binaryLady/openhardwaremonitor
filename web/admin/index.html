@@ -9,6 +9,12 @@
 <link rel="apple-touch-icon" href="/apple-icon.png" />
 <link rel="stylesheet" href="/ttm/tokens.css" />
 <link rel="stylesheet" href="/ttm/components.css" />
+<style>
+  /* whitelabel form rhythm: stacked label→field, full-width inputs */
+  #h-wl ~ .ttm-grid label.ttm-note:not([style]) { display: block; margin: .55rem 0 .15rem; }
+  #h-wl ~ .ttm-grid .ttm-input { width: 100%; box-sizing: border-box; }
+  #wl-tokens { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .5rem; }
+</style>
 </head>
 <body class="ttm-page">
 <main class="ttm-main">
@@ -34,6 +40,52 @@
     <section class="ttm-card full" aria-labelledby="h-tele">
       <h2 class="ttm-card__title" id="h-tele">Telemetry — latest events</h2>
       <div class="ttm-tablewrap" id="events"><p class="ttm-note">loading…</p></div>
+    </section>
+
+    <section class="ttm-card full" aria-labelledby="h-wl">
+      <h2 class="ttm-card__title" id="h-wl">Whitelabel — brand · theme · gate</h2>
+      <p class="ttm-note">Edits preview live on this page. <b>Save on device</b> keeps the
+      token overrides in this browser (visitor-level); <b>Publish site-wide</b> writes
+      <code>ohm_site_config</code> so every visitor gets them (needs Supabase).</p>
+      <div class="ttm-grid" style="margin-top:.8rem">
+        <div>
+          <h3 class="ttm-card__title">Brand</h3>
+          <label class="ttm-note" for="wl-title">page title</label>
+          <input class="ttm-input" id="wl-title" type="text" placeholder="Hardware — live sensors">
+          <label class="ttm-note" for="wl-tagline">header tagline</label>
+          <input class="ttm-input" id="wl-tagline" type="text" placeholder="open hardware monitor · live sensors">
+          <label class="ttm-note" for="wl-footer">footer name</label>
+          <input class="ttm-input" id="wl-footer" type="text" placeholder="thetechmargin">
+          <label class="ttm-note" style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem">
+            <span class="ttm-switch"><input type="checkbox" id="wl-footer-hide"><span class="track"></span></span>
+            hide footer badge</label>
+        </div>
+        <div>
+          <h3 class="ttm-card__title">Theme</h3>
+          <label class="ttm-note" for="wl-default">site default</label>
+          <span class="ttm-select" style="position:relative;display:inline-block">
+            <select id="wl-default"><option value="ttm">Dark</option><option value="terminal">Terminal</option><option value="">Zine</option></select></span>
+          <div class="ttm-row" id="wl-tokens" style="margin-top:.6rem"></div>
+        </div>
+        <div>
+          <h3 class="ttm-card__title">Gate</h3>
+          <label class="ttm-note" style="display:flex;align-items:center;gap:.5rem">
+            <span class="ttm-switch"><input type="checkbox" id="wl-gate-on" checked><span class="track"></span></span>
+            gate enabled</label>
+          <label class="ttm-note" for="wl-gate-title">title</label>
+          <input class="ttm-input" id="wl-gate-title" type="text" placeholder="Sign in">
+          <label class="ttm-note" for="wl-gate-body">body</label>
+          <input class="ttm-input" id="wl-gate-body" type="text" placeholder="Name and email to enter.">
+          <label class="ttm-note" for="wl-gate-fine">fine print</label>
+          <input class="ttm-input" id="wl-gate-fine" type="text" placeholder="Stored by the site operator.">
+        </div>
+      </div>
+      <div class="ttm-row" style="margin-top:1rem">
+        <button class="ttm-btn-outline" id="wl-save">Save on device</button>
+        <button class="ttm-btn-primary" id="wl-publish">Publish site-wide</button>
+        <button class="ttm-btn-outline" id="wl-reset">Reset</button>
+        <span class="ttm-note" id="wl-status"></span>
+      </div>
     </section>
   </div>
 </main>
@@ -87,6 +139,8 @@
   var sb = window.TTMStack.supabase();
   var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g,
     function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+
+  initWhitelabel();
 
   if (!sb) {
     ['#visitors', '#events'].forEach(function(sel){
@@ -147,6 +201,107 @@
     })
     .catch(function(e){ $('#events').innerHTML = '<p class="ttm-note">telemetry read failed: ' + esc(e.message) + '</p>'; });
   };
+
+  // ── Whitelabel editor: live preview → save on device → publish site-wide ──
+  function initWhitelabel(){
+    var $ = function(sel){ return document.querySelector(sel); };
+    var sb = window.TTMStack.supabase();
+    var toast = function(m,o){ window.TTMToast && TTMToast.show(m, o || {}); };
+    var TOKENS = [
+      ['--ttm-pink','pink'], ['--ttm-cyan','cyan'], ['--ttm-lime','lime'],
+      ['--ttm-goldenrod','goldenrod'], ['--ttm-hot-red','hot-red'],
+      ['--ttm-irid-a','irid a'], ['--ttm-irid-b','irid b'], ['--ttm-irid-c','irid c'],
+      ['--ttm-irid-d','irid d'], ['--ttm-irid-e','irid e']
+    ];
+    var root = document.documentElement;
+    function cssVar(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
+    function toHex(c){
+      if (/^#([0-9a-f]{6})$/i.test(c)) return c;
+      var m = c.match(/\d+/g);
+      if (!m) return '#000000';
+      return '#' + m.slice(0,3).map(function(v){ return (+v).toString(16).padStart(2,'0'); }).join('');
+    }
+
+    // build token pickers from live values
+    var wrap = $('#wl-tokens');
+    TOKENS.forEach(function(t){
+      var lab = document.createElement('label');
+      lab.className = 'ttm-note';
+      lab.style.cssText = 'display:flex;flex-direction:column;gap:.2rem;align-items:center';
+      lab.innerHTML = '<input type="color" data-token="' + t[0] + '" value="' + toHex(cssVar(t[0])) + '">' + t[1];
+      wrap.appendChild(lab);
+    });
+
+    // prefill from published config
+    var b = TTMBrand.get('brand'), th = TTMBrand.get('theme'), g = TTMBrand.get('gate');
+    $('#wl-title').value = b.page_title || ''; $('#wl-tagline').value = b.tagline || '';
+    $('#wl-footer').value = b.footer_name || ''; $('#wl-footer-hide').checked = !!b.footer_hidden;
+    $('#wl-default').value = (th['default'] === null || th['default'] === undefined) ? 'ttm' : th['default'];
+    $('#wl-gate-on').checked = g.enabled !== false;
+    $('#wl-gate-title').value = g.title || ''; $('#wl-gate-body').value = g.body || '';
+    $('#wl-gate-fine').value = g.fine || '';
+    Object.keys(th.tokens || {}).forEach(function(k){
+      var inp = wrap.querySelector('[data-token="' + k + '"]');
+      if (inp) inp.value = toHex(th.tokens[k]);
+    });
+
+    function editedTokens(){
+      var out = {};
+      wrap.querySelectorAll('[data-token]').forEach(function(inp){
+        if (inp.value.toLowerCase() !== toHex(cssVar(inp.dataset.token)).toLowerCase() ||
+            inp.dataset.dirty) out[inp.dataset.token] = inp.value;
+      });
+      return out;
+    }
+    // live preview
+    wrap.addEventListener('input', function(e){
+      if (!e.target.dataset.token) return;
+      e.target.dataset.dirty = '1';
+      root.style.setProperty(e.target.dataset.token, e.target.value);
+    });
+    $('#wl-title').addEventListener('input', function(){ document.title = this.value || 'Mission Control — Hardware'; });
+    $('#wl-tagline').addEventListener('input', function(){
+      var c = document.querySelector('.ttm-header .ttm-crumb'); if (c && this.value) c.textContent = this.value;
+    });
+
+    $('#wl-save').addEventListener('click', function(){
+      var t = editedTokens();
+      var merged = TTMTheme.getCustom();
+      Object.keys(t).forEach(function(k){ merged[k] = t[k]; });
+      TTMTheme.setCustom(merged);
+      toast(Object.keys(t).length + ' token override(s) saved on this device.', { type: 'success' });
+    });
+
+    if (!sb) {
+      $('#wl-publish').disabled = true;
+      $('#wl-status').textContent = 'publish needs Supabase (local-only mode)';
+    }
+    $('#wl-publish').addEventListener('click', function(){
+      if (!sb) return;
+      var rows = [
+        { key: 'brand', value: { page_title: $('#wl-title').value, tagline: $('#wl-tagline').value,
+            footer_name: $('#wl-footer').value || 'thetechmargin', footer_hidden: $('#wl-footer-hide').checked } },
+        { key: 'theme', value: { 'default': $('#wl-default').value, tokens: editedTokens() } },
+        { key: 'gate',  value: { enabled: $('#wl-gate-on').checked, title: $('#wl-gate-title').value,
+            body: $('#wl-gate-body').value, fine: $('#wl-gate-fine').value } }
+      ];
+      sb.from('ohm_site_config').upsert(rows).then(function(r){
+        if (r.error) { toast('Publish failed: ' + r.error.message, { type: 'error' }); return; }
+        TTMBrand.refresh().then(function(){ toast('Published site-wide.', { type: 'success' }); });
+        window.TTMStack.track('whitelabel_publish', {});
+      });
+    });
+
+    $('#wl-reset').addEventListener('click', function(){
+      TTMTheme.resetCustom();
+      wrap.querySelectorAll('[data-token]').forEach(function(inp){
+        root.style.removeProperty(inp.dataset.token);
+        delete inp.dataset.dirty;
+        inp.value = toHex(cssVar(inp.dataset.token));
+      });
+      toast('Device overrides cleared.', { type: 'success', timeout: 2000 });
+    });
+  }
 })();
 </script>
 </body>
