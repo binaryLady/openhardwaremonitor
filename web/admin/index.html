@@ -53,7 +53,7 @@
           <input class="ttm-input" id="wl-tagline" type="text" placeholder="open hardware monitor · live sensors">
           <label class="ttm-note" for="wl-footer">footer name</label>
           <input class="ttm-input" id="wl-footer" type="text" placeholder="your name · optional">
-          <label class="ttm-note ttm-inline" style="margin-top:.5rem">
+          <label class="ttm-note ttm-inline ttm-gap-top-sm">
             <span class="ttm-switch"><input type="checkbox" id="wl-footer-hide"><span class="track"></span></span>
             hide footer badge</label>
         </div>
@@ -255,7 +255,6 @@
     TOKENS.forEach(function(t){
       var lab = document.createElement('label');
       lab.className = 'ttm-note';
-      lab.style.cssText = 'display:flex;flex-direction:column;gap:.2rem;align-items:center';
       lab.innerHTML = '<input type="color" data-token="' + t[0] + '" value="' + toHex(cssVar(t[0])) + '">' + t[1];
       wrap.appendChild(lab);
     });

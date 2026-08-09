@@ -218,7 +218,7 @@
   footer .heart { color: var(--ttm-hot-red); }
 
   footer .bn { font-family: var(--ttm-font-serif); font-size: 1rem; }
-@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
 
 /* ── ttm-burger + ttm-menu (theme.js) — all routes + theme, collapsed ── */
 .ttm-burger {
@@ -414,7 +414,7 @@
   padding: .55rem .35rem .55rem .8rem;
   font: 400 var(--ttm-fs-small)/1.4 var(--ttm-font-sans);
   pointer-events: auto;
-  animation: ttm-toast-in .22s ease;
+  animation: ttm-toast-in var(--ttm-anim-pop) ease;
 }
 .ttm-toast--success { border-left-color: var(--ttm-success); }
 .ttm-toast--warning { border-left-color: var(--ttm-warning); }
@@ -606,7 +606,7 @@ body.ttm-page {
     var(--ttm-irid-a), var(--ttm-irid-b), var(--ttm-irid-c),
     var(--ttm-irid-d), var(--ttm-irid-e), var(--ttm-irid-a));
   background-size: 400% 400%;
-  animation: ttm-iridescence 8s ease infinite;
+  animation: ttm-iridescence var(--ttm-anim-shimmer) ease infinite;
 }
 @keyframes ttm-iridescence {
   0% { background-position: 0% 50%; }
@@ -659,14 +659,17 @@ body.ttm-page {
 .ttm-skip:focus-visible { transform: none; }
 /* the skip target takes focus programmatically; never draw a ring on the page body */
 .ttm-main:focus { outline: none; }
-@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
 
 /* ── layout utilities — the sanctioned way to compose without inline styles ── */
 .ttm-inline { display: flex; align-items: center; gap: var(--ttm-spacing-sm); flex-wrap: wrap; }
 .ttm-gap-top { margin-top: var(--ttm-spacing-md); }
+.ttm-gap-top-sm { margin-top: var(--ttm-spacing-sm); }
+.ttm-gap-bottom { margin-bottom: var(--ttm-spacing-md); }
 .ttm-form label.ttm-note { display: block; margin: .55rem 0 .15rem; }
 .ttm-form .ttm-input { width: 100%; box-sizing: border-box; }
 .ttm-swatch-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ttm-spacing-sm); }
+.ttm-swatch-grid label { display: flex; flex-direction: column; gap: var(--ttm-spacing-xs); align-items: center; }
 .ttm-select { position: relative; display: inline-block; }
 
 /* ── ttm-input — mono text/url field, pairs with buttons in a ttm-srcbar ── */
@@ -760,7 +763,7 @@ body.ttm-page {
 
 /* fresh reading: one soft flash, token-timed; reduced motion collapses it */
 @keyframes ttm-val-fresh { from { background: var(--ttm-wash-hover); } to { background: transparent; } }
-.ttm-sensor .val.is-fresh { animation: ttm-val-fresh 900ms ease-out 1; border-radius: var(--radius-sm); }
+.ttm-sensor .val.is-fresh { animation: ttm-val-fresh var(--ttm-anim-flash) ease-out 1; border-radius: var(--radius-sm); }
 
 /* narrow screens: the sparkline cedes its column before anything truncates */
 @media (max-width: 560px) {
@@ -889,7 +892,7 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
   margin-right: .45em;
   border-radius: 50%;
   background: var(--ttm-success);
-  animation: ttm-pulse 2.4s ease-in-out infinite;
+  animation: ttm-pulse var(--ttm-anim-pulse) ease-in-out infinite;
 }
 @keyframes ttm-pulse {
   0%, 100% { opacity: 1; }
