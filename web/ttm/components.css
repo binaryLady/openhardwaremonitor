@@ -877,6 +877,23 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 }
 .ttm-menu__bernard:hover { background: var(--ttm-surface-alt); }
 
+/* ── ttm-modetoggle — light/dark flip in the page header (brand pattern) ── */
+.ttm-modetoggle {
+  margin-left: auto;
+  align-self: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ttm-border);
+  background: transparent;
+  color: var(--ttm-text);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--ttm-transition-fast), transform var(--ttm-transition-fast);
+}
+.ttm-modetoggle:hover { background: var(--ttm-wash-hover); transform: rotate(15deg); }
+
 /* ── visual pop — glow where the data is alive, gradients where it moves ── */
 .ttm-badge--live {
   color: var(--ttm-success);

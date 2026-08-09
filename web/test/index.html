@@ -148,12 +148,20 @@ window.addEventListener('load', function () {
     probe.remove();
     return fails.length === 0 ? true : fails.join('; ');
   });
-  t('modes: TTMTheme exposes mode/setMode/MODES and menu has mode radios', function () {
+  t('modes: TTMTheme exposes mode/setMode/MODES; header carries the toggle', function () {
     var T = window.TTMTheme;
     return typeof T.mode === 'function' && typeof T.setMode === 'function' &&
-      Array.isArray(T.MODES) && T.MODES.length === 3 &&
-      document.querySelectorAll('input[name="ttm-mode-pick"]').length === 3
-      ? true : 'mode API or radios missing';
+      Array.isArray(T.MODES) && T.MODES.length === 2 &&
+      document.querySelector('.ttm-header .ttm-modetoggle') !== null
+      ? true : 'mode API or header toggle missing';
+  });
+  t('modes: the header toggle flips the resolved mode', function () {
+    var root = document.documentElement;
+    var before = root.getAttribute('data-ttm-mode');
+    document.querySelector('.ttm-modetoggle').click();
+    var flipped = root.getAttribute('data-ttm-mode');
+    window.TTMTheme.setMode('dark'); // restore the bench pin
+    return before !== flipped ? true : 'stuck at ' + before;
   });
   t('theme.js: burger menu injected with theme radios', function () {
     return document.querySelector('.ttm-burger') !== null &&
