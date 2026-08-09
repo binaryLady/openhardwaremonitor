@@ -444,6 +444,15 @@ window.addEventListener('load', function () {
     N.closeMenu();
     var closed = !N.menuOpen() &&
       document.activeElement === document.querySelector('.ttm-burger');
+    // This test parked the browser's sequential-focus starting point on the
+    // burger (blur alone does not clear it), which would send the visitor's
+    // first Tab into the page tail instead of the skip link. A transient
+    // sentinel at the top of body resets the starting point to document start.
+    var sentinel = document.createElement('span');
+    sentinel.tabIndex = -1;
+    document.body.insertBefore(sentinel, document.body.firstChild);
+    sentinel.focus();
+    sentinel.remove();
     return opened && closed ? true : 'opened=' + opened + ' closed=' + closed;
   });
 
