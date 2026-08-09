@@ -255,47 +255,68 @@
     <EmbeddedResource Include="Resources\factor.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\js\jquery-ui-1.8.16.custom.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\jquery.tmpl.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\jquery.treeTable.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\ohm_web.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\images\toggle-collapse-dark.png" />
-    <EmbeddedResource Include="Resources\Web\images\toggle-collapse-light.png" />
-    <EmbeddedResource Include="Resources\Web\images\toggle-expand-dark.png" />
-    <EmbeddedResource Include="Resources\Web\images\toggle-expand-light.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_75_dadada_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_75_ffffff_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_inset-soft_95_fef1ec_1x100.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_222222_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_2e83ff_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_454545_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_888888_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_cd0a0a_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\jquery-ui-1.8.16.custom.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\css\jquery.treeTable.css" />
-    <EmbeddedResource Include="Resources\Web\css\ohm_web.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\index.html" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\images\transparent.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\js\jquery-1.7.2.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\knockout-2.1.0.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\knockout.mapping-latest.min.js" />
+    <!-- The TTM web dashboard (web/) is embedded directly via Link metadata,
+         so the browser UI and the embedded server share one source tree. -->
+    <EmbeddedResource Include="web\index.html">
+      <Link>Resources\Web\index.html</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\dashboard.js">
+      <Link>Resources\Web\dashboard.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\parse.js">
+      <Link>Resources\Web\parse.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\bridge.js">
+      <Link>Resources\Web\bridge.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\demo-data.js">
+      <Link>Resources\Web\demo-data.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\icon.svg">
+      <Link>Resources\Web\icon.svg</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\favicon.ico">
+      <Link>Resources\Web\favicon.ico</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\apple-icon.png">
+      <Link>Resources\Web\apple-icon.png</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\tokens.css">
+      <Link>Resources\Web\ttm\tokens.css</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\components.css">
+      <Link>Resources\Web\ttm\components.css</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\config.js">
+      <Link>Resources\Web\ttm\config.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\theme.js">
+      <Link>Resources\Web\ttm\theme.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\brand.js">
+      <Link>Resources\Web\ttm\brand.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\toast.js">
+      <Link>Resources\Web\ttm\toast.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\stack.js">
+      <Link>Resources\Web\ttm\stack.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\vendor\supabase.js">
+      <Link>Resources\Web\vendor\supabase.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\components\index.html">
+      <Link>Resources\Web\components\index.html</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\test\index.html">
+      <Link>Resources\Web\test\index.html</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\test\fixtures\data.sample.js">
+      <Link>Resources\Web\test\fixtures\data.sample.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\admin\index.html">
+      <Link>Resources\Web\admin\index.html</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ram.png" />
