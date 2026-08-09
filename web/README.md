@@ -25,8 +25,9 @@ demo feed, `/test/` for the self-test bench, `/admin/` for operators).
   sensors from a seeded generator; the same seed gives every student the
   same bytes for reproducible exercises.
 - **Design-system reference** — `/components/` shows the whole TTM stack
-  end to end; `/test/` proves it (42 checks, incl. WCAG contrast); the
-  token layer whitelabels via `TTMTheme.setCustom`.
+  end to end; `/test/` proves it (45 checks, incl. WCAG contrast); the
+  token layer whitelabels from Mission Control's editor — live preview,
+  save on device, or publish site-wide via `ohm_site_config`.
 - **Fork it for your own feed** — `parse.js`/`bridge.js` are pure and
   DOM-free: point them at any display-string sensor tree and the rest of
   the stack comes along.
@@ -40,10 +41,10 @@ demo feed, `/test/` for the self-test bench, `/admin/` for operators).
 | `bridge.js` | **map bridge** (`window.OHMBridge`): SpaceAPI v14 fragment for Maps of Making |
 | `dashboard.js` | rendering + data flow: polling, status, toasts, shortcuts |
 | `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape |
-| `ttm/` | the TTM stack: tokens, components, theme switcher, toasts, gate/telemetry (see `/THEMING.md`) |
+| `ttm/` | the TTM stack: tokens, components, theme switcher, whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
 | `admin/` | operator page; renders only for visitors flagged `is_admin` |
 | `components/` | end-to-end gallery of the component stack |
-| `test/` | the bench: 42 assertions, runs from `file://` or `/test/` |
+| `test/` | the bench: 45 assertions, runs from `file://` or `/test/` |
 
 ## Data contract
 
@@ -92,8 +93,9 @@ at the top of `bridge.js`):
 
 ## Tests
 
-Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 42
+Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 45
 assertions: the TTM stack (tokens incl. the full theme-able vocabulary,
+the whitelabel loader,
 theming across all three terminal selectors, whitelabel runtime, toasts,
 gate, telemetry), WCAG 2.1 contrast computed from live tokens in both
 themes, the sensor core, seeded demo/fixture data, and the map bridge

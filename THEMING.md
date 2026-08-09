@@ -23,12 +23,18 @@ A visitor's stored choice wins over the site default.
 
 ## Custom tokens (whitelabel)
 
-`theme.js` accepts per-site token overrides (localStorage
-`ttm_custom_tokens`, validated against `/^--(ttm|z|radius)-[a-z-]+$/`).
-The whitelabel admin editor that writes them (`brand.js` +
-`whitelabel.sql`) lives on the maps_of_making site; here the hook is
-dormant unless overrides are set by hand. Overrides apply on top of the
-active theme.
+Two layers, personal always winning:
+
+- **Device overrides** — `theme.js` applies localStorage
+  `ttm_custom_tokens` (validated against `/^--(ttm|z|radius)-[a-z-]+$/`).
+  Mission Control's Whitelabel card edits them with live preview and
+  **Save on device** (`TTMTheme.setCustom`).
+- **Site config** — `web/ttm/brand.js` reads `ohm_site_config` from
+  Supabase (60s browser cache): brand copy (page title, tagline, footer
+  badge), site default theme, site-wide token overrides, and gate copy
+  (consumed by `stack.js` via `TTMBrand.get('gate')`). Mission Control's
+  **Publish site-wide** writes it. Fail-soft: without Supabase the
+  defaults apply and publish is disabled with a note.
 
 ## Brand reference
 
