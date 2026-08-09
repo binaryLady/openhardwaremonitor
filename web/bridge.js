@@ -15,10 +15,28 @@
 //   url, location: {lat, lon}, contact: {...},
 //   image: { static: 'https://…/machine.jpg', iiif: 'https://…/iiif/machine' },
 //   fourCorners: { authorship: {credit, license}, backstory: {text},
-//                  imagery: {media: […]}, links: {links: […]} }
+//                  imagery: {media: […]}, links: {links: […]} },
+//   capabilities: ['Q332988', 'http://www.wikidata.org/entity/Q685', …],
+//   equipment: [{ equipment_type, manufacturing_process, make, model, … }]
 // }
+//
+// capabilities/equipment follow the OHM×MoM integration plan (upstream
+// maps_of_making docs/draft/ohm-mom-integration.md): manufacturing
+// capabilities anchor to Wikidata QIDs — the shared vocabulary hub between
+// Maps of Making's activity ontology (owl:sameAs) and Open Hardware
+// Manager's OKW records — emitted here as ext_tags (full Wikidata entity
+// IRIs) and ext_okw.equipment (OKW field names, passed through verbatim).
+// SpaceAPI v14 ext_ prefixing, like the other extensions; revisit the key
+// shape when MoM's ingestion of capability blocks lands (their phase 3).
 (function () {
   'use strict';
+
+  /** 'Q332988' | full IRI → canonical Wikidata entity IRI (null if neither). */
+  function wikidataIRI(c) {
+    if (/^Q\d+$/.test(c)) return 'http://www.wikidata.org/entity/' + c;
+    if (/^https?:\/\//.test(c)) return c;
+    return null;
+  }
 
   /** SpaceAPI-style fragment as a plain object. */
   function fragment(root, meta) {
@@ -59,6 +77,13 @@
       },
       'x-source': meta.source || 'open hardware monitor /data.json web dashboard'
     };
+    if (meta.capabilities && meta.capabilities.length) {
+      var tags = meta.capabilities.map(wikidataIRI).filter(function (t) { return t; });
+      if (tags.length) doc.ext_tags = tags;
+    }
+    if (meta.equipment && meta.equipment.length) {
+      doc.ext_okw = { equipment: meta.equipment };
+    }
     if (meta.image && meta.image.static) doc.logo = meta.image.static;
     if (meta.image && meta.image.iiif) {
       doc.ext_iiif = {

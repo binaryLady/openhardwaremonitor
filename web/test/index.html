@@ -370,6 +370,25 @@ window.addEventListener('load', function () {
            /Open Hardware Monitor/.test(doc.ext_fourcorners.backstory.text)
       ? true : 'merge broken';
   });
+  t('bridge: capabilities become Wikidata IRIs in ext_tags; absent without meta', function () {
+    var doc = window.OHMBridge.fragment(window.OHM_FIXTURE, {
+      capabilities: ['Q332988', 'http://www.wikidata.org/entity/Q685', 'not-a-qid']
+    });
+    var bare = window.OHMBridge.fragment(window.OHM_FIXTURE, {});
+    return doc.ext_tags && doc.ext_tags.length === 2 &&
+           doc.ext_tags[0] === 'http://www.wikidata.org/entity/Q332988' &&
+           doc.ext_tags[1] === 'http://www.wikidata.org/entity/Q685' &&
+           !('ext_tags' in bare) ? true : JSON.stringify(doc.ext_tags);
+  });
+  t('bridge: OKW equipment passes through as ext_okw.equipment', function () {
+    var eq = [{ equipment_type: 'http://www.wikidata.org/entity/Q332988',
+                make: 'Epilog', model: 'Fusion Pro', laser_power: 120 }];
+    var doc = window.OHMBridge.fragment(window.OHM_FIXTURE, { equipment: eq });
+    var bare = window.OHMBridge.fragment(window.OHM_FIXTURE, {});
+    return doc.ext_okw && doc.ext_okw.equipment[0].make === 'Epilog' &&
+           doc.ext_okw.equipment[0].laser_power === 120 &&
+           !('ext_okw' in bare) ? true : JSON.stringify(doc.ext_okw);
+  });
   t('bridge: IIIF ImageService3 block well-formed when meta provides a service', function () {
     var doc = window.OHMBridge.fragment(window.OHM_FIXTURE,
       { image: { iiif: 'https://iiif.example/machine' } });
