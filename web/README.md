@@ -72,32 +72,64 @@ the page from the same origin, use a local proxy, or use demo data.
 
 ## UX
 
-- hero band: the machine leads with stat tiles — hottest sensor (the one
-  hero figure), peak load, sensor count — each with a 40-point trend
-  sparkline built from the poll history the page already collects
-- sensor rows carry an inline sparkline (2px, de-emphasis ink, status
-  only on the "now" dot); the meter's unfilled track tints with the row's
-  state so warn/hot reads across the whole bar; fresh readings flash once
-- the machine URL persists in localStorage; the live badge pulses
-- keyboard: <kbd>d</kbd> demo · <kbd>/</kbd> connect · <kbd>t</kbd>
-  dark/terminal theme · <kbd>Esc</kbd> pause · <kbd>?</kbd> drawer menu ·
-  <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd>
-  navigates dashboard / components / test bench / mission control / maps.
-  The chord handler runs in the capture phase and consumes its keys, so
-  <kbd>g</kbd>-then-<kbd>t</kbd> navigates without also toggling the theme;
-  page-level shortcuts skip any key arriving `defaultPrevented`
-- sensor tree: <kbd>↑</kbd>/<kbd>↓</kbd> (or <kbd>j</kbd>/<kbd>k</kbd>)
-  move between device cards, <kbd>Home</kbd>/<kbd>End</kbd> jump to the
-  edges, <kbd>←</kbd>/<kbd>→</kbd> collapse/expand, <kbd>Enter</kbd>/<kbd>Space</kbd>
-  toggle (native). Keyboard focus survives the 5 s poll re-render
-- accessible navigation: every page starts with a skip-to-content link
-  (first tab stop, jumps to `#main`); the drawer menu moves focus in on
-  open, traps <kbd>Tab</kbd>, and returns focus to the burger on close;
-  `window.TTMNav` exposes the routes/chord state the test bench asserts
-- polling pauses when the tab is hidden and resumes on return; under
-  `prefers-reduced-motion` it stretches to 20 s
-- the status badge is a polite live region; warn/hot rows carry explanatory
-  titles rather than color alone
+- **Hero band** — the machine leads with stat tiles: hottest sensor (the
+  one hero figure of the view), peak load, sensor count — each with a
+  40-point trend sparkline built from the poll history the page already
+  collects.
+- **Sensor rows** carry an inline sparkline (2px line in de-emphasis ink,
+  no axes; the status color appears only on the "now" dot). The meter's
+  unfilled track tints with the row's state so warn/hot reads across the
+  whole bar. Fresh readings flash once, token-timed.
+- **Signs of life** — the live badge carries a heartbeat dot; device
+  cards get a hover wash. All motion wears `--ttm-anim-*` tokens.
+- **Frictionless return** — the machine URL persists in localStorage;
+  polling pauses when the tab is hidden and resumes on return.
+
+## Keyboard
+
+Single keys act on the dashboard; <kbd>g</kbd>-chords navigate the whole
+site. Shortcuts never fire while typing in a field.
+
+| Keys | Action |
+|---|---|
+| <kbd>d</kbd> | load / restart the demo feed |
+| <kbd>/</kbd> | focus the machine-URL field |
+| <kbd>t</kbd> | toggle dark ↔ terminal theme |
+| <kbd>Esc</kbd> | pause polling |
+| <kbd>?</kbd> | open / close the site menu (focus moves in) |
+| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / components / test bench / mission control / Maps of Making |
+| <kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>j</kbd>/<kbd>k</kbd> | move between device cards in the sensor tree |
+| <kbd>Home</kbd>/<kbd>End</kbd> | first / last device card |
+| <kbd>←</kbd>/<kbd>→</kbd> | collapse / expand the focused card |
+| <kbd>Enter</kbd>/<kbd>Space</kbd> | toggle the focused card (native) |
+
+The chord handler runs in the capture phase and consumes its keys, so
+<kbd>g</kbd>-then-<kbd>t</kbd> navigates without also toggling the theme;
+page-level shortcuts skip any key arriving `defaultPrevented`.
+`window.TTMNav` exposes the routes and chord state the test bench asserts.
+
+## Accessibility
+
+- **Skip link on every page** — the first tab stop jumps focus to
+  `#main` (`tabindex="-1"`), styled above every overlay.
+- **Focus is managed, never lost** — the drawer menu moves focus in on
+  open, traps <kbd>Tab</kbd>, and returns focus to the burger on close
+  (Escape and backdrop both close); keyboard focus in the sensor tree
+  survives the 5 s poll re-render; the gate dialog traps focus and
+  restores flow on completion.
+- **WCAG 2.1 AA, computed not claimed** — the test bench measures
+  contrast for every text/status pair and 3:1 for interactive chrome
+  (1.4.11), in both themes, from live token values on every run.
+- **State is never color-alone** — warn/hot rows carry explanatory
+  `title` text and tinted meter tracks alongside the colored value; the
+  status badge is a polite live region (`role="status"`,
+  `aria-live="polite"`).
+- **Reduced motion respected end to end** — `prefers-reduced-motion`
+  collapses every transition *and* animation (flash, pulse, shimmer),
+  and polling relaxes from 5 s to 20 s so values stop fluttering.
+- **44px touch targets**, `aria-expanded`/`aria-controls` on the menu
+  disclosure, `aria-current` marks the page you are on, meters and
+  sparklines are `aria-hidden` (the value text carries the data).
 
 ## Publishing to open maps (SpaceAPI · Four Corners · IIIF)
 
