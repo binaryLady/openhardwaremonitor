@@ -11,6 +11,9 @@
 <script src="../ttm/theme.js"></script>
 <script src="../ttm/toast.js"></script>
 <script src="../ttm/stack.js"></script>
+<script src="../parse.js"></script>
+<script src="../bridge.js"></script>
+<script src="../demo-data.js"></script>
 <style>
   .pass{color:var(--ttm-success);font-weight:700}
   .fail{color:var(--ttm-danger);font-weight:700}
@@ -116,6 +119,59 @@ window.addEventListener('load', function () {
     var gate = document.querySelector('.ttm-gate, [class*="gate"]');
     var signed = !!window.TTMStack.visitor();
     return skipped || gate !== null || signed ? true : 'no gate, not signed, not skipped';
+  });
+
+  // ── sensor core (parse.js) ────────────────────────────────────────────────
+  var P = window.OHMParse;
+  t('parse: num handles display strings', function () {
+    return P.num('1,234 RPM') === 1234 && P.num('52.0 °C') === 52 &&
+           P.num('-12.5 W') === -12.5 && P.num('') === null ? true : 'bad parse';
+  });
+  t('parse: categoryOf reads the icon', function () {
+    return P.categoryOf({ ImageURL: 'images_icon/temperature.png' }) === 'temperature' &&
+           P.categoryOf({ ImageURL: 'images/transparent.png' }) === null ? true : 'bad category';
+  });
+  var demoBlocks = P.flatten(window.OHM_DEMO());
+  t('parse: flatten finds 5 hardware blocks in the demo tree', function () {
+    return demoBlocks.length === 5 ? true : 'blocks=' + demoBlocks.length;
+  });
+  t('parse: flatten finds all 32 demo sensors (incl. sub-hardware)', function () {
+    var n = demoBlocks.reduce(function (a, b) { return a + b.sensors.length; }, 0);
+    return n === 32 ? true : 'sensors=' + n;
+  });
+  t('parse: stateOf thresholds (temp 70/85, load 80/95)', function () {
+    return P.stateOf({ cat: 'temperature', n: 85 }) === 'hot' &&
+           P.stateOf({ cat: 'temperature', n: 70 }) === 'warn' &&
+           P.stateOf({ cat: 'load', n: 95 }) === 'hot' &&
+           P.stateOf({ cat: 'load', n: 80 }) === 'warn' &&
+           P.stateOf({ cat: 'fan', n: 9999 }) === '' &&
+           P.stateOf({ cat: 'temperature', n: null }) === '' ? true : 'bad state';
+  });
+  t('parse: meterPct clamps load and scales min..max', function () {
+    return P.meterPct({ cat: 'load', value: '120 %', n: 120 }) === 100 &&
+           P.meterPct({ cat: 'clock', value: '50 MHz', n: 50, nMin: 0, nMax: 100 }) === 50 &&
+           P.meterPct({ cat: 'clock', value: '', n: null }) === null ? true : 'bad meter';
+  });
+
+  // ── map bridge (bridge.js) ────────────────────────────────────────────────
+  var frag = window.OHMBridge.fragment(window.OHM_DEMO());
+  t('bridge: SpaceAPI v14 envelope', function () {
+    return Array.isArray(frag.api_compatibility) && frag.api_compatibility[0] === '14' &&
+           frag.space === 'FORGE-01' && typeof frag.state.open === 'boolean' &&
+           typeof frag['x-source'] === 'string' ? true : 'bad envelope';
+  });
+  t('bridge: 7 temperatures + 3 fans from the demo tree', function () {
+    var tn = frag.sensors.temperature.length, fn = frag.sensors.fan_speed.length;
+    return tn === 7 && fn === 3 ? true : 'temps=' + tn + ' fans=' + fn;
+  });
+  t('bridge: sensor entries carry machine/hardware location', function () {
+    var s = frag.sensors.temperature[0];
+    return s && /^FORGE-01 \//.test(s.location) && typeof s.value === 'number' &&
+           s.unit === '°C' ? true : JSON.stringify(s);
+  });
+  t('bridge: json() emits parseable pretty JSON', function () {
+    var doc = JSON.parse(window.OHMBridge.json(window.OHM_DEMO()));
+    return doc.space === 'FORGE-01' ? true : 'roundtrip failed';
   });
 
   // ── report ────────────────────────────────────────────────────────────────
