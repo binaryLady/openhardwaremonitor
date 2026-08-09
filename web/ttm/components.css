@@ -1,6 +1,9 @@
 /* ============================================================================
    TTM component library — the spec's Component Patterns, implemented once.
    Pure token consumers (tokens.css is the only place a color may be defined).
+   Spacing doctrine: structural spacing uses the --ttm-spacing-* scale;
+   intra-component optical rhythm (.3/.6/.8/1.1rem …) is deliberate taste
+   and stays literal — never introduce a new color or font literal though.
    Consumed by every surface: map chrome widgets (menu, gate, toasts, footer),
    dashboard primitives (card, kv, bar, badge, meter, table), and form
    components (buttons, input, select, switch, color, range).
@@ -391,14 +394,14 @@
   z-index: var(--z-overlay);
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: var(--ttm-spacing-sm);
   width: min(92vw, 22rem);
   pointer-events: none;
 }
 .ttm-toast {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: var(--ttm-spacing-sm);
   background: var(--ttm-surface);
   color: var(--ttm-text);
   border: 1.5px solid var(--ttm-border);
@@ -442,7 +445,7 @@
 }
 .ttm-menu__bernard {
   display: block;
-  margin: 0 0 1rem;
+  margin: 0 0 var(--ttm-spacing-md);
   padding: .8rem .85rem;
   border: 1.5px solid var(--ttm-border);
   border-radius: var(--radius-sm);
@@ -450,7 +453,7 @@
   text-decoration: none;
 }
 .ttm-menu__bernard .voice {
-  font-family: 'Special Elite', var(--ttm-font-mono);
+  font-family: var(--ttm-font-voice);
   font-size: .95rem;
   line-height: 1.5;
   color: var(--ttm-goldenrod); /* lamplit amber — Bernard's band */
@@ -459,7 +462,7 @@
 
 /* ── Shortcut hints in the menu ── */
 .ttm-menu__keys {
-  margin: 1rem 0 0;
+  margin: var(--ttm-spacing-md) 0 0;
   padding: .75rem;
   border-top: 1.5px solid var(--ttm-border-subtle);
   font: 400 var(--ttm-fs-caption)/1.9 var(--ttm-font-mono);
@@ -612,7 +615,7 @@ body.ttm-page {
 }
 .ttm-header h1 { font-size: var(--ttm-fs-h3); font-weight: 600; margin: 0; }
 .ttm-crumb { font-family: var(--ttm-font-mono); font-size: var(--ttm-fs-caption); color: var(--ttm-text-muted); }
-.ttm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); grid-auto-flow: dense; gap: 1rem; }
+.ttm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); grid-auto-flow: dense; gap: var(--ttm-spacing-md); }
 .ttm-grid--wide { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
 .full { grid-column: 1 / -1; }
 .ttm-row { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .7rem; }
@@ -635,6 +638,14 @@ body.ttm-page {
 :focus-visible { outline: 2px solid var(--ttm-focus); outline-offset: 2px; }
 ::selection { background: var(--ttm-control); color: var(--ttm-on-accent); }
 @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+
+/* ── layout utilities — the sanctioned way to compose without inline styles ── */
+.ttm-inline { display: flex; align-items: center; gap: var(--ttm-spacing-sm); flex-wrap: wrap; }
+.ttm-gap-top { margin-top: var(--ttm-spacing-md); }
+.ttm-form label.ttm-note { display: block; margin: .55rem 0 .15rem; }
+.ttm-form .ttm-input { width: 100%; box-sizing: border-box; }
+.ttm-swatch-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ttm-spacing-sm); }
+.ttm-select { position: relative; display: inline-block; }
 
 /* ── ttm-input — mono text/url field, pairs with buttons in a ttm-srcbar ── */
 .ttm-srcbar { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.2rem; }
@@ -738,7 +749,7 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 /* ── ttm-menu__bernard — the keeper greets at the door (amber band) ── */
 .ttm-menu__bernard {
   display: block;
-  margin: 0 0 1rem;
+  margin: 0 0 var(--ttm-spacing-md);
   padding: .8rem .85rem;
   border: 1.5px solid var(--ttm-border);
   border-radius: var(--radius-sm);
@@ -746,7 +757,7 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
   text-decoration: none;
 }
 .ttm-menu__bernard .voice {
-  font-family: 'Special Elite', var(--ttm-font-mono);
+  font-family: var(--ttm-font-voice);
   font-size: .95rem;
   line-height: 1.5;
   color: var(--ttm-goldenrod); /* lamplit amber — Bernard's band */

@@ -64,6 +64,7 @@
   --ttm-font-sans: 'Poppins', 'Inter Tight', system-ui, sans-serif;
   --ttm-font-serif: 'Pacifico', 'Caveat', cursive;
   --ttm-font-mono: 'Geist Mono', 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --ttm-font-voice: 'Special Elite', var(--ttm-font-mono); /* Bernard's typewriter */
 
   /* Type scale */
   --ttm-fs-display: 4.5rem;
