@@ -21,7 +21,7 @@
     { href: '/components/', name: 'Components',      desc: 'the design stack, end to end' },
     { href: '/test/',       name: 'Test bench',      desc: 'the stack proves itself in-browser' },
     { group: 'Network' },
-    { href: 'https://maps-of-making.vercel.app/', name: 'Maps of Making',
+    { href: 'https://maps.thetechmargin.com/', name: 'Maps of Making',
       desc: 'where the map bridge publishes to' },
   ];
 
@@ -92,7 +92,7 @@
       "Bernard (they/them), keeper of 'Mother Sands'. Your machine's hum carries to the map.";
     var html = '<div class="ttm-menu__head"><span class="ttm-menu__title">Menu</span>' +
       '<button type="button" class="ttm-menu__close" aria-label="Close menu">×</button></div>';
-    html += '<a class="ttm-menu__bernard" href="https://maps-of-making.vercel.app/genjson/"><span class="voice"></span></a>';
+    html += '<a class="ttm-menu__bernard" href="https://maps.thetechmargin.com/genjson/"><span class="voice"></span></a>';
     // This page's actions: buttons proxy the dashboard's own controls.
     var ACTIONS = [
       { id: 'connect',     name: 'Connect',     desc: 'poll a machine’s data.json' },
@@ -188,7 +188,7 @@
       if (/INPUT|TEXTAREA|SELECT/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === '?') { e.preventDefault(); isOpen() ? close() : open(); return; }
       var routes = { d: '/', c: '/components/', t: '/test/', a: '/admin/',
-        m: 'https://maps-of-making.vercel.app/' };
+        m: 'https://maps.thetechmargin.com/' };
       if (pendingG && Date.now() - pendingG < 1500 && routes[e.key]) {
         e.preventDefault();
         pendingG = 0;
