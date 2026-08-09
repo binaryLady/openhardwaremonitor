@@ -61,6 +61,11 @@
 
   // ── gate ───────────────────────────────────────────────────────
   var skipGate = new URLSearchParams(location.search).has('nogate');
+  // /admin/ needs an identity to check is_admin against, so the gate shows
+  // there even when the site-wide gate is disabled; ?signin=1 forces it too
+  // (the deny card's "Sign in again" uses it after clearing the visitor).
+  var forceGate = location.pathname.indexOf('/admin') === 0 ||
+    new URLSearchParams(location.search).has('signin');
   function gateCopy() {
     var g = (window.TTMBrand && window.TTMBrand.get('gate')) || {};
     return {
@@ -125,6 +130,11 @@
         wrap.remove();
         if (window.TTMToast) window.TTMToast.show('Welcome, ' + name + '.', { type: 'success', timeout: 3000 });
       };
+      // on /admin/ the guard already rendered its verdict before this
+      // sign-in existed — reload so isAdmin() re-evaluates with the identity
+      var finish = function () {
+        if (location.pathname.indexOf('/admin') === 0) location.replace('/admin/');
+      };
       done(); // clear the modal immediately — entry never waits on the network
       if (sb) {
         try {
@@ -132,14 +142,23 @@
             p_name: name, p_email: email, p_ua: navigator.userAgent.slice(0, 250)
           }).then(function (r) {
             if (r.error) console.warn('[ttm] visitor save failed (kept locally):', r.error.message);
-          }).catch(function (e) { console.warn('[ttm] visitor save failed (kept locally):', e.message); });
-        } catch (e) { console.warn('[ttm] visitor save failed (kept locally):', e.message); }
-      }
+            finish();
+          }).catch(function (e) {
+            console.warn('[ttm] visitor save failed (kept locally):', e.message);
+            finish();
+          });
+        } catch (e) {
+          console.warn('[ttm] visitor save failed (kept locally):', e.message);
+          finish();
+        }
+      } else finish();
     });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    var maybeGate = function () { if (!skipGate && !visitor() && gateCopy().enabled) showGate(); };
+    var maybeGate = function () {
+      if (!skipGate && !visitor() && (gateCopy().enabled || forceGate)) showGate();
+    };
     // wait for whitelabel config (cached: instant) so copy + enabled are right
     if (window.TTMBrand) window.TTMBrand.ready().then(maybeGate); else maybeGate();
     track('page_view', { theme: (window.TTMTheme && window.TTMTheme.current()) || 'zine' });

@@ -103,17 +103,28 @@
   document.head.appendChild(veil);
   function deny(){
     var m = document.querySelector('main');
+    var v = (window.TTMStack && window.TTMStack.visitor()) || null;
     m.innerHTML =
       '<header class="ttm-header"><h1>Mission Control</h1>' +
       '<span class="ttm-crumb">operator access required</span></header>' +
       '<section class="ttm-card"><h2 class="ttm-card__title">This area is gated</h2>' +
-      '<p>Telemetry and visitor info are operator-only. Sign in through the ' +
-      'gate, then ask the site operator to grant your email admin status ' +
-      '(<code>supabase/schema.sql</code> has the one-liner).</p>' +
+      '<p>Telemetry and visitor info are operator-only. Sign in with the ' +
+      'operator email, or ask the site operator to grant your email admin ' +
+      'status (<code>supabase/schema.sql</code> has the one-liner).</p>' +
+      '<p class="ttm-note" id="admin-who"></p>' +
       '<div class="ttm-row"><a class="ttm-btn-outline" href="/">Back to the dashboard</a>' +
+      '<button type="button" class="ttm-btn-outline" id="admin-signin">Sign in again</button>' +
       '<button type="button" class="ttm-btn-primary" id="admin-retry">Access granted — retry</button>' +
       '</div></section>';
+    // identity as text, never HTML — a stale or wrong email must be visible
+    document.getElementById('admin-who').textContent = v && v.email
+      ? 'Signed in as ' + v.email + ' — this account has no operator access.'
+      : 'Not signed in on this device (sign-ins expire after 24 hours).';
     veil.remove();
+    document.getElementById('admin-signin').addEventListener('click', function(){
+      try { localStorage.removeItem('ttm_visitor'); } catch(e){}
+      location.href = '/admin/?signin=1';
+    });
     document.getElementById('admin-retry').addEventListener('click', function(){ location.reload(); });
   }
   function decide(){
