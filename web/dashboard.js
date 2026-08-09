@@ -14,7 +14,9 @@
   };
   const toast = (msg, opts) => window.TTMToast && TTMToast.show(msg, opts || {});
 
-  const POLL_MS = 5000;
+  // under reduced motion, poll gently: values stop fluttering every 5s
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const POLL_MS = REDUCED ? 20000 : 5000;
   let timer = null;
   let mode = 'idle'; // idle | demo | live
   let lastTree = null;
@@ -47,7 +49,9 @@
           card.appendChild(g);
         }
         const row = document.createElement('div');
-        row.className = 'ttm-sensor' + (stateOf(s) ? ' ttm-sensor--' + stateOf(s) : '');
+        const st = stateOf(s);
+        row.className = 'ttm-sensor' + (st ? ' ttm-sensor--' + st : '');
+        if (st) row.title = st === 'hot' ? 'above critical threshold' : 'above warning threshold';
         const pct = meterPct(s);
         row.innerHTML =
           '<span class="nm" title="' + esc(s.name) + '">' + esc(s.name) + '</span>' +
