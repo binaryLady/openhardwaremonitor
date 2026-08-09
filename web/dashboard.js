@@ -165,11 +165,10 @@
       setStatus('unreachable', 'bad');
       if (failStreak === 1) {
         toast('Could not reach ' + url + ' — ' + err.message +
-          '. If the monitor is running: from an https page, browsers block ' +
-          'plain-http machines (mixed content) — open the dashboard the ' +
-          'machine itself serves at that address instead. Upstream builds ' +
-          'also lack a CORS header for cross-origin reads. Or load demo data.',
-          { type: 'error', timeout: 12000 });
+          '. If the monitor is running, this is likely CORS: the embedded ' +
+          'server sends no Access-Control-Allow-Origin header, so browsers ' +
+          'block cross-origin reads. Open this page from the same origin, ' +
+          'use a local proxy, or load demo data.', { type: 'error', timeout: 12000 });
       }
     }
   }
