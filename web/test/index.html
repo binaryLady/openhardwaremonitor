@@ -24,7 +24,8 @@
 </style>
 </head>
 <body class="ttm-page">
-<main class="ttm-main">
+<a class="ttm-skip" href="#main">Skip to content</a>
+<main class="ttm-main" id="main" tabindex="-1">
   <header class="ttm-header">
     <h1>Stack <span class="gradient-text-rainbow">· test bench</span></h1>
     <span class="ttm-crumb">tokens · theming · toasts · gate · telemetry</span>
@@ -397,6 +398,53 @@ window.addEventListener('load', function () {
     return s && s['@context'] === 'http://iiif.io/api/image/3/context.json' &&
            s.id === 'https://iiif.example/machine' && s.type === 'ImageService3' &&
            s.profile === 'level1' && !('ext_iiif' in none) ? true : JSON.stringify(s);
+  });
+
+  // ── keyboard shortcuts + accessible navigation (theme.js) ────────────────
+  t('a11y: skip link is the first tab stop and targets #main', function () {
+    var skip = document.body.querySelector('a, button, input, [tabindex]');
+    var main = document.getElementById('main');
+    return skip && skip.classList.contains('ttm-skip') &&
+           skip.getAttribute('href') === '#main' &&
+           main !== null && main.getAttribute('tabindex') === '-1'
+      ? true : 'skip=' + (skip && skip.className) + ' main=' + !!main;
+  });
+  t('a11y: skip link hidden off-screen until focused', function () {
+    var cs = getComputedStyle(document.querySelector('.ttm-skip'));
+    return cs.position === 'fixed' && cs.transform !== 'none' ? true :
+      'position=' + cs.position + ' transform=' + cs.transform;
+  });
+  t('nav: TTMNav API surface complete', function () {
+    var N = window.TTMNav;
+    return N && ['d', 'c', 't', 'a', 'm'].every(function (k) { return k in N.routes; }) &&
+           typeof N.chordPending === 'function' && typeof N.openMenu === 'function' &&
+           typeof N.closeMenu === 'function' && typeof N.menuOpen === 'function'
+      ? true : 'missing keys';
+  });
+  t('nav: g arms the chord, a non-route key disarms it', function () {
+    // 'q' maps to no route, so this never navigates away from the bench
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', bubbles: true }));
+    var armed = window.TTMNav.chordPending();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'q', bubbles: true }));
+    var disarmed = !window.TTMNav.chordPending();
+    return armed && disarmed ? true : 'armed=' + armed + ' disarmed=' + disarmed;
+  });
+  t('nav: chord prefix is consumed — page handlers see it defaultPrevented', function () {
+    var e = new KeyboardEvent('keydown', { key: 'g', bubbles: true, cancelable: true });
+    document.dispatchEvent(e);
+    var claimed = e.defaultPrevented;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'q', bubbles: true }));
+    return claimed ? true : 'g not consumed by capture handler';
+  });
+  t('nav: menu opens with focus inside, closes back to the burger', function () {
+    var N = window.TTMNav;
+    N.openMenu();
+    var opened = N.menuOpen() &&
+      document.getElementById('ttm-menu').contains(document.activeElement);
+    N.closeMenu();
+    var closed = !N.menuOpen() &&
+      document.activeElement === document.querySelector('.ttm-burger');
+    return opened && closed ? true : 'opened=' + opened + ' closed=' + closed;
   });
 
   // ── report ────────────────────────────────────────────────────────────────

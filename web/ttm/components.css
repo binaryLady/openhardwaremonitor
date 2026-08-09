@@ -274,11 +274,14 @@
   color: var(--ttm-text);
   transform: translateX(100%);
   visibility: hidden;
-  transition: transform var(--ttm-transition-normal), visibility var(--ttm-transition-normal);
+  /* visibility flips after the slide-out only; on open it must switch
+     instantly so focus can move into the panel the same tick */
+  transition: transform var(--ttm-transition-normal), visibility 0s var(--ttm-transition-normal);
 }
 .ttm-menu.is-open {
   transform: translateX(0);
   visibility: visible;
+  transition: transform var(--ttm-transition-normal);
 }
 .ttm-menu__head {
   position: sticky;
@@ -637,6 +640,25 @@ body.ttm-page {
 }
 :focus-visible { outline: 2px solid var(--ttm-focus); outline-offset: 2px; }
 ::selection { background: var(--ttm-control); color: var(--ttm-on-accent); }
+
+/* ── ttm-skip — skip-to-content link, first tab stop on every page ── */
+.ttm-skip {
+  position: fixed;
+  top: var(--ttm-spacing-sm, .5rem);
+  left: var(--ttm-spacing-sm, .5rem);
+  z-index: calc(var(--z-overlay) + 1);
+  padding: .55rem .9rem;
+  background: var(--ttm-surface);
+  color: var(--ttm-text);
+  border: 1.5px solid var(--ttm-focus);
+  border-radius: var(--radius-sm);
+  font: 600 var(--ttm-fs-caption) var(--ttm-font-mono);
+  text-decoration: none;
+  transform: translateY(calc(-100% - 2rem));
+}
+.ttm-skip:focus-visible { transform: none; }
+/* the skip target takes focus programmatically; never draw a ring on the page body */
+.ttm-main:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
 
 /* ── layout utilities — the sanctioned way to compose without inline styles ── */
