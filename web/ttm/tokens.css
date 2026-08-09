@@ -121,6 +121,13 @@
   --ttm-hot-red-hover: #e60073;
   --ttm-goldenrod-hover: #e68600;
 
+  /* Iridescent pearl spectrum (brand shimmer — favicon, header rule) */
+  --ttm-irid-a: #ff9a9e;
+  --ttm-irid-b: #fecfef;
+  --ttm-irid-c: #a1c4fd;
+  --ttm-irid-d: #c2e9fb;
+  --ttm-irid-e: #d4fc79;
+
   /* Scrollbar (spec §Scrollbar) */
   --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-cyan) 30%, transparent);
   --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-cyan) 50%, transparent);
@@ -167,6 +174,12 @@
   --ttm-font-serif: var(--ttm-font-mono);
   --ttm-on-accent: #f2ede1;
   --ttm-shadow: 3px 3px 0 var(--ttm-text);
+  /* Pearl spectrum deepened for the paper ground */
+  --ttm-irid-a: #e2797e;
+  --ttm-irid-b: #d99cc4;
+  --ttm-irid-c: #7fa7ec;
+  --ttm-irid-d: #7fc0e0;
+  --ttm-irid-e: #a3cf4a;
   /* Re-declare derived role tokens: custom-property var()s substitute where
      DECLARED, so without these a terminal-themed subtree would inherit the
      dark theme's already-resolved values from :root */
