@@ -732,3 +732,21 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
   color: var(--ttm-goldenrod); /* lamplit amber — Bernard's band */
 }
 .ttm-menu__bernard:hover { background: var(--ttm-surface-alt); }
+
+/* ── visual pop — glow where the data is alive, gradients where it moves ── */
+.ttm-badge--live {
+  color: var(--ttm-success);
+  border-color: var(--ttm-success);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ttm-success) 45%, transparent);
+}
+.ttm-sensor .meterbar i {
+  background: linear-gradient(90deg, var(--ttm-cyan), var(--ttm-lime));
+}
+.ttm-sensor--warn .meterbar i { background: var(--ttm-warning); }
+.ttm-sensor--hot .meterbar i {
+  background: var(--ttm-danger);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ttm-danger) 60%, transparent);
+}
+details.ttm-hw > summary:hover { background: var(--ttm-wash); border-radius: var(--radius-sm); }
+.ttm-card { transition: border-color var(--ttm-transition-fast); }
+.ttm-card:hover { border-color: color-mix(in srgb, var(--ttm-control) 35%, var(--ttm-border)); }

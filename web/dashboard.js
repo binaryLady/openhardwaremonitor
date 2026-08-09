@@ -113,8 +113,8 @@
 
   function setStatus(txt, tone) {
     els.status.textContent = txt;
-    els.status.style.color = tone === 'ok' ? 'var(--ttm-success)'
-      : tone === 'bad' ? 'var(--ttm-danger)' : '';
+    els.status.className = 'ttm-badge' +
+      (tone === 'ok' ? ' ttm-badge--live' : tone === 'bad' ? ' ttm-badge--danger' : '');
   }
 
   function stop() {
