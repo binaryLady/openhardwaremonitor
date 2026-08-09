@@ -137,20 +137,28 @@
   --ttm-surface-alt: #ddd4c0;
   --ttm-text: #2b2a28;
   --ttm-text-secondary: #4a4844;
-  --ttm-text-muted: #6f6b63;
+  --ttm-text-muted: #635f57;   /* AA 4.9:1 on surface — #6f6b63 measured 4.11 */
   --ttm-text-faint: #a09a8c;
   --ttm-border: #c9c0aa;
   --ttm-border-subtle: #ddd4c0;
-  --ttm-pink: #e85d9c;
+  --ttm-pink: #b83570;         /* deep rose: light on-accent ink passes AA (4.7:1) */
   --ttm-lime: #7c9f35;
   --ttm-cyan: #09d3c5;
   --ttm-hot-red: #ff5555;
   --ttm-goldenrod: #f1a942;
-  --ttm-pink-hover: #d84b8c;
+  --ttm-pink-hover: #a52e63;
   --ttm-lime-hover: #6b8c2c;
   --ttm-cyan-hover: #08b8ab;
   --ttm-hot-red-hover: #e64444;
   --ttm-goldenrod-hover: #dd9631;
+  /* Status + chrome accents re-derived for the light ground — the bright
+     dark-theme values measure 1.1–3.2:1 here; these pass AA/1.4.11 */
+  --ttm-success: #166534;
+  --ttm-danger: #b91c1c;
+  --ttm-warning: #8a5a00;
+  --ttm-info: #0f6674;
+  --ttm-control: #0f6674;
+  --ttm-focus: #0f6674;
   --ttm-overlay: rgba(43, 42, 40, 0.5);
   --ttm-glass: rgba(242, 237, 225, 0.9);
   --ttm-wash: rgba(43, 42, 40, 0.04);
@@ -159,6 +167,13 @@
   --ttm-font-serif: var(--ttm-font-mono);
   --ttm-on-accent: #f2ede1;
   --ttm-shadow: 3px 3px 0 var(--ttm-text);
+  /* Re-declare derived role tokens: custom-property var()s substitute where
+     DECLARED, so without these a terminal-themed subtree would inherit the
+     dark theme's already-resolved values from :root */
+  --ttm-accent-cta: var(--ttm-pink);
+  --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-cyan) 30%, transparent);
+  --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-cyan) 50%, transparent);
+  --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
 }
 
 /* Token-driven scrollbars (spec §Scrollbar) */

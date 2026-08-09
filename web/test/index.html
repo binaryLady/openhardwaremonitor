@@ -104,6 +104,65 @@ window.addEventListener('load', function () {
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
   });
 
+  // ── WCAG 2.1 contrast (the W3C check) ─────────────────────────────────────
+  // resolve any token (including var() chains) to rgb via a live probe
+  function resolveColor(token, themeAttr) {
+    var probe = document.createElement('span');
+    if (themeAttr) probe.setAttribute('data-ttm-theme', themeAttr);
+    probe.style.color = 'var(' + token + ')';
+    document.body.appendChild(probe);
+    var rgb = getComputedStyle(probe).color.match(/\d+(\.\d+)?/g).map(Number);
+    probe.remove();
+    return rgb;
+  }
+  function luminance(rgb) {
+    var c = rgb.slice(0, 3).map(function (v) {
+      v /= 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function contrast(a, b) {
+    var la = luminance(a), lb = luminance(b);
+    return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+  }
+  var AA_PAIRS = [
+    ['--ttm-text', '--ttm-bg'],
+    ['--ttm-text', '--ttm-surface'],
+    ['--ttm-text-secondary', '--ttm-surface'],
+    ['--ttm-text-muted', '--ttm-surface'],
+    ['--ttm-on-accent', '--ttm-accent-cta'],
+    ['--ttm-success', '--ttm-bg'],
+    ['--ttm-danger', '--ttm-bg'],
+    ['--ttm-warning', '--ttm-bg'],
+    ['--ttm-info', '--ttm-bg']
+  ];
+  // WCAG 1.4.11 non-text: 3:1 for interactive chrome. Borders are exempt by
+  // design: cards/dividers are decorative, and inputs are identified by
+  // background + label, not border alone.
+  var UI_PAIRS = [
+    ['--ttm-control', '--ttm-bg'],
+    ['--ttm-focus', '--ttm-bg']
+  ];
+  ['ttm', 'terminal'].forEach(function (theme) {
+    t('wcag: AA 4.5:1 for all text/status pairs — ' + theme + ' theme', function () {
+      var fails = [];
+      AA_PAIRS.forEach(function (p) {
+        var r = contrast(resolveColor(p[0], theme), resolveColor(p[1], theme));
+        if (r < 4.5) fails.push(p[0] + ' on ' + p[1] + ' = ' + r.toFixed(2));
+      });
+      return fails.length === 0 ? true : fails.join('; ');
+    });
+    t('wcag: 3:1 for interactive chrome (1.4.11) — ' + theme + ' theme', function () {
+      var fails = [];
+      UI_PAIRS.forEach(function (p) {
+        var r = contrast(resolveColor(p[0], theme), resolveColor(p[1], theme));
+        if (r < 3) fails.push(p[0] + ' on ' + p[1] + ' = ' + r.toFixed(2));
+      });
+      return fails.length === 0 ? true : fails.join('; ');
+    });
+  });
+
   // ── whitelabel runtime (TTMTheme) ─────────────────────────────────────────
   t('whitelabel: TTMTheme API surface complete', function () {
     var T = window.TTMTheme;
