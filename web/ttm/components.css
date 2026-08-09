@@ -465,7 +465,9 @@
   font: 400 var(--ttm-fs-caption)/1.9 var(--ttm-font-mono);
   color: var(--ttm-text-muted);
 }
-.ttm-menu__keys kbd {
+.ttm-kbd-hints { font: 400 var(--ttm-fs-caption)/1.9 var(--ttm-font-mono); }
+.ttm-menu__keys kbd,
+.ttm-kbd-hints kbd {
   display: inline-block;
   min-width: 1.35em;
   text-align: center;

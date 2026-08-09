@@ -14,76 +14,15 @@
   };
   const toast = (msg, opts) => window.TTMToast && TTMToast.show(msg, opts || {});
 
-  const POLL_MS = 5000;
+  // under reduced motion, poll gently: values stop fluttering every 5s
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const POLL_MS = REDUCED ? 20000 : 5000;
   let timer = null;
   let mode = 'idle'; // idle | demo | live
   let lastTree = null;
 
-  // ---- parsing ------------------------------------------------------------
-
-  // "52.0 °C" -> 52.0 ; "1,234 RPM" -> 1234 ; "" -> null
-  function num(s) {
-    if (typeof s === 'number') return s;
-    if (!s) return null;
-    const m = String(s).replace(/,/g, '').match(/-?\d+(\.\d+)?/);
-    return m ? parseFloat(m[0]) : null;
-  }
-
-  // Category comes from the type-group node's icon (images_icon/temperature.png …)
-  function categoryOf(node) {
-    const m = /images_icon\/([a-z_]+)\.png/.exec(node.ImageURL || '');
-    return m ? m[1] : null;
-  }
-
-  // Flatten the tree into hardware blocks: [{name, icon, sensors:[{name, cat, value, min, max, n, nMin, nMax}]}]
-  function flatten(root) {
-    const blocks = [];
-    const machines = (root.Children || []);
-    machines.forEach(machine => {
-      (machine.Children || []).forEach(function walkHw(hw) {
-        const block = { name: hw.Text, icon: categoryOf(hw), sensors: [] };
-        (hw.Children || []).forEach(child => {
-          if (categoryOf(child) && child.Children && child.Children.length &&
-              child.Children.every(c => !c.Children || !c.Children.length)) {
-            // a type group (Temperatures / Fans / …) full of leaf sensors
-            const cat = categoryOf(child);
-            child.Children.forEach(s => block.sensors.push({
-              name: s.Text, cat, group: child.Text,
-              value: s.Value, min: s.Min, max: s.Max,
-              n: num(s.Value), nMin: num(s.Min), nMax: num(s.Max)
-            }));
-          } else if (child.Children && child.Children.length) {
-            walkHw(child); // sub-hardware (e.g. SuperIO chip under mainboard)
-          }
-        });
-        if (block.sensors.length) blocks.push(block);
-      });
-    });
-    return blocks;
-  }
-
-  // ---- thresholds ---------------------------------------------------------
-
-  function stateOf(s) {
-    if (s.n == null) return '';
-    if (s.cat === 'temperature') {
-      if (s.n >= 85) return 'hot';
-      if (s.n >= 70) return 'warn';
-    } else if (s.cat === 'load') {
-      if (s.n >= 95) return 'hot';
-      if (s.n >= 80) return 'warn';
-    }
-    return '';
-  }
-
-  function meterPct(s) {
-    if (s.n == null) return null;
-    if (s.cat === 'load' || /%/.test(s.value)) return Math.max(0, Math.min(100, s.n));
-    // scale within the session's observed min..max window
-    if (s.nMin != null && s.nMax != null && s.nMax > s.nMin)
-      return ((s.n - s.nMin) / (s.nMax - s.nMin)) * 100;
-    return null;
-  }
+  // parsing + thresholds live in parse.js (window.OHMParse)
+  const { flatten, stateOf, meterPct } = window.OHMParse;
 
   // ---- rendering ----------------------------------------------------------
 
@@ -110,7 +49,9 @@
           card.appendChild(g);
         }
         const row = document.createElement('div');
-        row.className = 'ttm-sensor' + (stateOf(s) ? ' ttm-sensor--' + stateOf(s) : '');
+        const st = stateOf(s);
+        row.className = 'ttm-sensor' + (st ? ' ttm-sensor--' + st : '');
+        if (st) row.title = st === 'hot' ? 'above critical threshold' : 'above warning threshold';
         const pct = meterPct(s);
         row.innerHTML =
           '<span class="nm" title="' + esc(s.name) + '">' + esc(s.name) + '</span>' +
@@ -129,43 +70,12 @@
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   }
 
-  // ---- map bridge (SpaceAPI fragment) -------------------------------------
-
-  function bridge(root) {
-    const blocks = flatten(root);
-    const machineNode = (root.Children || [])[0];
-    const machine = machineNode ? machineNode.Text : 'machine';
-    const temps = [], fans = [];
-    blocks.forEach(b => b.sensors.forEach(s => {
-      if (s.n == null) return;
-      const loc = machine + ' / ' + b.name;
-      if (s.cat === 'temperature') temps.push({ value: s.n, unit: '°C', location: loc, name: s.name });
-      if (s.cat === 'fan') fans.push({ value: Math.round(s.n), unit: 'RPM', location: loc, name: s.name });
-    }));
-    const anyLoad = blocks.some(b => b.sensors.some(s => s.cat === 'load' && s.n != null && s.n > 5));
-    const doc = {
-      api_compatibility: ['14'],
-      space: machine,
-      url: 'https://example.org',
-      location: { lat: 0, lon: 0 },
-      state: {
-        open: anyLoad,
-        message: anyLoad ? 'machine active — sensors report load' : 'machine idle',
-        lastchange: Math.floor(Date.now() / 1000)
-      },
-      sensors: { temperature: temps, fan_speed: fans },
-      contact: {},
-      'x-source': 'open hardware monitor /data.json via thetechmargin dashboard'
-    };
-    return JSON.stringify(doc, null, 2);
-  }
-
   // ---- data flow ----------------------------------------------------------
 
   function apply(root) {
     lastTree = root;
     render(root);
-    els.bridge.textContent = bridge(root);
+    els.bridge.textContent = window.OHMBridge.json(root);
     els.copy.disabled = false;
   }
 
@@ -242,6 +152,22 @@
     } catch (_) {
       toast('Copy failed — select the JSON and copy manually.', { type: 'warning' });
     }
+  });
+
+  // keyboard: d demo · / focus url · t theme · esc pause — never while typing
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^(input|textarea|select)$/i.test(e.target.tagName)) return;
+    if (e.key === 'd') { startDemo(); }
+    else if (e.key === '/') { e.preventDefault(); els.url.focus(); }
+    else if (e.key === 't') {
+      const cur = document.documentElement.getAttribute('data-ttm-theme') || 'ttm';
+      const next = cur === 'terminal' ? 'ttm' : 'terminal';
+      document.documentElement.setAttribute('data-ttm-theme', next);
+      try { localStorage.setItem('ttm_theme', next); } catch (_) {}
+      toast('Theme: ' + (next === 'terminal' ? 'terminal' : 'dark'), { timeout: 1500 });
+    }
+    else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }
   });
 
   document.addEventListener('visibilitychange', () => {

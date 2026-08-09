@@ -26,7 +26,7 @@
     <input type="url" class="ttm-input" id="src-url" placeholder="http://machine:8085/data.json" aria-label="Open Hardware Monitor data URL">
     <button class="ttm-btn-primary" id="connect">Connect</button>
     <button class="ttm-btn-outline" id="demo">Demo data</button>
-    <span class="ttm-badge" id="status">idle</span>
+    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
   </div>
 
   <div class="ttm-grid ttm-grid--wide">
@@ -48,9 +48,13 @@
   </div>
 
   <footer class="ttm-footer">sensors read locally · nothing leaves your machine
-    unless you publish the bridge</footer>
+    unless you publish the bridge<br>
+    <span class="ttm-kbd-hints"><kbd>d</kbd> demo · <kbd>/</kbd> connect ·
+    <kbd>t</kbd> theme · <kbd>esc</kbd> pause</span></footer>
 </main>
 
+<script src="/parse.js"></script>
+<script src="/bridge.js"></script>
 <script src="/demo-data.js"></script>
 <script src="/dashboard.js"></script>
 </body>
