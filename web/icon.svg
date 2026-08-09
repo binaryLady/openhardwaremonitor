@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Maps of Making network glyph, OHM edition: same geometry, the strokes
+     carry the TTM iridescent gradient (cyan → hot-red → pink → lime →
+     goldenrod) swept corner to corner across the whole mark. -->
 <svg
    viewBox="0 0 14 14"
    width="14"
@@ -8,7 +11,18 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs4" />
+     id="defs4">
+    <linearGradient
+       id="irid"
+       gradientUnits="userSpaceOnUse"
+       x1="1.9" y1="8.6" x2="12.1" y2="2.6">
+      <stop offset="0" stop-color="#09FFF0" />
+      <stop offset="0.28" stop-color="#ff0080" />
+      <stop offset="0.5" stop-color="#E904E5" />
+      <stop offset="0.74" stop-color="#a1ff00" />
+      <stop offset="1" stop-color="#ff9500" />
+    </linearGradient>
+  </defs>
   <rect
      width="14"
      height="14"
@@ -19,7 +33,7 @@
      cy="3.3747871"
      r="1.4500852"
      fill="none"
-     stroke="#f0f6fc"
+     stroke="url(#irid)"
      stroke-width="2"
      stroke-linecap="round"
      stroke-linejoin="round"
@@ -30,7 +44,7 @@
      cy="10.625213"
      r="1.4500852"
      fill="none"
-     stroke="#f0f6fc"
+     stroke="url(#irid)"
      stroke-width="2"
      stroke-linecap="round"
      stroke-linejoin="round"
@@ -41,7 +55,7 @@
      cy="7"
      r="1.4500852"
      fill="none"
-     stroke="#f0f6fc"
+     stroke="url(#irid)"
      stroke-width="2"
      stroke-linecap="round"
      stroke-linejoin="round"
@@ -52,7 +66,7 @@
      y1="4.0091991"
      x2="4.5529814"
      y2="6.3655877"
-     stroke="#f0f6fc"
+     stroke="url(#irid)"
      stroke-width="2"
      stroke-linecap="round"
      id="line3"
@@ -62,7 +76,7 @@
      y1="7.6344123"
      x2="9.4470186"
      y2="9.9908009"
-     stroke="#f0f6fc"
+     stroke="url(#irid)"
      stroke-width="2"
      stroke-linecap="round"
      id="line4"
