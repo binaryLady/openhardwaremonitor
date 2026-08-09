@@ -94,7 +94,7 @@ site. Shortcuts never fire while typing in a field.
 |---|---|
 | <kbd>d</kbd> | load / restart the demo feed |
 | <kbd>/</kbd> | focus the machine-URL field |
-| <kbd>t</kbd> | toggle dark ↔ terminal theme |
+| <kbd>t</kbd> | cycle theme: warm → terminal → zine |
 | <kbd>Esc</kbd> | pause polling |
 | <kbd>?</kbd> | open / close the site menu (focus moves in) |
 | <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / components / test bench / mission control / Maps of Making |
@@ -124,6 +124,12 @@ page-level shortcuts skip any key arriving `defaultPrevented`.
   `title` text and tinted meter tracks alongside the colored value; the
   status badge is a polite live region (`role="status"`,
   `aria-live="polite"`).
+- **Light and dark in every preset** — each theme names a *world*
+  (warm, terminal, zine) and carries both polarities: warm-light ivory,
+  CRT-phosphor terminal-dark, inverted-photocopy zine-dark. The mode
+  follows the OS by default (live, via `prefers-color-scheme`) and is
+  overridable in the menu (Auto / Light / Dark); all six combinations
+  are WCAG-AA-checked by the bench on every run.
 - **Reduced motion respected end to end** — `prefers-reduced-motion`
   collapses every transition *and* animation (flash, pulse, shimmer),
   and polling relaxes from 5 s to 20 s so values stop fluttering.

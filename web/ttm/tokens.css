@@ -247,6 +247,151 @@
   --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
 }
 
+/* ── Light/dark modes for every preset ──────────────────────────────────────
+   Each theme names a WORLD (warm, terminal, zine); the mode names its
+   POLARITY. theme.js resolves the visitor's choice (or the OS preference)
+   into a concrete data-ttm-mode attribute before paint, so every variant is
+   defined exactly once here — no prefers-color-scheme duplication.
+   Defaults stay as shipped: ttm is dark-native, terminal and zine are
+   light-native; the blocks below define each theme's other polarity. */
+
+/* Dark (ttm), light mode — warm ivory, same neon family inked for paper */
+:is([data-ttm-theme="ttm"], :root:not([data-ttm-theme]))[data-ttm-mode="light"] {
+  --ttm-bg: #faf7f2;
+  --ttm-bg-alt: #f1ece4;
+  --ttm-surface: #f1ece4;
+  --ttm-surface-alt: #e6dfd3;
+  --ttm-text: #241c15;
+  --ttm-text-secondary: #4a4238;
+  --ttm-text-muted: #675d51;
+  --ttm-text-faint: #a89c8e;
+  --ttm-border: #d8cfc0;
+  --ttm-border-subtle: #ece5da;
+  --ttm-pink: #a3128f;
+  --ttm-lime: #5c7d10;
+  --ttm-cyan: #0c7d74;
+  --ttm-hot-red: #cf0a5e;
+  --ttm-goldenrod: #9a6200;
+  --ttm-pink-hover: #8a0f79;
+  --ttm-lime-hover: #4c680d;
+  --ttm-cyan-hover: #0a655e;
+  --ttm-hot-red-hover: #b00950;
+  --ttm-goldenrod-hover: #7d4f00;
+  --ttm-success: #166534;
+  --ttm-danger: #b91c1c;
+  --ttm-warning: #8a5a00;
+  --ttm-info: #0c7d74;
+  --ttm-control: #0c7d74;
+  --ttm-focus: #0c7d74;
+  --ttm-overlay: rgba(36, 28, 21, 0.5);
+  --ttm-glass: rgba(250, 247, 242, 0.92);
+  --ttm-wash: rgba(36, 28, 21, 0.05);
+  --ttm-wash-hover: rgba(36, 28, 21, 0.09);
+  --ttm-on-accent: #faf7f2;
+  --ttm-shadow: 0 0 0 1.5px var(--ttm-border), 0 8px 24px rgba(80, 60, 40, 0.18);
+  --ttm-irid-a: #e2797e;
+  --ttm-irid-b: #d99cc4;
+  --ttm-irid-c: #7fa7ec;
+  --ttm-irid-d: #7fc0e0;
+  --ttm-irid-e: #a3cf4a;
+  --ttm-accent-cta: var(--ttm-pink);
+  --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-cyan) 30%, transparent);
+  --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-cyan) 50%, transparent);
+  --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
+}
+
+/* Terminal, dark mode — CRT phosphor: green-tinted black, pale phosphor ink */
+[data-ttm-theme="terminal"][data-ttm-mode="dark"] {
+  --ttm-bg: #0b100c;
+  --ttm-bg-alt: #11170f;
+  --ttm-surface: #11170f;
+  --ttm-surface-alt: #1a231a;
+  --ttm-text: #d7e8cf;
+  --ttm-text-secondary: #b3c9ab;
+  --ttm-text-muted: #8aa681;
+  --ttm-text-faint: #46543f;
+  --ttm-border: #2c3a2a;
+  --ttm-border-subtle: #1a231a;
+  --ttm-pink: #e878b8;
+  --ttm-lime: #a1ff00;
+  --ttm-cyan: #09d3c5;
+  --ttm-hot-red: #ff6b6b;
+  --ttm-goldenrod: #f1a942;
+  --ttm-pink-hover: #d45fa4;
+  --ttm-lime-hover: #8ae600;
+  --ttm-cyan-hover: #08b8ab;
+  --ttm-hot-red-hover: #e65555;
+  --ttm-goldenrod-hover: #dd9631;
+  --ttm-success: #4ade80;
+  --ttm-danger: #ff6b6b;
+  --ttm-warning: #ffb84d;
+  --ttm-info: #4ce0d2;
+  --ttm-control: #4ce0d2;
+  --ttm-focus: #4ce0d2;
+  --ttm-overlay: rgba(11, 16, 12, 0.82);
+  --ttm-glass: rgba(17, 23, 15, 0.9);
+  --ttm-wash: rgba(215, 232, 207, 0.05);
+  --ttm-wash-hover: rgba(215, 232, 207, 0.09);
+  --ttm-on-accent: #0b100c;
+  --ttm-shadow: 3px 3px 0 #000000;
+  --ttm-irid-a: #e2797e;
+  --ttm-irid-b: #d99cc4;
+  --ttm-irid-c: #7fa7ec;
+  --ttm-irid-d: #7fc0e0;
+  --ttm-irid-e: #a3cf4a;
+  --ttm-font-sans: var(--ttm-font-mono);
+  --ttm-font-serif: var(--ttm-font-mono);
+  --ttm-accent-cta: var(--ttm-pink);
+  --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-cyan) 30%, transparent);
+  --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-cyan) 50%, transparent);
+  --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
+}
+
+/* Zine, dark mode — inverted photocopy: black paper, white ink, neon spots */
+[data-ttm-theme="zine"][data-ttm-mode="dark"] {
+  --ttm-bg: #0d0a0f;
+  --ttm-bg-alt: #17121c;
+  --ttm-surface: #120e16;
+  --ttm-surface-alt: #1f1826;
+  --ttm-text: #f5f2f7;
+  --ttm-text-secondary: #d4cede;
+  --ttm-text-muted: #a79fae;
+  --ttm-text-faint: #57505e;
+  --ttm-border: #f5f2f7;          /* white ink — the photocopy inverts */
+  --ttm-border-subtle: #292231;
+  --ttm-pink: #ff3bfb;
+  --ttm-lime: #b6ff4d;
+  --ttm-cyan: #4dffef;
+  --ttm-hot-red: #ff4d94;
+  --ttm-goldenrod: #ffb020;
+  --ttm-pink-hover: #e620e2;
+  --ttm-lime-hover: #a1f036;
+  --ttm-cyan-hover: #2eeedd;
+  --ttm-hot-red-hover: #ef3a83;
+  --ttm-goldenrod-hover: #f0a010;
+  --ttm-success: #4ade80;
+  --ttm-danger: #ff6b6b;
+  --ttm-warning: #ffb84d;
+  --ttm-info: #b794f6;
+  --ttm-control: #b794f6;
+  --ttm-focus: #b794f6;
+  --ttm-overlay: rgba(13, 10, 15, 0.82);
+  --ttm-glass: rgba(18, 14, 22, 0.9);
+  --ttm-wash: rgba(245, 242, 247, 0.05);
+  --ttm-wash-hover: rgba(245, 242, 247, 0.09);
+  --ttm-on-accent: #0d0a0f;
+  --ttm-shadow: 4px 4px 0 var(--ttm-text);
+  --ttm-irid-a: #ff9a9e;
+  --ttm-irid-b: #fecfef;
+  --ttm-irid-c: #a1c4fd;
+  --ttm-irid-d: #c2e9fb;
+  --ttm-irid-e: #d4fc79;
+  --ttm-accent-cta: var(--ttm-pink);
+  --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-control) 30%, transparent);
+  --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-control) 50%, transparent);
+  --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
+}
+
 /* Token-driven scrollbars (spec §Scrollbar) */
 * { scrollbar-width: thin; scrollbar-color: var(--ttm-scrollbar-thumb) var(--ttm-scrollbar-track); }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
