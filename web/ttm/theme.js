@@ -81,8 +81,16 @@
     panel.setAttribute('aria-label', 'Site menu');
     panel.setAttribute('aria-hidden', 'true');
 
+    // Meet Bernard — the keeper greets you at the door, by the name you gave
+    // at the gate. Voice per the character bible: em-dash, typewriter, amber,
+    // they/them, short sentences. Name is injected as text, never HTML.
+    var visitorName = '';
+    try { visitorName = (JSON.parse(localStorage.getItem('ttm_visitor')) || {}).name || ''; } catch (e) {}
+    var greeting = (visitorName ? '\u2014 ' + visitorName + '. ' : '\u2014 ') +
+      "Bernard (they/them), keeper of 'Mother Sands'. Your machine's hum carries to the map.";
     var html = '<div class="ttm-menu__head"><span class="ttm-menu__title">Menu</span>' +
       '<button type="button" class="ttm-menu__close" aria-label="Close menu">×</button></div>';
+    html += '<a class="ttm-menu__bernard" href="https://maps-of-making.vercel.app/genjson/"><span class="voice"></span></a>';
     // This page's actions: buttons proxy the dashboard's own controls.
     var ACTIONS = [
       { id: 'connect',     name: 'Connect',     desc: 'poll a machine’s data.json' },
@@ -119,6 +127,7 @@
       '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close<br>' +
       '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>m</kbd> maps of making</div>';
     panel.innerHTML = html;
+    panel.querySelector('.ttm-menu__bernard .voice').textContent = greeting;
 
     function isOpen() { return panel.classList.contains('is-open'); }
     function open() {
