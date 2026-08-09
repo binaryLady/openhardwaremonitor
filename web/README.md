@@ -15,7 +15,7 @@ https://openhardwaremonitor.vercel.app.
 | **Terminal** | ![Terminal dark (CRT phosphor)](../docs/screenshots/dashboard-terminal-dark.png) | ![Terminal light (paper)](../docs/screenshots/dashboard-terminal.png) |
 | **Zine** | ![Zine dark (inverted photocopy)](../docs/screenshots/dashboard-zine-dark.png) | ![Zine light (photocopy)](../docs/screenshots/dashboard-zine.png) |
 
-Mode follows the OS by default (Auto) and is overridable from the menu;
+Mode follows the OS until you touch the ☀/☾ toggle in the page header;
 every combination is WCAG-AA-verified by `/test/` on each run.
 
 ## Use cases
@@ -131,10 +131,9 @@ page-level shortcuts skip any key arriving `defaultPrevented`.
   `aria-live="polite"`).
 - **Light and dark in every preset** — each theme names a *world*
   (warm, terminal, zine) and carries both polarities: warm-light ivory,
-  CRT-phosphor terminal-dark, inverted-photocopy zine-dark. The mode
-  follows the OS by default (live, via `prefers-color-scheme`) and is
-  overridable in the menu (Auto / Light / Dark); all six combinations
-  are WCAG-AA-checked by the bench on every run.
+  CRT-phosphor terminal-dark, inverted-photocopy zine-dark. The mode follows
+  the OS until you touch the ☀/☾ toggle in the page header; all six
+  combinations are WCAG-AA-checked by the bench on every run.
 - **Reduced motion respected end to end** — `prefers-reduced-motion`
   collapses every transition *and* animation (flash, pulse, shimmer),
   and polling relaxes from 5 s to 20 s so values stop fluttering.

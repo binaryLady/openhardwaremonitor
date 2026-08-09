@@ -44,16 +44,16 @@
       every telemetry event attributed to it. Erasing signs you out.</p>
     </section>
 
-    <section class="ttm-card" aria-labelledby="h-op">
+    <!-- Operator unlock: intentionally not rendered for visitors. The card
+         only appears with ?operator in the URL (the operator knows the door)
+         or when a token already verified in this tab. -->
+    <section class="ttm-card" aria-labelledby="h-op" id="op-card" hidden>
       <h2 class="ttm-card__title" id="h-op">Operator</h2>
-      <p class="ttm-note">Signed-in visitors see the masked, view-only tier.
-      The operator token unlocks full CRUD: unmasked records, edit/delete any
-      visitor, the admin marker, telemetry purge, and site-wide publishing.</p>
       <div class="ttm-srcbar">
         <input type="password" class="ttm-input" id="op-token" placeholder="operator token" aria-label="Operator token" autocomplete="off">
         <button class="ttm-btn-primary" id="op-unlock">Unlock</button>
       </div>
-      <p class="ttm-note" id="op-status">locked — token held in this tab only</p>
+      <p class="ttm-note" id="op-status">token held in this tab only</p>
     </section>
 
     <section class="ttm-card full" aria-labelledby="h-visitors">
@@ -73,8 +73,7 @@
     <section class="ttm-card full" aria-labelledby="h-wl">
       <h2 class="ttm-card__title" id="h-wl">Whitelabel — brand · theme · gate · contact</h2>
       <p class="ttm-note">Edits preview live on this page. <b>Save on device</b> keeps the
-      token overrides in this browser (visitor-level); <b>Publish site-wide</b> writes
-      <code>ohm_site_config</code> so every visitor gets them (operator token required).</p>
+      token overrides in this browser (visitor-level).</p>
       <div class="ttm-grid ttm-form ttm-gap-top">
         <div>
           <h3 class="ttm-card__title">Brand</h3>
@@ -127,7 +126,7 @@
       </div>
       <div class="ttm-row ttm-gap-top">
         <button class="ttm-btn-outline" id="wl-save">Save on device</button>
-        <button class="ttm-btn-primary" id="wl-publish">Publish site-wide</button>
+        <button class="ttm-btn-primary" id="wl-publish" hidden>Publish site-wide</button>
         <button class="ttm-btn-outline" id="wl-reset">Reset</button>
         <span class="ttm-note" id="wl-status"></span>
       </div>
@@ -163,7 +162,7 @@
     $('#tier-badge').className = 'ttm-badge' + (t === 'operator' ? ' ttm-badge--success' : '');
     $('#tier-crumb').textContent = t === 'operator'
       ? 'telemetry · visitors · operator (full CRUD)'
-      : 'masked view · your record is yours';
+      : 'telemetry · visitors';
   }
 
   function boot(){
@@ -175,12 +174,15 @@
     initMyRecord();
     initOperator();
     initWhitelabel();
+    if (new URLSearchParams(location.search).has('operator')) {
+      $('#op-card').hidden = false;
+    }
     if (!sb) {
       ['#visitors', '#events'].forEach(function(sel){
         $(sel).innerHTML = '<p class="ttm-note">local-only mode — connect Supabase ' +
           '(SUPABASE_URL / SUPABASE_ANON_KEY env vars) to collect data.</p>';
       });
-      $('#op-status').textContent = 'operator tier needs Supabase (local-only mode)';
+      $('#op-status').textContent = 'needs Supabase (local-only mode)';
       return;
     }
     loadMasked();
@@ -271,7 +273,7 @@
   function tryUnlock(){
     var t = $('#op-token').value.trim();
     if (!t) return;
-    if (!sb) { $('#op-status').textContent = 'operator tier needs Supabase (local-only mode)'; return; }
+    if (!sb) { $('#op-status').textContent = 'needs Supabase (local-only mode)'; return; }
     verifyToken(t, false);
   }
   function verifyToken(t, silent){
@@ -284,6 +286,8 @@
       }
       token = t;
       try { sessionStorage.setItem('ohm_admin_token', t); } catch(e){}
+      $('#op-card').hidden = false;
+      $('#wl-publish').hidden = false;
       setTier('operator');
       $('#op-status').textContent = 'unlocked — full CRUD active in this tab';
       $('#op-token').value = '';
@@ -432,7 +436,7 @@
     }
     $('#wl-publish').addEventListener('click', function(){
       if (!sb) return;
-      if (!token) { toast('Unlock with the operator token first.', { type: 'warning' }); return; }
+      if (!token) return;
       var config = {
         brand: { page_title: $('#wl-title').value, tagline: $('#wl-tagline').value,
                  footer_name: $('#wl-footer').value, footer_hidden: $('#wl-footer-hide').checked },

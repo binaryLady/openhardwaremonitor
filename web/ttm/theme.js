@@ -13,8 +13,7 @@
   // Every theme supports both polarities; Auto follows the OS. theme.js
   // resolves the choice into a concrete data-ttm-mode attribute before
   // paint, so tokens.css defines each variant exactly once.
-  var MODES = ['auto', 'light', 'dark'];
-  var MODE_LABELS = { 'auto': 'Auto', 'light': 'Light', 'dark': 'Dark' };
+  var MODES = ['light', 'dark'];
   var mediaDark = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
   var ALLOWED_TOKEN = /^--(ttm|z|radius)-[a-z-]+$/;
   // Information hierarchy: the product first, publishing second, operator
@@ -62,13 +61,10 @@
   function resetCustom() { setCustom({}); }
   function currentMode() {
     var v = stored('ttm_mode');
-    return MODES.indexOf(v) !== -1 ? v : 'auto';
+    if (MODES.indexOf(v) !== -1) return v;
+    return mediaDark && mediaDark.matches ? 'dark' : 'light'; // OS until toggled
   }
-  function resolveMode() {
-    var m = currentMode();
-    if (m !== 'auto') return m;
-    return mediaDark && mediaDark.matches ? 'dark' : 'light';
-  }
+  function resolveMode() { return currentMode(); }
   function apply(theme) {
     if (theme) document.documentElement.setAttribute('data-ttm-theme', theme);
     else document.documentElement.removeAttribute('data-ttm-theme');
@@ -76,8 +72,10 @@
     document.querySelectorAll('.ttm-menu__theme input[name="ttm-theme-pick"]').forEach(function (r) {
       r.checked = r.value === theme;
     });
-    document.querySelectorAll('.ttm-menu__theme input[name="ttm-mode-pick"]').forEach(function (r) {
-      r.checked = r.value === currentMode();
+    var mode = resolveMode();
+    document.querySelectorAll('.ttm-modetoggle').forEach(function (b) {
+      b.textContent = mode === 'dark' ? '\u2600' : '\u263E';
+      b.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     });
   }
   function setMode(mode) {
@@ -92,7 +90,7 @@
   // Auto mode tracks the OS live
   if (mediaDark && mediaDark.addEventListener) {
     mediaDark.addEventListener('change', function () {
-      if (currentMode() === 'auto') apply(currentTheme());
+      if (MODES.indexOf(stored('ttm_mode')) === -1) apply(currentTheme());
     });
   }
 
@@ -165,13 +163,6 @@
       var id = 'ttm-theme-' + t;
       html += '<label for="' + id + '"><input type="radio" id="' + id + '" name="ttm-theme-pick" value="' + t + '"' +
         (currentTheme() === t ? ' checked' : '') + '><span>' + THEME_LABELS[t] + '</span></label>';
-    });
-    html += '</fieldset>';
-    html += '<fieldset class="ttm-menu__theme"><legend>Light / dark</legend>';
-    MODES.forEach(function (m) {
-      var id = 'ttm-mode-' + m;
-      html += '<label for="' + id + '"><input type="radio" id="' + id + '" name="ttm-mode-pick" value="' + m + '"' +
-        (currentMode() === m ? ' checked' : '') + '><span>' + MODE_LABELS[m] + '</span></label>';
     });
     html += '</fieldset>';
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
@@ -271,13 +262,6 @@
       if (target) { target.click(); target.focus(); }
     });
     panel.addEventListener('change', function (e) {
-      if (e.target.name === 'ttm-mode-pick') {
-        setMode(e.target.value);
-        if (window.TTMToast) window.TTMToast.show(
-          MODE_LABELS[e.target.value] + ' mode.', { type: 'success', timeout: 2500 });
-        if (window.TTMStack) window.TTMStack.track('mode_change', { mode: e.target.value });
-        return;
-      }
       if (e.target.name !== 'ttm-theme-pick') return;
       try { localStorage.setItem('ttm_theme', e.target.value); } catch (err) {}
       apply(e.target.value);
@@ -320,7 +304,23 @@
     };
   }
 
+  function buildModeToggle() {
+    var header = document.querySelector('.ttm-header');
+    if (!header || header.querySelector('.ttm-modetoggle')) return;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ttm-modetoggle';
+    b.addEventListener('click', function () {
+      var next = resolveMode() === 'dark' ? 'light' : 'dark';
+      setMode(next);
+      if (window.TTMStack) window.TTMStack.track('mode_change', { mode: next });
+    });
+    header.appendChild(b);
+    apply(currentTheme()); // paint the glyph
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    buildModeToggle();
     buildMenu();
     var badge = document.createElement('div');
     badge.className = 'ttm-footer-badge';
