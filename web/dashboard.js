@@ -66,43 +66,12 @@
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   }
 
-  // ---- map bridge (SpaceAPI fragment) -------------------------------------
-
-  function bridge(root) {
-    const blocks = flatten(root);
-    const machineNode = (root.Children || [])[0];
-    const machine = machineNode ? machineNode.Text : 'machine';
-    const temps = [], fans = [];
-    blocks.forEach(b => b.sensors.forEach(s => {
-      if (s.n == null) return;
-      const loc = machine + ' / ' + b.name;
-      if (s.cat === 'temperature') temps.push({ value: s.n, unit: '°C', location: loc, name: s.name });
-      if (s.cat === 'fan') fans.push({ value: Math.round(s.n), unit: 'RPM', location: loc, name: s.name });
-    }));
-    const anyLoad = blocks.some(b => b.sensors.some(s => s.cat === 'load' && s.n != null && s.n > 5));
-    const doc = {
-      api_compatibility: ['14'],
-      space: machine,
-      url: 'https://example.org',
-      location: { lat: 0, lon: 0 },
-      state: {
-        open: anyLoad,
-        message: anyLoad ? 'machine active — sensors report load' : 'machine idle',
-        lastchange: Math.floor(Date.now() / 1000)
-      },
-      sensors: { temperature: temps, fan_speed: fans },
-      contact: {},
-      'x-source': 'open hardware monitor /data.json via thetechmargin dashboard'
-    };
-    return JSON.stringify(doc, null, 2);
-  }
-
   // ---- data flow ----------------------------------------------------------
 
   function apply(root) {
     lastTree = root;
     render(root);
-    els.bridge.textContent = bridge(root);
+    els.bridge.textContent = window.OHMBridge.json(root);
     els.copy.disabled = false;
   }
 
