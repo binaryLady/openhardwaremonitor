@@ -15,18 +15,45 @@
 <main class="ttm-main" id="main" tabindex="-1">
   <header class="ttm-header">
     <h1>Mission Control <span class="gradient-text-rainbow">· hardware</span></h1>
-    <span class="ttm-crumb">telemetry · visitors · operator-only</span>
+    <span class="ttm-crumb" id="tier-crumb">telemetry · visitors · tiered access</span>
   </header>
 
   <div class="ttm-grid">
     <section class="ttm-card full" aria-labelledby="h-stats">
-      <h2 class="ttm-card__title" id="h-stats">Last 24 hours</h2>
+      <h2 class="ttm-card__title" id="h-stats">Last 24 hours <span class="ttm-badge" id="tier-badge">viewer</span></h2>
       <div class="ttm-tiles">
         <div class="ttm-tile"><span class="ttm-tile__label">Page views</span><b class="ttm-tile__value" id="st-views">—</b></div>
         <div class="ttm-tile"><span class="ttm-tile__label">Sessions</span><b class="ttm-tile__value" id="st-sessions">—</b></div>
         <div class="ttm-tile"><span class="ttm-tile__label">Gate completions</span><b class="ttm-tile__value" id="st-gates">—</b></div>
         <div class="ttm-tile"><span class="ttm-tile__label">Events all time</span><b class="ttm-tile__value" id="st-total">—</b></div>
       </div>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="h-me">
+      <h2 class="ttm-card__title" id="h-me">My record</h2>
+      <p class="ttm-note" id="me-who">not signed in</p>
+      <div class="ttm-form">
+        <label class="ttm-note" for="me-name">display name</label>
+        <input class="ttm-input" id="me-name" type="text" maxlength="120" autocomplete="name">
+      </div>
+      <div class="ttm-row">
+        <button class="ttm-btn-primary" id="me-save">Save name</button>
+        <button class="ttm-btn-outline" id="me-delete">Delete my data</button>
+      </div>
+      <p class="ttm-note">You control your own record: rename it, or erase it and
+      every telemetry event attributed to it. Erasing signs you out.</p>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="h-op">
+      <h2 class="ttm-card__title" id="h-op">Operator</h2>
+      <p class="ttm-note">Signed-in visitors see the masked, view-only tier.
+      The operator token unlocks full CRUD: unmasked records, edit/delete any
+      visitor, the admin marker, telemetry purge, and site-wide publishing.</p>
+      <div class="ttm-srcbar">
+        <input type="password" class="ttm-input" id="op-token" placeholder="operator token" aria-label="Operator token" autocomplete="off">
+        <button class="ttm-btn-primary" id="op-unlock">Unlock</button>
+      </div>
+      <p class="ttm-note" id="op-status">locked — token held in this tab only</p>
     </section>
 
     <section class="ttm-card full" aria-labelledby="h-visitors">
@@ -37,13 +64,17 @@
     <section class="ttm-card full" aria-labelledby="h-tele">
       <h2 class="ttm-card__title" id="h-tele">Telemetry — latest events</h2>
       <div class="ttm-tablewrap" id="events"><p class="ttm-note">loading…</p></div>
+      <div class="ttm-row" id="purge-row" hidden>
+        <button class="ttm-btn-outline" id="ev-purge">Purge events older than 30 days</button>
+        <span class="ttm-note" id="purge-status"></span>
+      </div>
     </section>
 
     <section class="ttm-card full" aria-labelledby="h-wl">
-      <h2 class="ttm-card__title" id="h-wl">Whitelabel — brand · theme · gate</h2>
+      <h2 class="ttm-card__title" id="h-wl">Whitelabel — brand · theme · gate · contact</h2>
       <p class="ttm-note">Edits preview live on this page. <b>Save on device</b> keeps the
       token overrides in this browser (visitor-level); <b>Publish site-wide</b> writes
-      <code>ohm_site_config</code> so every visitor gets them (needs Supabase).</p>
+      <code>ohm_site_config</code> so every visitor gets them (operator token required).</p>
       <div class="ttm-grid ttm-form ttm-gap-top">
         <div>
           <h3 class="ttm-card__title">Brand</h3>
@@ -111,147 +142,225 @@
 <script src="/ttm/toast.js"></script>
 <script src="/ttm/stack.js"></script>
 <script>
-// Admin guard: operator-only. Content stays hidden until TTMStack.isAdmin()
-// confirms the signed-in visitor's row has is_admin=true; otherwise the page
-// body is replaced with an access card. The data script below only boots on
-// confirmation, so telemetry/visitor reads never fire for non-admins.
+// Tiered Mission Control — nobody dead-ends here.
+//   visitor  (auto): signed in through the gate → masked, view-only directory
+//            and telemetry of others + full CRUD on their OWN record.
+//   operator: the token (sessionStorage only) unlocks unmasked reads and CRUD
+//            everywhere. Email claims are unauthenticated, so nothing
+//            privileged ever derives from them — the token is the only key.
 (function(){
   'use strict';
-  var veil = document.createElement('style');
-  veil.textContent = 'main{visibility:hidden}';
-  document.head.appendChild(veil);
-  function deny(){
-    var m = document.querySelector('main');
-    var v = (window.TTMStack && window.TTMStack.visitor()) || null;
-    m.innerHTML =
-      '<header class="ttm-header"><h1>Mission Control</h1>' +
-      '<span class="ttm-crumb">operator access required</span></header>' +
-      '<section class="ttm-card"><h2 class="ttm-card__title">This area is gated</h2>' +
-      '<p>Telemetry and visitor info are operator-only. Sign in with the ' +
-      'operator email, or ask the site operator to grant your email admin ' +
-      'status (<code>supabase/schema.sql</code> has the one-liner).</p>' +
-      '<p class="ttm-note" id="admin-who"></p>' +
-      '<div class="ttm-row"><a class="ttm-btn-outline" href="/">Back to the dashboard</a>' +
-      '<button type="button" class="ttm-btn-outline" id="admin-signin">Sign in again</button>' +
-      '<button type="button" class="ttm-btn-primary" id="admin-retry">Access granted — retry</button>' +
-      '</div></section>';
-    // identity as text, never HTML — a stale or wrong email must be visible
-    document.getElementById('admin-who').textContent = v && v.email
-      ? 'Signed in as ' + v.email + ' — this account has no operator access.'
-      : 'Not signed in on this device (sign-ins expire after 24 hours).';
-    veil.remove();
-    document.getElementById('admin-signin').addEventListener('click', function(){
-      try { localStorage.removeItem('ttm_visitor'); } catch(e){}
-      location.href = '/admin/?signin=1';
-    });
-    document.getElementById('admin-retry').addEventListener('click', function(){ location.reload(); });
-  }
-  function decide(){
-    window.TTMStack.isAdmin().then(function(ok){
-      if (ok) { veil.remove(); if (window.__ttmAdminBoot) window.__ttmAdminBoot(); }
-      else deny();
-    });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', decide);
-  else decide();
-})();
-</script>
-<script>
-(function(){
-  'use strict';
-  window.__ttmAdminBoot = function(){
   var $ = function(sel){ return document.querySelector(sel); };
   var sb = window.TTMStack.supabase();
   var toast = function(m,o){ window.TTMToast && TTMToast.show(m, o || {}); };
   var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g,
     function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
-  var token = null;
+  var me = null;      // signed-in visitor {name, email}
+  var token = null;   // operator token once verified
 
-  initWhitelabel();
+  function setTier(t){
+    $('#tier-badge').textContent = t;
+    $('#tier-badge').className = 'ttm-badge' + (t === 'operator' ? ' ttm-badge--success' : '');
+    $('#tier-crumb').textContent = t === 'operator'
+      ? 'telemetry · visitors · operator (full CRUD)'
+      : 'masked view · your record is yours';
+  }
 
-  if (!sb) {
-    ['#visitors', '#events'].forEach(function(sel){
-      $(sel).innerHTML = '<p class="ttm-note">local-only mode — connect Supabase ' +
-        '(SUPABASE_URL / SUPABASE_ANON_KEY env vars) to collect data.</p>';
+  function boot(){
+    me = window.TTMStack.visitor();
+    if (!me) return; // the forced gate overlays; completing it reloads this page
+    $('#me-who').textContent = me.email;
+    $('#me-name').value = me.name || '';
+    setTier('viewer');
+    initMyRecord();
+    initOperator();
+    initWhitelabel();
+    if (!sb) {
+      ['#visitors', '#events'].forEach(function(sel){
+        $(sel).innerHTML = '<p class="ttm-note">local-only mode — connect Supabase ' +
+          '(SUPABASE_URL / SUPABASE_ANON_KEY env vars) to collect data.</p>';
+      });
+      $('#op-status').textContent = 'operator tier needs Supabase (local-only mode)';
+      return;
+    }
+    loadMasked();
+    var stored = null;
+    try { stored = sessionStorage.getItem('ohm_admin_token'); } catch(e){}
+    if (stored) verifyToken(stored, true);
+  }
+
+  // ── stats from whatever tier is loaded ──
+  function renderStats(rows, total){
+    var dayAgo = Date.now() - 24*3600*1000;
+    var day = rows.filter(function(e){ return new Date(e.ts).getTime() >= dayAgo; });
+    $('#st-views').textContent = day.filter(function(e){ return e.event === 'page_view'; }).length;
+    $('#st-sessions').textContent = new Set(day.map(function(e){ return e.session_id || e.visitor_masked || ''; })).size;
+    $('#st-gates').textContent = day.filter(function(e){ return e.event === 'gate_complete'; }).length;
+    $('#st-total').textContent = total != null ? total : rows.length + '+';
+  }
+
+  // ── viewer tier: masked, view-only ──
+  function loadMasked(){
+    sb.rpc('ohm_visitors_masked', { p_email: me.email }).then(function(r){
+      if (r.error) { $('#visitors').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
+      var rows = r.data || [];
+      if (!rows.length) { $('#visitors').innerHTML = '<p class="ttm-note">no sign-ins yet</p>'; return; }
+      var html = '<table class="ttm-table"><thead><tr><th>name</th><th>email</th><th>last seen</th><th>admin</th></tr></thead><tbody>';
+      rows.forEach(function(v){
+        html += '<tr><td>' + esc(v.name) + '</td><td class="mono">' + esc(v.email_masked) + '</td>' +
+          '<td class="mono">' + esc((v.last_seen || '').slice(0, 16).replace('T', ' ')) + '</td>' +
+          '<td>' + (v.is_admin ? '<span class="ttm-badge ttm-badge--success">admin</span>' : '') + '</td></tr>';
+      });
+      $('#visitors').innerHTML = html + '</tbody></table>';
     });
-    return;
+    sb.rpc('ohm_events_masked', { p_email: me.email, p_limit: 200 }).then(function(r){
+      if (r.error) { $('#events').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
+      var rows = r.data || [];
+      renderStats(rows, null);
+      if (!rows.length) { $('#events').innerHTML = '<p class="ttm-note">no events yet</p>'; return; }
+      var html = '<table class="ttm-table"><thead><tr><th>when</th><th>event</th><th>page</th><th>visitor</th></tr></thead><tbody>';
+      rows.slice(0, 100).forEach(function(e){
+        html += '<tr><td class="mono">' + esc((e.ts || '').slice(5, 16).replace('T', ' ')) + '</td>' +
+          '<td>' + esc(e.event) + '</td><td class="mono">' + esc(e.page) + '</td>' +
+          '<td class="mono">' + esc(e.visitor_masked || '') + '</td></tr>';
+      });
+      $('#events').innerHTML = html + '</tbody></table>';
+    });
   }
 
-  // ── operator token: the credential for all reads + publishes ──
-  // Kept in sessionStorage only (cleared when the tab closes). Set it in
-  // Supabase per supabase/schema.sql → "SET YOUR TOKEN".
-  function askToken(msg){
-    $('#visitors').innerHTML = '<p class="ttm-note">' + esc(msg || 'Operator token required.') + '</p>';
-    $('#events').innerHTML =
-      '<div class="ttm-srcbar"><input type="password" class="ttm-input" id="op-token" ' +
-      'placeholder="operator token" aria-label="Operator token">' +
-      '<button class="ttm-btn-primary" id="op-token-go">Unlock</button></div>' +
-      '<p class="ttm-note">The token set in <code>ohm_admin_secrets</code> ' +
-      '(see supabase/schema.sql). Held in this tab only.</p>';
-    $('#op-token-go').addEventListener('click', tryToken);
-    $('#op-token').addEventListener('keydown', function(e){ if (e.key === 'Enter') tryToken(); });
-    $('#op-token').focus();
+  // ── my record: CRUD on the row that matches my signed-in email ──
+  function initMyRecord(){
+    $('#me-save').addEventListener('click', function(){
+      var name = $('#me-name').value.trim();
+      if (!name) { toast('Name cannot be empty.', { type: 'warning' }); return; }
+      var local = function(){
+        try {
+          var rec = JSON.parse(localStorage.getItem('ttm_visitor')) || {};
+          rec.name = name;
+          localStorage.setItem('ttm_visitor', JSON.stringify(rec));
+        } catch(e){}
+        me.name = name;
+        toast('Name saved.', { type: 'success' });
+      };
+      if (!sb) { local(); return; }
+      sb.rpc('ohm_update_own_name', { p_email: me.email, p_name: name }).then(function(r){
+        if (r.error) { toast('Save failed: ' + r.error.message, { type: 'error' }); return; }
+        local();
+        if (token) loadFull(); else loadMasked();
+      });
+    });
+    $('#me-delete').addEventListener('click', function(){
+      if (!confirm('Erase your record and all telemetry attributed to ' + me.email + '? This signs you out.')) return;
+      var done = function(){
+        try { localStorage.removeItem('ttm_visitor'); } catch(e){}
+        location.href = '/';
+      };
+      if (!sb) { done(); return; }
+      sb.rpc('ohm_delete_own', { p_email: me.email }).then(function(r){
+        if (r.error) { toast('Erase failed: ' + r.error.message, { type: 'error' }); return; }
+        done();
+      });
+    });
   }
-  function tryToken(){
+
+  // ── operator tier: token unlocks CRUD everywhere ──
+  function initOperator(){
+    $('#op-unlock').addEventListener('click', function(){ tryUnlock(); });
+    $('#op-token').addEventListener('keydown', function(e){ if (e.key === 'Enter') tryUnlock(); });
+  }
+  function tryUnlock(){
     var t = $('#op-token').value.trim();
     if (!t) return;
-    verify(t);
+    if (!sb) { $('#op-status').textContent = 'operator tier needs Supabase (local-only mode)'; return; }
+    verifyToken(t, false);
   }
-  function verify(t){
+  function verifyToken(t, silent){
     sb.rpc('ohm_admin_stats', { p_token: t }).then(function(r){
       if (r.error) {
         try { sessionStorage.removeItem('ohm_admin_token'); } catch(e){}
-        askToken('That token was not accepted.');
+        $('#op-status').textContent = 'token not accepted';
+        if (!silent) toast('That token was not accepted.', { type: 'error' });
         return;
       }
       token = t;
       try { sessionStorage.setItem('ohm_admin_token', t); } catch(e){}
+      setTier('operator');
+      $('#op-status').textContent = 'unlocked — full CRUD active in this tab';
+      $('#op-token').value = '';
+      $('#purge-row').hidden = false;
       var total = (r.data && r.data[0] && r.data[0].total_events) || 0;
       $('#st-total').textContent = total;
-      loadData();
+      loadFull();
     });
   }
 
-  function loadData(){
-    sb.rpc('ohm_admin_events', { p_token: token, p_limit: 1000 }).then(function(r){
-      if (r.error) throw r.error;
+  function loadFull(){
+    sb.rpc('ohm_admin_visitors', { p_token: token }).then(function(r){
+      if (r.error) { $('#visitors').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
       var rows = r.data || [];
-      var dayAgo = Date.now() - 24*3600*1000;
-      var day = rows.filter(function(e){ return new Date(e.ts).getTime() >= dayAgo; });
-      $('#st-views').textContent = day.filter(function(e){ return e.event === 'page_view'; }).length;
-      $('#st-sessions').textContent = new Set(day.map(function(e){ return e.session_id; })).size;
-      $('#st-gates').textContent = day.filter(function(e){ return e.event === 'gate_complete'; }).length;
-      var recent = rows.slice(0, 100);
-      if (!recent.length) { $('#events').innerHTML = '<p class="ttm-note">no events yet</p>'; return; }
+      if (!rows.length) { $('#visitors').innerHTML = '<p class="ttm-note">no sign-ins yet</p>'; return; }
+      var html = '<table class="ttm-table"><thead><tr><th>name</th><th>email</th><th>last seen</th><th>admin</th><th>actions</th></tr></thead><tbody>';
+      rows.forEach(function(v){
+        html += '<tr data-email="' + esc(v.email) + '">' +
+          '<td>' + esc(v.name) + '</td><td class="mono">' + esc(v.email) + '</td>' +
+          '<td class="mono">' + esc((v.last_seen || '').slice(0, 16).replace('T', ' ')) + '</td>' +
+          '<td>' + (v.is_admin ? '<span class="ttm-badge ttm-badge--success">admin</span>' : '') + '</td>' +
+          '<td class="mono">' +
+            '<button type="button" class="ttm-btn-outline" data-act="rename">rename</button> ' +
+            '<button type="button" class="ttm-btn-outline" data-act="' + (v.is_admin ? 'demote' : 'promote') + '">' + (v.is_admin ? 'revoke admin' : 'make admin') + '</button> ' +
+            '<button type="button" class="ttm-btn-outline" data-act="delete">delete</button>' +
+          '</td></tr>';
+      });
+      $('#visitors').innerHTML = html + '</tbody></table>';
+      $('#visitors').querySelectorAll('button[data-act]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          visitorAction(btn.dataset.act, btn.closest('tr').dataset.email);
+        });
+      });
+    });
+    sb.rpc('ohm_admin_events', { p_token: token, p_limit: 1000 }).then(function(r){
+      if (r.error) { $('#events').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
+      var rows = r.data || [];
+      renderStats(rows, $('#st-total').textContent);
+      if (!rows.length) { $('#events').innerHTML = '<p class="ttm-note">no events yet</p>'; return; }
       var html = '<table class="ttm-table"><thead><tr><th>when</th><th>event</th><th>page</th><th>session</th><th>visitor</th></tr></thead><tbody>';
-      recent.forEach(function(e){
+      rows.slice(0, 100).forEach(function(e){
         html += '<tr><td class="mono">' + esc((e.ts || '').slice(5, 16).replace('T', ' ')) + '</td>' +
           '<td>' + esc(e.event) + '</td><td class="mono">' + esc(e.page) + '</td>' +
           '<td class="mono">' + esc((e.session_id || '').slice(0, 10)) + '</td>' +
           '<td class="mono">' + esc(e.visitor_email || '') + '</td></tr>';
       });
       $('#events').innerHTML = html + '</tbody></table>';
-    }).catch(function(e){ $('#events').innerHTML = '<p class="ttm-note">telemetry read failed: ' + esc(e.message) + '</p>'; });
-
-    sb.rpc('ohm_admin_visitors', { p_token: token }).then(function(r){
-      if (r.error) throw r.error;
-      var rows = r.data || [];
-      if (!rows.length) { $('#visitors').innerHTML = '<p class="ttm-note">no sign-ins yet</p>'; return; }
-      var html = '<table class="ttm-table"><thead><tr><th>name</th><th>email</th><th>last seen</th><th>admin</th></tr></thead><tbody>';
-      rows.forEach(function(v){
-        html += '<tr><td>' + esc(v.name) + '</td><td class="mono">' + esc(v.email) + '</td>' +
-          '<td class="mono">' + esc((v.last_seen || '').slice(0, 16).replace('T', ' ')) + '</td>' +
-          '<td>' + (v.is_admin ? '<span class="ttm-badge ttm-badge--success">admin</span>' : '') + '</td></tr>';
-      });
-      $('#visitors').innerHTML = html + '</tbody></table>';
-    }).catch(function(e){ $('#visitors').innerHTML = '<p class="ttm-note">visitors read failed: ' + esc(e.message) + '</p>'; });
+    });
   }
 
-  var stored = null;
-  try { stored = sessionStorage.getItem('ohm_admin_token'); } catch(e){}
-  if (stored) verify(stored); else askToken();
+  function visitorAction(act, email){
+    if (act === 'rename') {
+      var name = prompt('New display name for ' + email + ':');
+      if (name === null || !name.trim()) return;
+      sb.rpc('ohm_admin_update_visitor', { p_token: token, p_email: email, p_name: name.trim() })
+        .then(function(r){ r.error ? toast(r.error.message, { type: 'error' }) : loadFull(); });
+    } else if (act === 'promote' || act === 'demote') {
+      sb.rpc('ohm_admin_update_visitor', { p_token: token, p_email: email, p_is_admin: act === 'promote' })
+        .then(function(r){ r.error ? toast(r.error.message, { type: 'error' }) : loadFull(); });
+    } else if (act === 'delete') {
+      if (!confirm('Delete ' + email + ' and all their telemetry? This cannot be undone.')) return;
+      sb.rpc('ohm_admin_delete_visitor', { p_token: token, p_email: email })
+        .then(function(r){ r.error ? toast(r.error.message, { type: 'error' }) : loadFull(); });
+    }
+  }
 
-  // ── Whitelabel editor: live preview → save on device → publish site-wide ──
+  $('#ev-purge').addEventListener('click', function(){
+    if (!token) return;
+    if (!confirm('Purge telemetry older than 30 days?')) return;
+    sb.rpc('ohm_admin_purge_events', { p_token: token, p_keep_days: 30 }).then(function(r){
+      if (r.error) { toast(r.error.message, { type: 'error' }); return; }
+      $('#purge-status').textContent = r.data + ' events purged';
+      loadFull();
+    });
+  });
+
+  // ── Whitelabel editor: live preview → save on device → publish (operator) ──
   function initWhitelabel(){
     var TOKENS = [
       ['--ttm-pink','pink'], ['--ttm-cyan','cyan'], ['--ttm-lime','lime'],
@@ -306,7 +415,7 @@
     });
     $('#wl-title').addEventListener('input', function(){ document.title = this.value || 'Mission Control — Hardware'; });
     $('#wl-tagline').addEventListener('input', function(){
-      var c = document.querySelector('.ttm-header .ttm-crumb'); if (c && this.value) c.textContent = this.value;
+      var el = document.querySelector('.ttm-header .ttm-crumb'); if (el && this.value) el.textContent = this.value;
     });
 
     $('#wl-save').addEventListener('click', function(){
@@ -355,7 +464,9 @@
       toast('Device overrides cleared.', { type: 'success', timeout: 2000 });
     });
   }
-  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 </body>
