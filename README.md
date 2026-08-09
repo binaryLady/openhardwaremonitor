@@ -11,7 +11,7 @@ it.
 
 | Dark theme (default) | Terminal theme |
 |---|---|
-| ![Dashboard, dark theme: machine summary strip and sensor meters with threshold coloring](docs/screenshots/dashboard-dark.png) | ![Dashboard, terminal theme: identical layout, all colors re-derived from the token layer](docs/screenshots/dashboard-terminal.png) |
+| ![Dashboard, dark theme: hero stat tiles with trend sparklines, sensor rows with inline sparklines and threshold-tinted meters](docs/screenshots/dashboard-dark.png) | ![Dashboard, terminal theme: identical hero tiles and sparklines, every color re-derived from the token layer](docs/screenshots/dashboard-terminal.png) |
 
 ## Scope of the fork
 
@@ -33,14 +33,26 @@ it.
   [OKW](https://github.com/iop-alliance/OpenKnowWhere) manufacturing
   capabilities, for registration on
   [Maps of Making](https://maps.thetechmargin.com).
-- **Test bench** (`web/test/`) — 55+ in-browser assertions covering the
+- **Test bench** (`web/test/`) — 57 in-browser assertions covering the
   sensor core, the bridge (including the extension contracts), theming,
   the whitelabel runtime, and WCAG contrast computed from live token
   values. Runs from `file://` or the deployed site; no build step.
 
 | Component gallery (`/components/`) | Test bench (`/test/`) |
 |---|---|
-| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows](docs/screenshots/components.png) | ![Test bench with 48 passing assertions](docs/screenshots/test-bench.png) |
+| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows with sparklines, stat tiles](docs/screenshots/components.png) | ![Test bench with 57 passing assertions](docs/screenshots/test-bench.png) |
+
+## Keyboard & accessibility
+
+The dashboard is fully keyboard-operable: <kbd>d</kbd> demo ·
+<kbd>/</kbd> connect · <kbd>t</kbd> theme · <kbd>Esc</kbd> pause ·
+<kbd>?</kbd> menu · <kbd>g</kbd>-chords navigate the site · arrows /
+<kbd>j</kbd>/<kbd>k</kbd> walk the sensor tree (focus survives the poll
+re-render). Every page opens with a skip-to-content link; the drawer
+menu manages focus per the ARIA disclosure pattern; WCAG 2.1 AA contrast
+is computed from live token values by the test bench on every run, in
+both themes; `prefers-reduced-motion` collapses all animation and slows
+polling. The full table lives in [`web/README.md`](web/README.md).
 
 ## Demo URLs
 
