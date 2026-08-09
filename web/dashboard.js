@@ -19,71 +19,8 @@
   let mode = 'idle'; // idle | demo | live
   let lastTree = null;
 
-  // ---- parsing ------------------------------------------------------------
-
-  // "52.0 °C" -> 52.0 ; "1,234 RPM" -> 1234 ; "" -> null
-  function num(s) {
-    if (typeof s === 'number') return s;
-    if (!s) return null;
-    const m = String(s).replace(/,/g, '').match(/-?\d+(\.\d+)?/);
-    return m ? parseFloat(m[0]) : null;
-  }
-
-  // Category comes from the type-group node's icon (images_icon/temperature.png …)
-  function categoryOf(node) {
-    const m = /images_icon\/([a-z_]+)\.png/.exec(node.ImageURL || '');
-    return m ? m[1] : null;
-  }
-
-  // Flatten the tree into hardware blocks: [{name, icon, sensors:[{name, cat, value, min, max, n, nMin, nMax}]}]
-  function flatten(root) {
-    const blocks = [];
-    const machines = (root.Children || []);
-    machines.forEach(machine => {
-      (machine.Children || []).forEach(function walkHw(hw) {
-        const block = { name: hw.Text, icon: categoryOf(hw), sensors: [] };
-        (hw.Children || []).forEach(child => {
-          if (categoryOf(child) && child.Children && child.Children.length &&
-              child.Children.every(c => !c.Children || !c.Children.length)) {
-            // a type group (Temperatures / Fans / …) full of leaf sensors
-            const cat = categoryOf(child);
-            child.Children.forEach(s => block.sensors.push({
-              name: s.Text, cat, group: child.Text,
-              value: s.Value, min: s.Min, max: s.Max,
-              n: num(s.Value), nMin: num(s.Min), nMax: num(s.Max)
-            }));
-          } else if (child.Children && child.Children.length) {
-            walkHw(child); // sub-hardware (e.g. SuperIO chip under mainboard)
-          }
-        });
-        if (block.sensors.length) blocks.push(block);
-      });
-    });
-    return blocks;
-  }
-
-  // ---- thresholds ---------------------------------------------------------
-
-  function stateOf(s) {
-    if (s.n == null) return '';
-    if (s.cat === 'temperature') {
-      if (s.n >= 85) return 'hot';
-      if (s.n >= 70) return 'warn';
-    } else if (s.cat === 'load') {
-      if (s.n >= 95) return 'hot';
-      if (s.n >= 80) return 'warn';
-    }
-    return '';
-  }
-
-  function meterPct(s) {
-    if (s.n == null) return null;
-    if (s.cat === 'load' || /%/.test(s.value)) return Math.max(0, Math.min(100, s.n));
-    // scale within the session's observed min..max window
-    if (s.nMin != null && s.nMax != null && s.nMax > s.nMin)
-      return ((s.n - s.nMin) / (s.nMax - s.nMin)) * 100;
-    return null;
-  }
+  // parsing + thresholds live in parse.js (window.OHMParse)
+  const { flatten, stateOf, meterPct } = window.OHMParse;
 
   // ---- rendering ----------------------------------------------------------
 
