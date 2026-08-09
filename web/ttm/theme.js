@@ -63,7 +63,10 @@
   applyCustom(getCustom());
 
   function buildMenu() {
-    var here = location.pathname.replace(/index\.html$/, '');
+    // current-page key includes the demo flag, so Dashboard (/) and
+    // Demo feed (/?demo=1) mark aria-current distinctly
+    var here = location.pathname.replace(/index\.html$/, '') +
+      (new URLSearchParams(location.search).has('demo') ? '?demo=1' : '');
     var burger = document.createElement('button');
     burger.className = 'ttm-burger';
     burger.type = 'button';
@@ -118,6 +121,11 @@
         '<span class="ttm-menu__desc">' + r.desc + '</span></a></li>';
     });
     html += '</ul></nav>';
+    // Contact & social — whitelabel-published (ohm_site_config key "contact"),
+    // hidden until the operator fills it in. Values render as text and
+    // validated URLs only; stored junk can never become markup or script.
+    html += '<nav aria-label="Contact" class="ttm-menu__contactnav" hidden>' +
+      '<ul class="ttm-menu__list ttm-menu__contact"></ul></nav>';
     html += '<fieldset class="ttm-menu__theme"><legend>Theme</legend>';
     THEMES.forEach(function (t) {
       var id = 'ttm-theme-' + (t || 'zine');
@@ -132,6 +140,58 @@
       '<kbd>Tab</kbd> from the top reaches a skip-to-content link on every page</div>';
     panel.innerHTML = html;
     panel.querySelector('.ttm-menu__bernard .voice').textContent = greeting;
+
+    // ── contact links: text + validated http(s)/mailto URLs only ──
+    var CONTACT_KEYS = [
+      ['email', 'Email'], ['website', 'Website'], ['github', 'GitHub'],
+      ['mastodon', 'Mastodon'], ['bluesky', 'Bluesky'], ['x', 'X'],
+    ];
+    function safeUrl(v, key) {
+      v = String(v || '').trim().slice(0, 300);
+      if (!v) return null;
+      if (key === 'email')
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'mailto:' + v : null;
+      if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+      try {
+        var u = new URL(v);
+        if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+      } catch (e) {}
+      return null;
+    }
+    function renderContact() {
+      var box = panel.querySelector('.ttm-menu__contact');
+      if (!box) return;
+      var c = (window.TTMBrand && window.TTMBrand.get('contact')) || {};
+      box.textContent = '';
+      var head = document.createElement('li');
+      head.className = 'ttm-menu__group';
+      head.setAttribute('role', 'presentation');
+      head.textContent = 'Contact';
+      box.appendChild(head);
+      var n = 0;
+      CONTACT_KEYS.forEach(function (k) {
+        var href = safeUrl(c[k[0]], k[0]);
+        if (!href) return;
+        n++;
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.className = 'ttm-menu__item';
+        a.href = href;
+        if (k[0] !== 'email') { a.target = '_blank'; a.rel = 'me noopener'; }
+        var nm = document.createElement('span');
+        nm.className = 'ttm-menu__name';
+        nm.textContent = k[1];
+        var ds = document.createElement('span');
+        ds.className = 'ttm-menu__desc';
+        ds.textContent = String(c[k[0]]).trim().slice(0, 300);
+        a.appendChild(nm); a.appendChild(ds);
+        li.appendChild(a);
+        box.appendChild(li);
+      });
+      panel.querySelector('.ttm-menu__contactnav').hidden = n === 0;
+    }
+    renderContact();
+    document.addEventListener('ttm:brand', renderContact);
 
     function isOpen() { return panel.classList.contains('is-open'); }
     function open() {

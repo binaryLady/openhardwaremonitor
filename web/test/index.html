@@ -211,6 +211,16 @@ window.addEventListener('load', function () {
     return b && b.footer_name === '' && g && g.enabled === true &&
            th && typeof th.tokens === 'object' ? true : 'defaults wrong';
   });
+  t('brand.js: contact section defaults (email/website/socials, all empty)', function () {
+    var c = window.TTMBrand.get('contact');
+    return c && ['email', 'website', 'github', 'mastodon', 'bluesky', 'x']
+      .every(function (k) { return c[k] === ''; }) ? true : JSON.stringify(c);
+  });
+  t('menu: contact block exists and stays hidden while unconfigured', function () {
+    var nav = document.querySelector('.ttm-menu__contactnav');
+    return nav !== null && nav.hidden === true ? true :
+      'nav=' + !!nav + ' hidden=' + (nav && nav.hidden);
+  });
   t('brand.js: gate copy is the hook stack.js reads', function () {
     var g = window.TTMBrand.get('gate');
     return typeof g.title === 'string' && typeof g.body === 'string' &&

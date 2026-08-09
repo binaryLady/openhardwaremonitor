@@ -204,7 +204,7 @@ begin
     raise exception 'invalid config';
   end if;
   for k in select jsonb_object_keys(p_config) loop
-    if k not in ('brand', 'theme', 'gate') then
+    if k not in ('brand', 'theme', 'gate', 'contact') then
       raise exception 'unknown config key %', k;
     end if;
     if length((p_config->k)::text) > 20000 then
@@ -222,7 +222,8 @@ grant execute on function public.ohm_publish_config(text, jsonb) to anon, authen
 insert into public.ohm_site_config (key, value) values
   ('brand', '{"tagline": "", "footer_name": "", "footer_hidden": false, "page_title": ""}'),
   ('theme', '{"default": "ttm", "tokens": {}}'),
-  ('gate',  '{"enabled": true, "title": "", "body": "", "fine": ""}')
+  ('gate',  '{"enabled": true, "title": "", "body": "", "fine": ""}'),
+  ('contact', '{"email": "", "website": "", "github": "", "mastodon": "", "bluesky": "", "x": ""}')
 on conflict (key) do nothing;
 
 -- Grant admin (SQL editor only — no client path can do this):
