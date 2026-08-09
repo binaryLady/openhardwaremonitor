@@ -115,6 +115,13 @@
   --ttm-transition-normal: 200ms ease;
   --ttm-transition-slow: 300ms ease;
 
+  /* Animation durations — every keyframe run wears one of these, so motion
+     is themable and the reduced-motion collapse catches all of it */
+  --ttm-anim-pop: 220ms;      /* entrances: toasts, menus */
+  --ttm-anim-flash: 900ms;    /* one-shot attention: fresh sensor values */
+  --ttm-anim-pulse: 2400ms;   /* heartbeat: live indicators */
+  --ttm-anim-shimmer: 8s;     /* ambient: iridescent brand rule */
+
   /* Accent hover variants (spec §Brand Colors) */
   --ttm-pink-hover: #c903c5;
   --ttm-lime-hover: #8ae600;

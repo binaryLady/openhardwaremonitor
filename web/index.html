@@ -32,13 +32,28 @@
   </div>
 
   <div class="ttm-grid ttm-grid--wide">
-    <section class="ttm-card full" id="machine-card" aria-labelledby="h-machine" hidden>
+    <section class="ttm-card full ttm-hero" id="machine-card" aria-labelledby="h-machine" hidden>
       <h2 class="ttm-card__title" id="h-machine">Machine</h2>
-      <div class="ttm-statrow">
-        <span class="stat"><b id="m-name" class="gradient-text-rainbow">—</b><span class="ttm-badge" id="m-state">idle</span></span>
-        <span class="stat"><span class="k">hottest</span><b id="m-hot">—</b></span>
-        <span class="stat"><span class="k">peak load</span><b id="m-load">—</b></span>
-        <span class="stat"><span class="k">sensors</span><b id="m-count">—</b></span>
+      <div class="ttm-hero__head">
+        <b id="m-name" class="gradient-text-rainbow">—</b>
+        <span class="ttm-badge" id="m-state">idle</span>
+      </div>
+      <div class="ttm-tiles">
+        <div class="ttm-tile ttm-tile--hero">
+          <span class="ttm-tile__label">Hottest sensor</span>
+          <b class="ttm-tile__value" id="m-hot">—</b>
+          <svg class="ttm-tile__trend" id="trend-hot" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+        <div class="ttm-tile">
+          <span class="ttm-tile__label">Peak load</span>
+          <b class="ttm-tile__value" id="m-load">—</b>
+          <svg class="ttm-tile__trend" id="trend-load" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+        <div class="ttm-tile">
+          <span class="ttm-tile__label">Sensors</span>
+          <b class="ttm-tile__value" id="m-count">—</b>
+          <span class="ttm-tile__sub" id="m-count-sub"></span>
+        </div>
       </div>
     </section>
 

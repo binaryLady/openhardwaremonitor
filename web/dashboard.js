@@ -24,6 +24,43 @@
   // parsing + thresholds live in parse.js (window.OHMParse)
   const { flatten, stateOf, meterPct } = window.OHMParse;
 
+  // ---- history + sparklines ----------------------------------------------
+  // Ring buffer of the last N numeric readings per sensor — polling already
+  // delivers a time series, the UI just never kept it. Held in memory only.
+  const HIST_N = 40;
+  const hist = new Map();
+  const lastVal = new Map(); // previous display string — a change gets a flash
+  function remember(key, n) {
+    if (n == null) return null;
+    let h = hist.get(key);
+    if (!h) { h = []; hist.set(key, h); }
+    h.push(n);
+    if (h.length > HIST_N) h.shift();
+    return h;
+  }
+  // 2px line, no axes or grid: the de-emphasis stroke carries the shape, a
+  // single end dot carries "now". Flat series draw as a midline.
+  function sparkline(svg, h, state) {
+    if (!svg) return;
+    if (!h || h.length < 2) { svg.replaceChildren(); return; }
+    const w = 120, ht = 32, pad = 3;
+    let min = Math.min.apply(null, h), max = Math.max.apply(null, h);
+    if (min === max) { min -= 1; max += 1; }
+    const x = i => pad + (w - 2 * pad) * (i / (h.length - 1));
+    const y = v => ht - pad - (ht - 2 * pad) * ((v - min) / (max - min));
+    const d = h.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+    const ns = 'http://www.w3.org/2000/svg';
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'spark__line');
+    const dot = document.createElementNS(ns, 'circle');
+    dot.setAttribute('cx', x(h.length - 1).toFixed(1));
+    dot.setAttribute('cy', y(h[h.length - 1]).toFixed(1));
+    dot.setAttribute('r', '2.5');
+    dot.setAttribute('class', 'spark__dot' + (state ? ' spark__dot--' + state : ''));
+    svg.replaceChildren(path, dot);
+  }
+
   // ---- rendering ----------------------------------------------------------
 
   function render(root) {
@@ -72,12 +109,21 @@
         row.className = 'ttm-sensor' + (st ? ' ttm-sensor--' + st : '');
         if (st) row.title = st === 'hot' ? 'above critical threshold' : 'above warning threshold';
         const pct = meterPct(s);
+        const key = block.name + '/' + s.group + '/' + s.name;
+        const h = remember(key, s.n);
+        const range = h && h.length > 1
+          ? ' · last ' + h.length + ' readings ' + Math.min.apply(null, h) + '–' + Math.max.apply(null, h)
+          : '';
         row.innerHTML =
-          '<span class="nm" title="' + esc(s.name) + '">' + esc(s.name) + '</span>' +
+          '<span class="nm" title="' + esc(s.name + range) + '">' + esc(s.name) + '</span>' +
+          '<svg class="spark" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg>' +
           '<span class="meterbar" aria-hidden="true">' +
             (pct == null ? '' : '<i style="width:' + pct.toFixed(1) + '%"></i>') +
           '</span>' +
-          '<span class="val">' + esc(s.value || '—') + '</span>';
+          '<span class="val' + (lastVal.get(key) !== s.value ? ' is-fresh' : '') + '">' +
+            esc(s.value || '—') + '</span>';
+        lastVal.set(key, s.value);
+        sparkline(row.querySelector('.spark'), h, st);
         card.appendChild(row);
       });
       els.tree.appendChild(card);
@@ -115,13 +161,18 @@
     st.className = 'ttm-badge' + (m.active ? ' ttm-badge--success' : '');
     const hot = $('#m-hot');
     hot.textContent = m.hottest ? m.hottest.value : '—';
-    hot.className = m.hottest && m.hottest.state ? m.hottest.state : '';
+    hot.className = 'ttm-tile__value' + (m.hottest && m.hottest.state ? ' ' + m.hottest.state : '');
     hot.title = m.hottest ? m.hottest.hw + ' / ' + m.hottest.name : '';
     const load = $('#m-load');
     load.textContent = m.maxLoad ? m.maxLoad.value : '—';
-    load.className = m.maxLoad && m.maxLoad.state ? m.maxLoad.state : '';
+    load.className = 'ttm-tile__value' + (m.maxLoad && m.maxLoad.state ? ' ' + m.maxLoad.state : '');
     load.title = m.maxLoad ? m.maxLoad.hw + ' / ' + m.maxLoad.name : '';
-    $('#m-count').textContent = m.sensors + ' across ' + m.blocks + ' devices · ' + m.fans + ' fans';
+    $('#m-count').textContent = m.sensors;
+    $('#m-count-sub').textContent = m.blocks + ' devices · ' + m.fans + ' fans';
+    sparkline($('#trend-hot'), m.hottest ? remember('~hottest', m.hottest.n) : null,
+      m.hottest && m.hottest.state);
+    sparkline($('#trend-load'), m.maxLoad ? remember('~maxload', m.maxLoad.n) : null,
+      m.maxLoad && m.maxLoad.state);
   }
 
   function setStatus(txt, tone) {
@@ -180,6 +231,7 @@
     mode = 'live';
     failStreak = 0;
     setStatus('connecting…');
+    try { localStorage.setItem('ohm_src_url', els.url.value.trim()); } catch (e) {}
     poll(url);
     timer = setInterval(() => poll(url), POLL_MS);
   }
@@ -244,6 +296,12 @@
     else if (mode === 'demo') startDemo();
     else if (mode === 'live') startLive();
   });
+
+  // the machine URL survives reloads — monitors are revisited, not retyped
+  try {
+    const saved = localStorage.getItem('ohm_src_url');
+    if (saved && !els.url.value) els.url.value = saved;
+  } catch (e) {}
 
   // ?demo=1 auto-loads demo data (handy for the deployed preview)
   if (new URLSearchParams(location.search).has('demo')) startDemo();

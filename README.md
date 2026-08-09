@@ -17,8 +17,9 @@ it.
 
 - **Dashboard** (`web/index.html`, `dashboard.js`) — polls the embedded
   server's `/data.json`, renders sensors grouped by hardware with
-  configurable warn/hot thresholds, and a machine summary strip
-  (activity, hottest temperature, peak load, counts).
+  configurable warn/hot thresholds, inline trend sparklines built from
+  the poll history, and a hero band of stat tiles (activity, hottest
+  temperature, peak load, counts).
 - **Design system** (`web/ttm/`) — a single token layer (colors, type,
   spacing, motion, z-index) consumed by one component library; two themes
   verified against WCAG 2.1 AA by computed contrast checks; site-wide
@@ -32,7 +33,7 @@ it.
   [OKW](https://github.com/iop-alliance/OpenKnowWhere) manufacturing
   capabilities, for registration on
   [Maps of Making](https://maps.thetechmargin.com).
-- **Test bench** (`web/test/`) — 48 in-browser assertions covering the
+- **Test bench** (`web/test/`) — 55+ in-browser assertions covering the
   sensor core, the bridge (including the extension contracts), theming,
   the whitelabel runtime, and WCAG contrast computed from live token
   values. Runs from `file://` or the deployed site; no build step.

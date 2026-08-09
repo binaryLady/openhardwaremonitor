@@ -19,15 +19,17 @@
   </header>
 
   <div class="ttm-grid">
-    <section class="ttm-card" aria-labelledby="h-stats">
+    <section class="ttm-card full" aria-labelledby="h-stats">
       <h2 class="ttm-card__title" id="h-stats">Last 24 hours</h2>
-      <div class="ttm-kv"><span class="k">page views</span><span class="v" id="st-views">—</span></div>
-      <div class="ttm-kv"><span class="k">sessions</span><span class="v" id="st-sessions">—</span></div>
-      <div class="ttm-kv"><span class="k">gate completions</span><span class="v" id="st-gates">—</span></div>
-      <div class="ttm-kv"><span class="k">events (all time)</span><span class="v" id="st-total">—</span></div>
+      <div class="ttm-tiles">
+        <div class="ttm-tile"><span class="ttm-tile__label">Page views</span><b class="ttm-tile__value" id="st-views">—</b></div>
+        <div class="ttm-tile"><span class="ttm-tile__label">Sessions</span><b class="ttm-tile__value" id="st-sessions">—</b></div>
+        <div class="ttm-tile"><span class="ttm-tile__label">Gate completions</span><b class="ttm-tile__value" id="st-gates">—</b></div>
+        <div class="ttm-tile"><span class="ttm-tile__label">Events all time</span><b class="ttm-tile__value" id="st-total">—</b></div>
+      </div>
     </section>
 
-    <section class="ttm-card" aria-labelledby="h-visitors">
+    <section class="ttm-card full" aria-labelledby="h-visitors">
       <h2 class="ttm-card__title" id="h-visitors">Visitors</h2>
       <div class="ttm-tablewrap" id="visitors"><p class="ttm-note">loading…</p></div>
     </section>
@@ -51,7 +53,7 @@
           <input class="ttm-input" id="wl-tagline" type="text" placeholder="open hardware monitor · live sensors">
           <label class="ttm-note" for="wl-footer">footer name</label>
           <input class="ttm-input" id="wl-footer" type="text" placeholder="your name · optional">
-          <label class="ttm-note ttm-inline" style="margin-top:.5rem">
+          <label class="ttm-note ttm-inline ttm-gap-top-sm">
             <span class="ttm-switch"><input type="checkbox" id="wl-footer-hide"><span class="track"></span></span>
             hide footer badge</label>
         </div>
@@ -253,7 +255,6 @@
     TOKENS.forEach(function(t){
       var lab = document.createElement('label');
       lab.className = 'ttm-note';
-      lab.style.cssText = 'display:flex;flex-direction:column;gap:.2rem;align-items:center';
       lab.innerHTML = '<input type="color" data-token="' + t[0] + '" value="' + toHex(cssVar(t[0])) + '">' + t[1];
       wrap.appendChild(lab);
     });

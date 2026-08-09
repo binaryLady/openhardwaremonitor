@@ -218,7 +218,7 @@
   footer .heart { color: var(--ttm-hot-red); }
 
   footer .bn { font-family: var(--ttm-font-serif); font-size: 1rem; }
-@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
 
 /* ── ttm-burger + ttm-menu (theme.js) — all routes + theme, collapsed ── */
 .ttm-burger {
@@ -414,7 +414,7 @@
   padding: .55rem .35rem .55rem .8rem;
   font: 400 var(--ttm-fs-small)/1.4 var(--ttm-font-sans);
   pointer-events: auto;
-  animation: ttm-toast-in .22s ease;
+  animation: ttm-toast-in var(--ttm-anim-pop) ease;
 }
 .ttm-toast--success { border-left-color: var(--ttm-success); }
 .ttm-toast--warning { border-left-color: var(--ttm-warning); }
@@ -606,7 +606,7 @@ body.ttm-page {
     var(--ttm-irid-a), var(--ttm-irid-b), var(--ttm-irid-c),
     var(--ttm-irid-d), var(--ttm-irid-e), var(--ttm-irid-a));
   background-size: 400% 400%;
-  animation: ttm-iridescence 8s ease infinite;
+  animation: ttm-iridescence var(--ttm-anim-shimmer) ease infinite;
 }
 @keyframes ttm-iridescence {
   0% { background-position: 0% 50%; }
@@ -659,14 +659,17 @@ body.ttm-page {
 .ttm-skip:focus-visible { transform: none; }
 /* the skip target takes focus programmatically; never draw a ring on the page body */
 .ttm-main:focus { outline: none; }
-@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
 
 /* ── layout utilities — the sanctioned way to compose without inline styles ── */
 .ttm-inline { display: flex; align-items: center; gap: var(--ttm-spacing-sm); flex-wrap: wrap; }
 .ttm-gap-top { margin-top: var(--ttm-spacing-md); }
+.ttm-gap-top-sm { margin-top: var(--ttm-spacing-sm); }
+.ttm-gap-bottom { margin-bottom: var(--ttm-spacing-md); }
 .ttm-form label.ttm-note { display: block; margin: .55rem 0 .15rem; }
 .ttm-form .ttm-input { width: 100%; box-sizing: border-box; }
 .ttm-swatch-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ttm-spacing-sm); }
+.ttm-swatch-grid label { display: flex; flex-direction: column; gap: var(--ttm-spacing-xs); align-items: center; }
 .ttm-select { position: relative; display: inline-block; }
 
 /* ── ttm-input — mono text/url field, pairs with buttons in a ttm-srcbar ── */
@@ -724,7 +727,7 @@ body.ttm-page {
 }
 .ttm-sensor {
   display: grid;
-  grid-template-columns: 1fr 5rem 5.8rem;
+  grid-template-columns: 1fr 4.5rem 5rem 5.8rem;
   gap: .6rem;
   align-items: center;
   padding: .28rem 0;
@@ -734,14 +737,102 @@ body.ttm-page {
 .ttm-sensor:last-child { border-bottom: none; }
 .ttm-sensor .nm { color: var(--ttm-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ttm-sensor .val { font-family: var(--ttm-font-mono); font-variant-numeric: tabular-nums; text-align: right; }
-.ttm-sensor .meterbar { height: 8px; background: var(--ttm-surface-alt); border-radius: 4px; overflow: hidden; }
-.ttm-sensor .meterbar i { display: block; height: 100%; border-radius: 4px; background: var(--ttm-lime); }
+/* the unfilled track is a lighter step of the fill's own ramp, so state
+   reads across the whole bar, not just the filled part */
+.ttm-sensor .meterbar {
+  height: 8px;
+  background: color-mix(in srgb, var(--ttm-lime) 14%, var(--ttm-surface-alt));
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ttm-sensor .meterbar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--ttm-lime);
+  transition: width var(--ttm-transition-slow);
+}
 .ttm-sensor--group { border-bottom: none; }
 .ttm-sensor--group .nm { color: var(--ttm-text-faint); font-size: var(--ttm-fs-caption); text-transform: uppercase; letter-spacing: .06em; }
+.ttm-sensor--warn .meterbar { background: color-mix(in srgb, var(--ttm-warning) 16%, var(--ttm-surface-alt)); }
+.ttm-sensor--hot .meterbar { background: color-mix(in srgb, var(--ttm-danger) 16%, var(--ttm-surface-alt)); }
 .ttm-sensor--warn .meterbar i { background: var(--ttm-warning); }
 .ttm-sensor--hot .meterbar i { background: var(--ttm-danger); }
 .ttm-sensor--warn .val { color: var(--ttm-warning); }
 .ttm-sensor--hot .val { color: var(--ttm-danger); }
+
+/* fresh reading: one soft flash, token-timed; reduced motion collapses it */
+@keyframes ttm-val-fresh { from { background: var(--ttm-wash-hover); } to { background: transparent; } }
+.ttm-sensor .val.is-fresh { animation: ttm-val-fresh var(--ttm-anim-flash) ease-out 1; border-radius: var(--radius-sm); }
+
+/* narrow screens: the sparkline cedes its column before anything truncates */
+@media (max-width: 560px) {
+  .ttm-sensor { grid-template-columns: 1fr 4rem 5.4rem; }
+  .ttm-sensor .spark { display: none; }
+  .ttm-sensor--group { grid-template-columns: 1fr; }
+}
+
+/* ── ttm-hero + ttm-tile — the dashboard's apex: machine identity, then
+      stat tiles (label · value · trend). One hero figure per view. ── */
+.ttm-hero { background: linear-gradient(160deg, var(--ttm-surface), var(--ttm-bg-alt)); }
+.ttm-hero__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ttm-spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--ttm-spacing-md);
+}
+.ttm-hero__head b { font: 600 var(--ttm-fs-h3)/1.2 var(--ttm-font-mono); }
+.ttm-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--ttm-spacing-md);
+}
+.ttm-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ttm-spacing-xs);
+  padding: var(--ttm-spacing-md);
+  background: var(--ttm-wash);
+  border: 1px solid var(--ttm-border-subtle);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+.ttm-tile__label {
+  font: 400 var(--ttm-fs-caption) var(--ttm-font-mono);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ttm-text-muted);
+}
+/* big standalone values read in proportional figures; tabular is for columns */
+.ttm-tile__value {
+  font: 600 var(--ttm-fs-h2)/1.1 var(--ttm-font-mono);
+  color: var(--ttm-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ttm-tile--hero .ttm-tile__value { font-size: var(--ttm-fs-h1); }
+.ttm-tile__value.warn { color: var(--ttm-warning); }
+.ttm-tile__value.hot { color: var(--ttm-danger); }
+.ttm-tile__sub { font: 400 var(--ttm-fs-caption) var(--ttm-font-mono); color: var(--ttm-text-muted); }
+.ttm-tile__trend { width: 100%; height: 32px; margin-top: auto; }
+
+/* ── spark — 2px line in the de-emphasis ink, end dot carries "now";
+      no axes, no grid: the row label + value are the chart furniture ── */
+.spark, .ttm-tile__trend { overflow: visible; }
+.spark { width: 100%; height: 20px; }
+.spark__line, .ttm-tile__trend .spark__line {
+  fill: none;
+  stroke: var(--ttm-text-faint);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.spark__dot { fill: var(--ttm-control); }
+.spark__dot--warn { fill: var(--ttm-warning); }
+.spark__dot--hot { fill: var(--ttm-danger); }
 
 /* ── ttm-statrow — machine overview strip (dashboard hierarchy apex) ── */
 .ttm-statrow { display: flex; flex-wrap: wrap; gap: var(--ttm-spacing-md) var(--ttm-spacing-xl); align-items: center; }
@@ -792,6 +883,26 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
   border-color: var(--ttm-success);
   box-shadow: 0 0 12px color-mix(in srgb, var(--ttm-success) 45%, transparent);
 }
+/* heartbeat dot on the live badge — the room-across signal that data flows */
+.ttm-badge--live::before {
+  content: "";
+  display: inline-block;
+  width: .45em;
+  height: .45em;
+  margin-right: .45em;
+  border-radius: 50%;
+  background: var(--ttm-success);
+  animation: ttm-pulse var(--ttm-anim-pulse) ease-in-out infinite;
+}
+@keyframes ttm-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ttm-badge--live::before { animation: none; }
+}
+details.ttm-hw { transition: background var(--ttm-transition-fast); border-radius: var(--radius-sm); }
+details.ttm-hw:hover { background: var(--ttm-wash); }
 .ttm-sensor .meterbar i {
   background: linear-gradient(90deg, var(--ttm-cyan), var(--ttm-lime));
 }

@@ -72,6 +72,13 @@ the page from the same origin, use a local proxy, or use demo data.
 
 ## UX
 
+- hero band: the machine leads with stat tiles — hottest sensor (the one
+  hero figure), peak load, sensor count — each with a 40-point trend
+  sparkline built from the poll history the page already collects
+- sensor rows carry an inline sparkline (2px, de-emphasis ink, status
+  only on the "now" dot); the meter's unfilled track tints with the row's
+  state so warn/hot reads across the whole bar; fresh readings flash once
+- the machine URL persists in localStorage; the live badge pulses
 - keyboard: <kbd>d</kbd> demo · <kbd>/</kbd> connect · <kbd>t</kbd>
   dark/terminal theme · <kbd>Esc</kbd> pause · <kbd>?</kbd> drawer menu ·
   <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd>
