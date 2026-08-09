@@ -75,7 +75,18 @@ the page from the same origin, use a local proxy, or use demo data.
 - keyboard: <kbd>d</kbd> demo · <kbd>/</kbd> connect · <kbd>t</kbd>
   dark/terminal theme · <kbd>Esc</kbd> pause · <kbd>?</kbd> drawer menu ·
   <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd>
-  navigates dashboard / components / test bench / mission control / maps
+  navigates dashboard / components / test bench / mission control / maps.
+  The chord handler runs in the capture phase and consumes its keys, so
+  <kbd>g</kbd>-then-<kbd>t</kbd> navigates without also toggling the theme;
+  page-level shortcuts skip any key arriving `defaultPrevented`
+- sensor tree: <kbd>↑</kbd>/<kbd>↓</kbd> (or <kbd>j</kbd>/<kbd>k</kbd>)
+  move between device cards, <kbd>Home</kbd>/<kbd>End</kbd> jump to the
+  edges, <kbd>←</kbd>/<kbd>→</kbd> collapse/expand, <kbd>Enter</kbd>/<kbd>Space</kbd>
+  toggle (native). Keyboard focus survives the 5 s poll re-render
+- accessible navigation: every page starts with a skip-to-content link
+  (first tab stop, jumps to `#main`); the drawer menu moves focus in on
+  open, traps <kbd>Tab</kbd>, and returns focus to the burger on close;
+  `window.TTMNav` exposes the routes/chord state the test bench asserts
 - polling pauses when the tab is hidden and resumes on return; under
   `prefers-reduced-motion` it stretches to 20 s
 - the status badge is a polite live region; warn/hot rows carry explanatory

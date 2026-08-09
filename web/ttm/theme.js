@@ -128,7 +128,8 @@
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
       '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close<br>' +
       '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>c</kbd> components · ' +
-      '<kbd>t</kbd> test bench · <kbd>a</kbd> mission control · <kbd>m</kbd> maps of making</div>';
+      '<kbd>t</kbd> test bench · <kbd>a</kbd> mission control · <kbd>m</kbd> maps of making<br>' +
+      '<kbd>Tab</kbd> from the top reaches a skip-to-content link on every page</div>';
     panel.innerHTML = html;
     panel.querySelector('.ttm-menu__bernard .voice').textContent = greeting;
 
@@ -182,21 +183,33 @@
     document.body.appendChild(panel);
 
     // ── Keyboard shortcuts: ? lands you in the menu; g-then-key navigates ──
+    // Capture phase so chords win over page-level single-key shortcuts:
+    // a consumed chord key (g-then-t) arrives at page handlers with
+    // defaultPrevented set, and they must skip it (dashboard.js does).
     var pendingG = 0;
+    var CHORD_ROUTES = { d: '/', c: '/components/', t: '/test/', a: '/admin/',
+      m: 'https://maps.thetechmargin.com/' };
     document.addEventListener('keydown', function (e) {
       var tag = (document.activeElement && document.activeElement.tagName) || '';
       if (/INPUT|TEXTAREA|SELECT/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === '?') { e.preventDefault(); isOpen() ? close() : open(); return; }
-      var routes = { d: '/', c: '/components/', t: '/test/', a: '/admin/',
-        m: 'https://maps.thetechmargin.com/' };
-      if (pendingG && Date.now() - pendingG < 1500 && routes[e.key]) {
+      if (pendingG && Date.now() - pendingG < 1500 && CHORD_ROUTES[e.key]) {
         e.preventDefault();
         pendingG = 0;
-        location.href = routes[e.key];
+        location.href = CHORD_ROUTES[e.key];
         return;
       }
-      pendingG = e.key === 'g' ? Date.now() : 0;
-    });
+      if (e.key === 'g') { pendingG = Date.now(); e.preventDefault(); }
+      else pendingG = 0;
+    }, true);
+
+    // Small public surface so pages (and the test bench) can see the
+    // navigation contract without re-implementing it.
+    window.TTMNav = {
+      routes: CHORD_ROUTES,
+      chordPending: function () { return pendingG !== 0 && Date.now() - pendingG < 1500; },
+      openMenu: open, closeMenu: close, menuOpen: isOpen,
+    };
   }
 
   document.addEventListener('DOMContentLoaded', function () {
