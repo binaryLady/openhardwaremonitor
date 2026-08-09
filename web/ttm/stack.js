@@ -165,7 +165,7 @@
     };
     // wait for whitelabel config (cached: instant) so copy + enabled are right
     if (window.TTMBrand) window.TTMBrand.ready().then(maybeGate); else maybeGate();
-    track('page_view', { theme: (window.TTMTheme && window.TTMTheme.current()) || 'zine' });
+    track('page_view', { theme: (window.TTMTheme && window.TTMTheme.current()) || 'ttm' });
   });
 
   // ── admin status ─────────────────────────────────────────────────────────────

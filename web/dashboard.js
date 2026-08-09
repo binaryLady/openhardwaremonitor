@@ -283,10 +283,11 @@
     if (e.key === 'd') { startDemo(); }
     else if (e.key === '/') { e.preventDefault(); els.url.focus(); }
     else if (e.key === 't') {
-      const cur = document.documentElement.getAttribute('data-ttm-theme') || 'ttm';
-      const next = cur === 'terminal' ? 'ttm' : 'terminal';
+      const themes = window.TTMTheme.THEMES;
+      const cur = window.TTMTheme.current();
+      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
       window.TTMTheme.set(next);
-      toast('Theme: ' + (next === 'terminal' ? 'terminal' : 'dark'), { timeout: 1500 });
+      toast('Theme: ' + ({ ttm: 'dark', terminal: 'terminal', zine: 'zine' }[next] || next), { timeout: 1500 });
     }
     else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }
   });

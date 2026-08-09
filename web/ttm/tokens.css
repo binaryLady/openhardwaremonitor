@@ -197,6 +197,56 @@
   --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
 }
 
+/* Zine theme — photocopy paper: hard white ground, black ink borders,
+   electric magenta + violet accents. Same three spec-compatible selectors
+   as terminal. Status/chrome accents are re-derived for the white ground
+   (the neon brand values measure < 3:1 there); the bench asserts AA. */
+:is(.zine, [data-theme="zine"], [data-ttm-theme="zine"]) {
+  --ttm-bg: #ffffff;
+  --ttm-bg-alt: #f4f1f6;
+  --ttm-surface: #faf8fc;
+  --ttm-surface-alt: #ece7f1;
+  --ttm-text: #17131a;
+  --ttm-text-secondary: #3d3745;
+  --ttm-text-muted: #5f5766;
+  --ttm-text-faint: #a79fae;
+  --ttm-border: #17131a;          /* zine ink: borders are drawn, not implied */
+  --ttm-border-subtle: #e2dce8;
+  --ttm-pink: #c203be;            /* magenta ink — AA as text on white */
+  --ttm-lime: #4c7a00;
+  --ttm-cyan: #067a72;
+  --ttm-hot-red: #d6006b;
+  --ttm-goldenrod: #a36a00;
+  --ttm-pink-hover: #a3039f;
+  --ttm-lime-hover: #3f6600;
+  --ttm-cyan-hover: #05635d;
+  --ttm-hot-red-hover: #b8005c;
+  --ttm-goldenrod-hover: #8a5a00;
+  --ttm-success: #166534;
+  --ttm-danger: #b91c1c;
+  --ttm-warning: #8a5a00;
+  --ttm-info: #6d28d9;
+  --ttm-control: #6d28d9;         /* violet chrome — the zine spot color */
+  --ttm-focus: #6d28d9;
+  --ttm-overlay: rgba(23, 19, 26, 0.5);
+  --ttm-glass: rgba(255, 255, 255, 0.92);
+  --ttm-wash: rgba(23, 19, 26, 0.04);
+  --ttm-wash-hover: rgba(23, 19, 26, 0.08);
+  --ttm-on-accent: #ffffff;
+  --ttm-shadow: 4px 4px 0 var(--ttm-text);  /* pasted-sticker offset */
+  /* Pearl spectrum inked for paper */
+  --ttm-irid-a: #d6467c;
+  --ttm-irid-b: #b565c9;
+  --ttm-irid-c: #4d7fe0;
+  --ttm-irid-d: #3fa4c9;
+  --ttm-irid-e: #7ba32c;
+  /* Re-declare derived role tokens (var()s substitute where DECLARED) */
+  --ttm-accent-cta: var(--ttm-pink);
+  --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-control) 30%, transparent);
+  --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-control) 50%, transparent);
+  --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
+}
+
 /* Token-driven scrollbars (spec §Scrollbar) */
 * { scrollbar-width: thin; scrollbar-color: var(--ttm-scrollbar-thumb) var(--ttm-scrollbar-track); }
 *::-webkit-scrollbar { width: 8px; height: 8px; }

@@ -101,6 +101,34 @@ window.addEventListener('load', function () {
     return got[0] === got[1] && got[1] === got[2] && got[0].indexOf('#f2ede1') === 0
       ? true : got.join(' | ');
   });
+  t('theme: zine palette distinct from dark and terminal', function () {
+    var probe = document.createElement('div');
+    document.body.appendChild(probe);
+    var read = function (attr) {
+      if (attr) probe.setAttribute('data-ttm-theme', attr);
+      else probe.removeAttribute('data-ttm-theme');
+      return cssVar('--ttm-bg', probe) + '/' + cssVar('--ttm-control', probe);
+    };
+    var dark = read('ttm'), term = read('terminal'), zine = read('zine');
+    probe.remove();
+    return zine !== dark && zine !== term && zine.indexOf('#ffffff') === 0
+      ? true : 'dark=' + dark + ' term=' + term + ' zine=' + zine;
+  });
+  t('theme: zine palette identical across all three spec selectors', function () {
+    var probe = document.createElement('div');
+    document.body.appendChild(probe);
+    var got = [0, 1, 2].map(function (i) {
+      probe.removeAttribute('class'); probe.removeAttribute('data-theme');
+      probe.removeAttribute('data-ttm-theme');
+      if (i === 0) probe.className = 'zine';
+      if (i === 1) probe.setAttribute('data-theme', 'zine');
+      if (i === 2) probe.setAttribute('data-ttm-theme', 'zine');
+      return cssVar('--ttm-bg', probe) + '/' + cssVar('--ttm-pink-hover', probe);
+    });
+    probe.remove();
+    return got[0] === got[1] && got[1] === got[2] && got[0].indexOf('#ffffff') === 0
+      ? true : got.join(' | ');
+  });
   t('theme.js: burger menu injected with theme radios', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
@@ -146,7 +174,7 @@ window.addEventListener('load', function () {
     ['--ttm-control', '--ttm-bg'],
     ['--ttm-focus', '--ttm-bg']
   ];
-  ['ttm', 'terminal'].forEach(function (theme) {
+  ['ttm', 'terminal', 'zine'].forEach(function (theme) {
     t('wcag: AA 4.5:1 for all text/status pairs — ' + theme + ' theme', function () {
       var fails = [];
       AA_PAIRS.forEach(function (p) {
