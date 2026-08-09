@@ -9,12 +9,6 @@
 <link rel="apple-touch-icon" href="/apple-icon.png" />
 <link rel="stylesheet" href="/ttm/tokens.css" />
 <link rel="stylesheet" href="/ttm/components.css" />
-<style>
-  /* whitelabel form rhythm: stacked label→field, full-width inputs */
-  #h-wl ~ .ttm-grid label.ttm-note:not([style]) { display: block; margin: .55rem 0 .15rem; }
-  #h-wl ~ .ttm-grid .ttm-input { width: 100%; box-sizing: border-box; }
-  #wl-tokens { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .5rem; }
-</style>
 </head>
 <body class="ttm-page">
 <main class="ttm-main">
@@ -47,7 +41,7 @@
       <p class="ttm-note">Edits preview live on this page. <b>Save on device</b> keeps the
       token overrides in this browser (visitor-level); <b>Publish site-wide</b> writes
       <code>ohm_site_config</code> so every visitor gets them (needs Supabase).</p>
-      <div class="ttm-grid" style="margin-top:.8rem">
+      <div class="ttm-grid ttm-form ttm-gap-top">
         <div>
           <h3 class="ttm-card__title">Brand</h3>
           <label class="ttm-note" for="wl-title">page title</label>
@@ -56,20 +50,20 @@
           <input class="ttm-input" id="wl-tagline" type="text" placeholder="open hardware monitor · live sensors">
           <label class="ttm-note" for="wl-footer">footer name</label>
           <input class="ttm-input" id="wl-footer" type="text" placeholder="thetechmargin">
-          <label class="ttm-note" style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem">
+          <label class="ttm-note ttm-inline" style="margin-top:.5rem">
             <span class="ttm-switch"><input type="checkbox" id="wl-footer-hide"><span class="track"></span></span>
             hide footer badge</label>
         </div>
         <div>
           <h3 class="ttm-card__title">Theme</h3>
           <label class="ttm-note" for="wl-default">site default</label>
-          <span class="ttm-select" style="position:relative;display:inline-block">
+          <span class="ttm-select">
             <select id="wl-default"><option value="ttm">Dark</option><option value="terminal">Terminal</option><option value="">Zine</option></select></span>
-          <div class="ttm-row" id="wl-tokens" style="margin-top:.6rem"></div>
+          <div class="ttm-swatch-grid ttm-gap-top" id="wl-tokens"></div>
         </div>
         <div>
           <h3 class="ttm-card__title">Gate</h3>
-          <label class="ttm-note" style="display:flex;align-items:center;gap:.5rem">
+          <label class="ttm-note ttm-inline">
             <span class="ttm-switch"><input type="checkbox" id="wl-gate-on" checked><span class="track"></span></span>
             gate enabled</label>
           <label class="ttm-note" for="wl-gate-title">title</label>
@@ -80,7 +74,7 @@
           <input class="ttm-input" id="wl-gate-fine" type="text" placeholder="Stored by the site operator.">
         </div>
       </div>
-      <div class="ttm-row" style="margin-top:1rem">
+      <div class="ttm-row ttm-gap-top">
         <button class="ttm-btn-outline" id="wl-save">Save on device</button>
         <button class="ttm-btn-primary" id="wl-publish">Publish site-wide</button>
         <button class="ttm-btn-outline" id="wl-reset">Reset</button>

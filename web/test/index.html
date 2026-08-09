@@ -82,7 +82,7 @@ window.addEventListener('load', function () {
   });
   t('tokens: spacing, motion, hover, scrollbar vocabulary present', function () {
     return ['--ttm-spacing-md', '--ttm-transition-fast', '--ttm-pink-hover',
-            '--ttm-scrollbar-thumb'].every(function (v) { return cssVar(v) !== ''; })
+            '--ttm-scrollbar-thumb', '--ttm-font-voice'].every(function (v) { return cssVar(v) !== ''; })
       ? true : 'missing token group';
   });
   t('theme: terminal palette identical across all three spec selectors', function () {
