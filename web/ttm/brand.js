@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   var DEFAULTS = {
-    brand: { name: '', tagline: '', footer_name: 'thetechmargin', footer_hidden: false, page_title: '' },
+    brand: { name: '', tagline: '', footer_name: '', footer_hidden: false, page_title: '' },
     theme: { 'default': null, tokens: {} },
     gate: { enabled: true, title: '', body: '', fine: '' },
   };
@@ -50,6 +50,8 @@
   function applyBrand(config) {
     var b = config.brand || {};
     if (b.page_title) document.title = b.page_title;
+    var wm = document.querySelector('[data-brand-wordmark]');
+    if (wm && b.name) wm.textContent = '· ' + b.name;
     var crumb = document.querySelector('.ttm-header .ttm-crumb');
     if (crumb && b.tagline) crumb.textContent = b.tagline;
     var badgeName = document.querySelector('.ttm-footer-badge .brand-name');

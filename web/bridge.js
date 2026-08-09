@@ -57,7 +57,7 @@
         imagery: fc.imagery || { media: [] },
         links: fc.links || { links: [] }
       },
-      'x-source': 'open hardware monitor /data.json via thetechmargin dashboard'
+      'x-source': meta.source || 'open hardware monitor /data.json web dashboard'
     };
     if (meta.image && meta.image.static) doc.logo = meta.image.static;
     if (meta.image && meta.image.iiif) {
