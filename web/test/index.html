@@ -104,6 +104,41 @@ window.addEventListener('load', function () {
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
   });
 
+  // ── whitelabel runtime (TTMTheme) ─────────────────────────────────────────
+  t('whitelabel: TTMTheme API surface complete', function () {
+    var T = window.TTMTheme;
+    return T && ['apply', 'set', 'current', 'THEMES', 'getCustom', 'setCustom',
+      'resetCustom'].every(function (k) { return k in T; }) ? true : 'missing keys';
+  });
+  t('whitelabel: setCustom applies + persists a valid token override', function () {
+    window.TTMTheme.setCustom({ '--ttm-pink': '#123456' });
+    var applied = document.documentElement.style.getPropertyValue('--ttm-pink') === '#123456';
+    var stored = (window.TTMTheme.getCustom() || {})['--ttm-pink'] === '#123456';
+    window.TTMTheme.resetCustom();
+    var cleared = document.documentElement.style.getPropertyValue('--ttm-pink') === '';
+    return applied && stored && cleared ? true :
+      'applied=' + applied + ' stored=' + stored + ' cleared=' + cleared;
+  });
+  t('whitelabel: overrides outside --ttm/--z/--radius are rejected', function () {
+    window.TTMTheme.setCustom({ 'background-image': 'url(x)', '--evil-token': 'red' });
+    var root = document.documentElement.style;
+    var ok = root.getPropertyValue('background-image') === '' &&
+             root.getPropertyValue('--evil-token') === '';
+    window.TTMTheme.resetCustom();
+    return ok ? true : 'invalid key leaked through';
+  });
+  t('whitelabel: set() persists and applies a theme', function () {
+    var before = localStorage.getItem('ttm_theme');
+    var ok = window.TTMTheme.set('terminal') === true &&
+             document.documentElement.getAttribute('data-ttm-theme') === 'terminal' &&
+             localStorage.getItem('ttm_theme') === 'terminal' &&
+             window.TTMTheme.set('bogus') === false;
+    if (before === null) localStorage.removeItem('ttm_theme');
+    else localStorage.setItem('ttm_theme', before);
+    window.TTMTheme.apply('ttm');
+    return ok ? true : 'set() broken';
+  });
+
   // ── toasts ────────────────────────────────────────────────────────────────
   t('toast.js: TTMToast.show renders a toast element', function () {
     if (!window.TTMToast || typeof TTMToast.show !== 'function') return 'TTMToast missing';

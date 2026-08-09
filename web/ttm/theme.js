@@ -194,8 +194,16 @@
     document.body.appendChild(badge);
   });
 
+  // set() persists then applies — apply() alone is for previews
+  function set(theme) {
+    if (THEMES.indexOf(theme) === -1) return false;
+    try { localStorage.setItem('ttm_theme', theme); } catch (e) {}
+    apply(theme);
+    return true;
+  }
+
   window.TTMTheme = {
-    apply: apply, current: currentTheme, THEMES: THEMES,
+    apply: apply, set: set, current: currentTheme, THEMES: THEMES,
     getCustom: getCustom, setCustom: setCustom, resetCustom: resetCustom,
   };
 })();

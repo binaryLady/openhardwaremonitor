@@ -163,8 +163,7 @@
     else if (e.key === 't') {
       const cur = document.documentElement.getAttribute('data-ttm-theme') || 'ttm';
       const next = cur === 'terminal' ? 'ttm' : 'terminal';
-      document.documentElement.setAttribute('data-ttm-theme', next);
-      try { localStorage.setItem('ttm_theme', next); } catch (_) {}
+      window.TTMTheme.set(next);
       toast('Theme: ' + (next === 'terminal' ? 'terminal' : 'dark'), { timeout: 1500 });
     }
     else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }
