@@ -11,11 +11,19 @@ cp -r web/. public/
 # Inject Supabase credentials from Vercel env vars (same shared project as
 # the other TTM sites; this dashboard's tables are prefixed ohm_). Unset
 # vars leave the placeholders, and the stack runs in local-only mode.
-if [ -n "${SUPABASE_URL:-}" ]; then
-  sed -i "s|%SUPABASE_URL%|${SUPABASE_URL}|" public/ttm/config.js
-fi
-if [ -n "${SUPABASE_ANON_KEY:-}" ]; then
-  sed -i "s|%SUPABASE_ANON_KEY%|${SUPABASE_ANON_KEY}|" public/ttm/config.js
+# Injection runs through node string-replacement, not sed: env values pasted
+# with trailing newlines or containing sed delimiters must not break builds.
+if [ -n "${SUPABASE_URL:-}" ] || [ -n "${SUPABASE_ANON_KEY:-}" ]; then
+  node -e '
+    const fs = require("fs");
+    const f = "public/ttm/config.js";
+    let s = fs.readFileSync(f, "utf8");
+    const url = (process.env.SUPABASE_URL || "").trim();
+    const key = (process.env.SUPABASE_ANON_KEY || "").trim();
+    if (url) s = s.replace("%SUPABASE_URL%", () => url);
+    if (key) s = s.replace("%SUPABASE_ANON_KEY%", () => key);
+    fs.writeFileSync(f, s);
+  '
 fi
 
 echo "build-web: $(find public -type f | wc -l) files staged in public/"
