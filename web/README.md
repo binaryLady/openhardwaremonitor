@@ -131,6 +131,27 @@ page-level shortcuts skip any key arriving `defaultPrevented`.
   disclosure, `aria-current` marks the page you are on, meters and
   sparklines are `aria-hidden` (the value text carries the data).
 
+## Access model (Mission Control)
+
+Tiered, with no dead-ends — nobody who signs in sees a locked door:
+
+- **Visitor (automatic)** — anyone signed in through the gate gets the
+  self-service tier: full CRUD on **their own record** (rename, or erase
+  it plus all telemetry attributed to it), and a **masked, view-only**
+  directory + telemetry of everyone else (emails masked to `f***@d***`,
+  no user agents).
+- **Operator** — the operator token (sha-256 in `ohm_admin_secrets`,
+  held in sessionStorage only) unlocks true CRUD everywhere: unmasked
+  reads, rename/delete any visitor, grant/revoke the admin marker,
+  purge old telemetry, publish whitelabel config site-wide.
+
+Threat model: gate email claims are unauthenticated — anyone can type
+any email — so nothing privileged ever derives from them. A claimed
+email can only mutate the row matching that exact email, can never
+touch `is_admin` or other rows, and sees only masked PII. Every
+privileged mutation requires the token. `supabase/schema.sql` carries
+the full RPC surface.
+
 ## Publishing to open maps (SpaceAPI · Four Corners · IIIF)
 
 The map-bridge fragment (`bridge.js`) is a SpaceAPI v14 document: register
