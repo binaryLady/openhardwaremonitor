@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-ttm-theme="ttm">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TTM Stack — Test Bench</title>
+<link rel="stylesheet" href="../ttm/tokens.css" />
+<link rel="stylesheet" href="../ttm/components.css" />
+<script src="../ttm/config.js"></script>
+<script src="../vendor/supabase.js"></script>
+<script src="../ttm/theme.js"></script>
+<script src="../ttm/toast.js"></script>
+<script src="../ttm/stack.js"></script>
+<style>
+  .pass{color:var(--ttm-success);font-weight:700}
+  .fail{color:var(--ttm-danger);font-weight:700}
+  #results td{padding:.35rem .5rem;border:1px solid var(--ttm-border);font-family:var(--ttm-font-mono);font-size:.8rem}
+  #results{border-collapse:collapse;width:100%}
+</style>
+</head>
+<body class="ttm-page">
+<main class="ttm-main">
+  <header class="ttm-header">
+    <h1>TTM Stack <span class="gradient-text-rainbow">· test bench</span></h1>
+    <span class="ttm-crumb">tokens · theming · toasts · gate · telemetry</span>
+  </header>
+  <section class="ttm-card full">
+    <h2 class="ttm-card__title">Results <span class="ttm-badge" id="summary">running…</span></h2>
+    <table id="results"></table>
+  </section>
+  <footer class="ttm-footer">stack self-test · everything runs local-only</footer>
+</main>
+<script>
+window.addEventListener('load', function () {
+  'use strict';
+  var results = [];
+  // strict: only `true` passes; any other return value is the failure detail
+  function t(name, fn) {
+    try { var v = fn(); results.push({ name: name, ok: v === true, detail: v === true ? '' : String(v) }); }
+    catch (e) { results.push({ name: name, ok: false, detail: e.message }); }
+  }
+  function cssVar(name, el) {
+    return getComputedStyle(el || document.documentElement).getPropertyValue(name).trim();
+  }
+
+  // ── tokens ────────────────────────────────────────────────────────────────
+  t('tokens.css loaded (--ttm-pink = #E904E5)', function () {
+    return cssVar('--ttm-pink').toLowerCase() === '#e904e5';
+  });
+  t('brand colors present (lime/cyan/hot-red/goldenrod)', function () {
+    return ['--ttm-lime', '--ttm-cyan', '--ttm-hot-red', '--ttm-goldenrod']
+      .every(function (v) { return cssVar(v) !== ''; });
+  });
+  t('components.css loaded (.ttm-card gets surface + border)', function () {
+    var el = document.querySelector('.ttm-card');
+    var cs = getComputedStyle(el);
+    return cs.borderTopWidth !== '0px' && cs.backgroundColor !== 'rgba(0, 0, 0, 0)';
+  });
+
+  // ── theming ───────────────────────────────────────────────────────────────
+  var bgTTM = cssVar('--ttm-bg');
+  t('theme: ttm surfaces active under data-ttm-theme="ttm"', function () {
+    return bgTTM !== '';
+  });
+  t('theme: terminal swaps surfaces', function () {
+    document.documentElement.setAttribute('data-ttm-theme', 'terminal');
+    var bg = cssVar('--ttm-bg');
+    return bg !== '' && bg !== bgTTM ? true : 'terminal --ttm-bg=' + bg;
+  });
+  t('theme: no attribute falls back to :root palette', function () {
+    // zine is a maps-site layer (ttm-theme.css); with tokens.css alone the
+    // attribute-less state must resolve to the :root (ttm) palette
+    document.documentElement.removeAttribute('data-ttm-theme');
+    var bg = cssVar('--ttm-bg');
+    document.documentElement.setAttribute('data-ttm-theme', 'ttm'); // restore
+    return bg === bgTTM ? true : 'fallback --ttm-bg=' + bg;
+  });
+  t('theme.js: burger menu injected with theme radios', function () {
+    return document.querySelector('.ttm-burger') !== null &&
+           document.querySelectorAll('.ttm-menu__theme input').length >= 2;
+  });
+
+  // ── toasts ────────────────────────────────────────────────────────────────
+  t('toast.js: TTMToast.show renders a toast element', function () {
+    if (!window.TTMToast || typeof TTMToast.show !== 'function') return 'TTMToast missing';
+    TTMToast.show('test bench toast');
+    return document.body.lastElementChild !== null &&
+           /toast/i.test(document.body.innerHTML) ? true : 'no toast in DOM';
+  });
+
+  // ── stack: config, gate, telemetry (local-only) ───────────────────────────
+  t('config.js: placeholders resolve to local-only mode', function () {
+    var c = window.TTM_CONFIG;
+    return c && c.supabaseUrl === '' && c.supabaseAnonKey === '' ? true
+      : 'supabaseUrl=' + JSON.stringify(c && c.supabaseUrl);
+  });
+  t('stack.js: TTMStack API surface complete', function () {
+    var s = window.TTMStack;
+    return s && ['track', 'flush', 'visitor', 'isAdmin', 'supabase', 'sessionId']
+      .every(function (k) { return k in s; }) ? true : 'missing keys';
+  });
+  t('stack.js: no Supabase client without credentials', function () {
+    return window.TTMStack.supabase() === null || window.TTMStack.supabase() === undefined;
+  });
+  t('stack.js: telemetry track() is fail-soft locally', function () {
+    window.TTMStack.track('test_bench_ping', { ok: 1 });
+    window.TTMStack.flush();
+    return true;
+  });
+  t('stack.js: sessionId issued', function () {
+    var id = window.TTMStack.sessionId;
+    return typeof id === 'string' && id.length > 0 ? true : String(id);
+  });
+  t('gate: shown on load, or honors ?nogate=1', function () {
+    var skipped = new URLSearchParams(location.search).has('nogate');
+    var gate = document.querySelector('.ttm-gate, [class*="gate"]');
+    var signed = !!window.TTMStack.visitor();
+    return skipped || gate !== null || signed ? true : 'no gate, not signed, not skipped';
+  });
+
+  // ── report ────────────────────────────────────────────────────────────────
+  var tbl = document.getElementById('results');
+  results.forEach(function (r) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="' + (r.ok ? 'pass' : 'fail') + '">' + (r.ok ? 'PASS' : 'FAIL') +
+      '</td><td>' + r.name + '</td><td>' + (r.detail || '') + '</td>';
+    tbl.appendChild(tr);
+  });
+  var passed = results.filter(function (r) { return r.ok; }).length;
+  var badge = document.getElementById('summary');
+  badge.textContent = passed + '/' + results.length + (passed === results.length ? ' ✓' : ' ✗');
+  window.__TTM_TEST_RESULTS = { passed: passed, total: results.length, results: results };
+});
+</script>
+</body>
+</html>
