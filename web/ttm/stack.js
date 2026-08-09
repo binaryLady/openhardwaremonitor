@@ -30,6 +30,8 @@
       var v = JSON.parse(localStorage.getItem('ttm_visitor'));
       if (!v) return null;
       if (v.ts && Date.now() - v.ts > SESSION_MS) return null; // expired
+      // normalize records stored before emails were lowercased at the gate
+      if (v.email) v.email = String(v.email).trim().toLowerCase();
       return v;
     } catch (e) { return null; }
   }
@@ -115,7 +117,9 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var name = nameEl.value.trim();
-      var email = mailEl.value.trim();
+      // lowercase to match the server's normalized row — mobile keyboards
+      // auto-capitalize, and a case-mismatched identity broke the admin probe
+      var email = mailEl.value.trim().toLowerCase();
       var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       nameEl.setAttribute('aria-invalid', String(!name));
       mailEl.setAttribute('aria-invalid', String(!emailOk));
