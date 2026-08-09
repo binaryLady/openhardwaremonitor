@@ -9,6 +9,7 @@
 <script src="../ttm/config.js"></script>
 <script src="../vendor/supabase.js"></script>
 <script src="../ttm/theme.js"></script>
+<script src="../ttm/brand.js"></script>
 <script src="../ttm/toast.js"></script>
 <script src="../ttm/stack.js"></script>
 <script src="../parse.js"></script>
@@ -196,6 +197,23 @@ window.addEventListener('load', function () {
     else localStorage.setItem('ttm_theme', before);
     window.TTMTheme.apply('ttm');
     return ok ? true : 'set() broken';
+  });
+
+  // ── whitelabel loader (TTMBrand) ──────────────────────────────────────────
+  t('brand.js: TTMBrand API surface complete', function () {
+    var B = window.TTMBrand;
+    return B && ['ready', 'get', 'refresh'].every(function (k) { return typeof B[k] === 'function'; })
+      ? true : 'missing keys';
+  });
+  t('brand.js: fail-soft defaults without Supabase', function () {
+    var b = window.TTMBrand.get('brand'), g = window.TTMBrand.get('gate'), th = window.TTMBrand.get('theme');
+    return b && b.footer_name === 'thetechmargin' && g && g.enabled === true &&
+           th && typeof th.tokens === 'object' ? true : 'defaults wrong';
+  });
+  t('brand.js: gate copy is the hook stack.js reads', function () {
+    var g = window.TTMBrand.get('gate');
+    return typeof g.title === 'string' && typeof g.body === 'string' &&
+           typeof g.fine === 'string' ? true : 'gate copy shape wrong';
   });
 
   // ── toasts ────────────────────────────────────────────────────────────────
