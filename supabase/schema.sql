@@ -47,3 +47,39 @@ create policy "anon can read ohm visitors (demo)" on public.ohm_visitors
   for select to anon using (true);
 create policy "anon can read ohm telemetry (demo)" on public.ohm_telemetry_events
   for select to anon using (true);
+
+-- ── Whitelabel / site configuration ─────────────────────────────────────────
+-- One row per config key, JSONB values. The site reads these at load
+-- (web/ttm/brand.js, cached in the browser for 60s); the Mission Control
+-- "Whitelabel" card writes them. Keys the frontend understands:
+--   'brand' : { "tagline": "…", "footer_name": "thetechmargin",
+--               "footer_hidden": false, "page_title": "…" }
+--   'theme' : { "default": "ttm" | "terminal" | "",
+--               "tokens": { "--ttm-pink": "#E904E5", ... } }
+--   'gate'  : { "enabled": true, "title": "…", "body": "…", "fine": "…" }
+
+create table if not exists public.ohm_site_config (
+  key         text primary key,
+  value       jsonb not null default '{}'::jsonb,
+  updated_at  timestamptz not null default now()
+);
+
+alter table public.ohm_site_config enable row level security;
+
+-- Everyone may read the whitelabel config (it is, by nature, public).
+create policy "anon can read site_config" on public.ohm_site_config
+  for select to anon using (true);
+
+-- DEMO-GRADE write access: Mission Control publishes with the anon key.
+-- Before real traffic, replace these two with an authenticated-admin policy.
+create policy "anon can insert site_config (demo)" on public.ohm_site_config
+  for insert to anon with check (true);
+create policy "anon can update site_config (demo)" on public.ohm_site_config
+  for update to anon using (true) with check (true);
+
+-- Sensible starting rows (idempotent).
+insert into public.ohm_site_config (key, value) values
+  ('brand', '{"tagline": "", "footer_name": "thetechmargin", "footer_hidden": false, "page_title": ""}'),
+  ('theme', '{"default": "ttm", "tokens": {}}'),
+  ('gate',  '{"enabled": true, "title": "", "body": "", "fine": ""}')
+on conflict (key) do nothing;
