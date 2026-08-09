@@ -8,8 +8,8 @@
 // Theme precedence: visitor choice → admin default → config default.
 (function () {
   'use strict';
-  var THEMES = ['', 'ttm', 'terminal'];
-  var THEME_LABELS = { '': 'Zine', 'ttm': 'Dark', 'terminal': 'Terminal' };
+  var THEMES = ['ttm', 'terminal', 'zine'];
+  var THEME_LABELS = { 'ttm': 'Dark', 'terminal': 'Terminal', 'zine': 'Zine' };
   var ALLOWED_TOKEN = /^--(ttm|z|radius)-[a-z-]+$/;
   // Information hierarchy: the product first, publishing second, operator
   // tools last, each with a role line so the list reads as a sitemap.
@@ -28,11 +28,14 @@
   function stored(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function currentTheme() {
     var v = stored('ttm_theme');
+    // legacy: Zine used to be the empty value (attribute-less), which
+    // rendered identically to Dark — old choices map to the real zine theme
+    if (v === '') v = 'zine';
     if (v !== null && THEMES.indexOf(v) !== -1) return v;
     v = stored('ttm_theme_default');
     if (v !== null && THEMES.indexOf(v) !== -1) return v;
     var c = (window.TTM_CONFIG && window.TTM_CONFIG.defaultTheme) || '';
-    return THEMES.indexOf(c) !== -1 ? c : '';
+    return THEMES.indexOf(c) !== -1 ? c : 'ttm';
   }
   function getCustom() {
     try { return JSON.parse(stored('ttm_custom_tokens')) || {}; } catch (e) { return {}; }
@@ -128,7 +131,7 @@
       '<ul class="ttm-menu__list ttm-menu__contact"></ul></nav>';
     html += '<fieldset class="ttm-menu__theme"><legend>Theme</legend>';
     THEMES.forEach(function (t) {
-      var id = 'ttm-theme-' + (t || 'zine');
+      var id = 'ttm-theme-' + t;
       html += '<label for="' + id + '"><input type="radio" id="' + id + '" name="ttm-theme-pick" value="' + t + '"' +
         (currentTheme() === t ? ' checked' : '') + '><span>' + THEME_LABELS[t] + '</span></label>';
     });
@@ -234,8 +237,8 @@
       try { localStorage.setItem('ttm_theme', e.target.value); } catch (err) {}
       apply(e.target.value);
       if (window.TTMToast) window.TTMToast.show(
-        (THEME_LABELS[e.target.value] || 'Zine') + ' theme.', { type: 'success', timeout: 2500 });
-      if (window.TTMStack) window.TTMStack.track('theme_change', { theme: e.target.value || 'zine' });
+        (THEME_LABELS[e.target.value] || 'Dark') + ' theme.', { type: 'success', timeout: 2500 });
+      if (window.TTMStack) window.TTMStack.track('theme_change', { theme: e.target.value || 'ttm' });
     });
 
     document.body.appendChild(backdrop);
