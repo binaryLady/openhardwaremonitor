@@ -4,8 +4,10 @@ A static browser dashboard for the machine running Open Hardware Monitor's
 embedded web server. No build step, no framework, no tracking — the C#
 application is untouched.
 
-Live: https://openhardwaremonitor.vercel.app (`?demo=1` for the animated
-demo feed, `/test/` for the self-test bench, `/admin/` for operators).
+Live demo: **https://ohm.thetechmargin.com** (`?demo=1` for the animated
+demo feed, `/components/` for the design-stack gallery, `/test/` for the
+self-test bench, `/admin/` for operators). Also served at
+https://openhardwaremonitor.vercel.app.
 
 ## Use cases
 
