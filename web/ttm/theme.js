@@ -18,8 +18,8 @@
     { href: '/?demo=1',  name: 'Demo feed',       desc: 'animated mock sensor data' },
     { group: 'Operator tools' },
     { href: '/admin/',      name: 'Mission Control', desc: 'telemetry · visitors (admin)' },
-    { href: '/components/', name: 'Components',      desc: 'the TTM stack, end to end' },
-    { href: '/test/',       name: 'Test bench',      desc: '42 self-checks in the browser' },
+    { href: '/components/', name: 'Components',      desc: 'the design stack, end to end' },
+    { href: '/test/',       name: 'Test bench',      desc: 'the stack proves itself in-browser' },
     { group: 'Network' },
     { href: 'https://maps-of-making.vercel.app/', name: 'Maps of Making',
       desc: 'where the map bridge publishes to' },
@@ -203,7 +203,7 @@
     buildMenu();
     var badge = document.createElement('div');
     badge.className = 'ttm-footer-badge';
-    badge.innerHTML = 'made with <span class="heart">❤</span> by <span class="brand-name gradient-text-rainbow">thetechmargin</span>';
+    badge.innerHTML = 'made with <span class="heart">❤</span> · <span class="brand-name gradient-text-rainbow">open source</span>';
     document.body.appendChild(badge);
   });
 

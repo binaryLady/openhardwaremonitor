@@ -49,7 +49,7 @@
           <label class="ttm-note" for="wl-tagline">header tagline</label>
           <input class="ttm-input" id="wl-tagline" type="text" placeholder="open hardware monitor · live sensors">
           <label class="ttm-note" for="wl-footer">footer name</label>
-          <input class="ttm-input" id="wl-footer" type="text" placeholder="thetechmargin">
+          <input class="ttm-input" id="wl-footer" type="text" placeholder="your name · optional">
           <label class="ttm-note ttm-inline" style="margin-top:.5rem">
             <span class="ttm-switch"><input type="checkbox" id="wl-footer-hide"><span class="track"></span></span>
             hide footer badge</label>
@@ -274,7 +274,7 @@
       if (!sb) return;
       var rows = [
         { key: 'brand', value: { page_title: $('#wl-title').value, tagline: $('#wl-tagline').value,
-            footer_name: $('#wl-footer').value || 'thetechmargin', footer_hidden: $('#wl-footer-hide').checked } },
+            footer_name: $('#wl-footer').value, footer_hidden: $('#wl-footer-hide').checked } },
         { key: 'theme', value: { 'default': $('#wl-default').value, tokens: editedTokens() } },
         { key: 'gate',  value: { enabled: $('#wl-gate-on').checked, title: $('#wl-gate-title').value,
             body: $('#wl-gate-body').value, fine: $('#wl-gate-fine').value } }
