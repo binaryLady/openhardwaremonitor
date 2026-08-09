@@ -447,6 +447,44 @@ window.addEventListener('load', function () {
     return opened && closed ? true : 'opened=' + opened + ' closed=' + closed;
   });
 
+  // ── overhaul components: stat tiles, sparklines, meter ramps ─────────────
+  t('tiles: .ttm-tile carries surface, border and big value type', function () {
+    var tile = document.createElement('div'); tile.className = 'ttm-tile';
+    tile.innerHTML = '<span class="ttm-tile__label">x</span><b class="ttm-tile__value">1</b>';
+    document.body.appendChild(tile);
+    var cs = getComputedStyle(tile);
+    var vs = getComputedStyle(tile.querySelector('.ttm-tile__value'));
+    var ok = cs.borderTopWidth !== '0px' && parseFloat(vs.fontSize) >= 24;
+    tile.remove();
+    return ok ? true : 'border=' + cs.borderTopWidth + ' value=' + vs.fontSize;
+  });
+  t('spark: 2px de-emphasis line, status only on the end dot', function () {
+    var host = document.createElement('div');
+    host.innerHTML = '<svg class="spark"><path class="spark__line" d="M0 0 L10 10"/>' +
+      '<circle class="spark__dot spark__dot--hot" r="2.5"/></svg>';
+    document.body.appendChild(host);
+    var line = getComputedStyle(host.querySelector('.spark__line'));
+    var dot = getComputedStyle(host.querySelector('.spark__dot'));
+    var textFaint = getComputedStyle(document.documentElement).getPropertyValue('--ttm-text-faint');
+    var ok = line.strokeWidth === '2px' && line.fill === 'none' &&
+      dot.fill !== '' && dot.fill !== line.stroke;
+    host.remove();
+    return ok ? true : 'stroke=' + line.strokeWidth + '/' + line.stroke +
+      ' dot=' + dot.fill + ' faint=' + textFaint;
+  });
+  t('meter: the unfilled track tints with the row state (warn/hot ramps)', function () {
+    var host = document.createElement('div');
+    host.innerHTML =
+      '<div class="ttm-sensor"><span class="meterbar"></span></div>' +
+      '<div class="ttm-sensor ttm-sensor--hot"><span class="meterbar"></span></div>';
+    document.body.appendChild(host);
+    var bars = host.querySelectorAll('.meterbar');
+    var base = getComputedStyle(bars[0]).backgroundColor;
+    var hot = getComputedStyle(bars[1]).backgroundColor;
+    host.remove();
+    return base !== hot && base !== '' ? true : 'base=' + base + ' hot=' + hot;
+  });
+
   // ── report ────────────────────────────────────────────────────────────────
   var tbl = document.getElementById('results');
   results.forEach(function (r) {
