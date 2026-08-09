@@ -9,9 +9,14 @@ demo feed, `/components/` for the design-stack gallery, `/test/` for the
 self-test bench, `/admin/` for operators). Also served at
 https://openhardwaremonitor.vercel.app.
 
-| Dark (default) | Terminal theme |
-|---|---|
-| ![Dashboard, warm-dark theme](../docs/screenshots/dashboard-dark.png) | ![Dashboard, terminal theme](../docs/screenshots/dashboard-terminal.png) |
+| | Dark mode | Light mode |
+|---|---|---|
+| **Warm** | ![Warm dark](../docs/screenshots/dashboard-dark.png) | ![Warm light](../docs/screenshots/dashboard-warm-light.png) |
+| **Terminal** | ![Terminal dark (CRT phosphor)](../docs/screenshots/dashboard-terminal-dark.png) | ![Terminal light (paper)](../docs/screenshots/dashboard-terminal.png) |
+| **Zine** | ![Zine dark (inverted photocopy)](../docs/screenshots/dashboard-zine-dark.png) | ![Zine light (photocopy)](../docs/screenshots/dashboard-zine.png) |
+
+Mode follows the OS by default (Auto) and is overridable from the menu;
+every combination is WCAG-AA-verified by `/test/` on each run.
 
 ## Use cases
 

@@ -9,9 +9,14 @@ Demo deployment: **https://ohm.thetechmargin.com** — `?demo=1` loads a
 generated 32-sensor feed, so no hardware or install is required to evaluate
 it.
 
-| Dark theme (default) | Terminal theme |
-|---|---|
-| ![Dashboard, dark theme: hero stat tiles with trend sparklines, sensor rows with inline sparklines and threshold-tinted meters](docs/screenshots/dashboard-dark.png) | ![Dashboard, terminal theme: identical hero tiles and sparklines, every color re-derived from the token layer](docs/screenshots/dashboard-terminal.png) |
+Three theme worlds × light and dark modes — six variants, one token
+layer, all WCAG-AA-checked by the in-browser bench:
+
+| | Dark mode | Light mode |
+|---|---|---|
+| **Warm** | ![Warm dark: hero stat tiles with trend sparklines on a warm near-black ground](docs/screenshots/dashboard-dark.png) | ![Warm light: the same layout on ivory paper, neon accents inked down](docs/screenshots/dashboard-warm-light.png) |
+| **Terminal** | ![Terminal dark: CRT phosphor — green-tinted black with pale phosphor ink](docs/screenshots/dashboard-terminal-dark.png) | ![Terminal light: warm paper and mono type](docs/screenshots/dashboard-terminal.png) |
+| **Zine** | ![Zine dark: inverted photocopy — black paper, white ink borders, neon spots](docs/screenshots/dashboard-zine-dark.png) | ![Zine light: white photocopy paper, hard black ink borders, magenta and violet](docs/screenshots/dashboard-zine.png) |
 
 ## Scope of the fork
 
@@ -21,8 +26,9 @@ it.
   the poll history, and a hero band of stat tiles (activity, hottest
   temperature, peak load, counts).
 - **Design system** (`web/ttm/`) — a single token layer (colors, type,
-  spacing, motion, z-index) consumed by one component library; two themes
-  verified against WCAG 2.1 AA by computed contrast checks; site-wide
+  spacing, motion, z-index) consumed by one component library; three theme
+  worlds, each in light and dark, all six verified against WCAG 2.1 AA
+  by computed contrast checks; site-wide
   whitelabeling via published config, with per-visitor overrides taking
   precedence. The application ships unbranded; identity is configuration.
 - **Publishing bridge** (`web/bridge.js`) — generates a SpaceAPI v14
@@ -33,14 +39,14 @@ it.
   [OKW](https://github.com/iop-alliance/OpenKnowWhere) manufacturing
   capabilities, for registration on
   [Maps of Making](https://maps.thetechmargin.com).
-- **Test bench** (`web/test/`) — 57 in-browser assertions covering the
+- **Test bench** (`web/test/`) — 71 in-browser assertions covering the
   sensor core, the bridge (including the extension contracts), theming,
   the whitelabel runtime, and WCAG contrast computed from live token
   values. Runs from `file://` or the deployed site; no build step.
 
 | Component gallery (`/components/`) | Test bench (`/test/`) |
 |---|---|
-| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows with sparklines, stat tiles](docs/screenshots/components.png) | ![Test bench with 57 passing assertions](docs/screenshots/test-bench.png) |
+| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows with sparklines, stat tiles](docs/screenshots/components.png) | ![Test bench with 71 passing assertions](docs/screenshots/test-bench.png) |
 
 ## Keyboard & accessibility
 
@@ -50,8 +56,8 @@ The dashboard is fully keyboard-operable: <kbd>d</kbd> demo ·
 <kbd>j</kbd>/<kbd>k</kbd> walk the sensor tree (focus survives the poll
 re-render). Every page opens with a skip-to-content link; the drawer
 menu manages focus per the ARIA disclosure pattern; WCAG 2.1 AA contrast
-is computed from live token values by the test bench on every run, in
-both themes; `prefers-reduced-motion` collapses all animation and slows
+is computed from live token values by the test bench on every run, across
+all six theme variants; `prefers-reduced-motion` collapses all animation and slows
 polling. The full table lives in [`web/README.md`](web/README.md).
 
 ## Demo URLs
