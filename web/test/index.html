@@ -284,6 +284,26 @@ window.addEventListener('load', function () {
     return bl.length === 5 && n === 32 ? true : 'blocks=' + bl.length + ' sensors=' + n;
   });
 
+  t('parse: summarize distills the fixture (machine, counts, hottest, load)', function () {
+    var m = P.summarize(window.OHM_FIXTURE);
+    var manualHot = null;
+    P.flatten(window.OHM_FIXTURE).forEach(function (b) {
+      b.sensors.forEach(function (s) {
+        if (s.cat === 'temperature' && s.n != null && (!manualHot || s.n > manualHot)) manualHot = s.n;
+      });
+    });
+    return m.machine === 'FORGE-01' && m.blocks === 5 && m.sensors === 32 &&
+           m.fans === 3 && typeof m.active === 'boolean' &&
+           m.hottest && m.hottest.n === manualHot && m.maxLoad && m.maxLoad.n > 0
+      ? true : JSON.stringify(m).slice(0, 120);
+  });
+  t('parse: summarize survives an empty tree', function () {
+    var m = P.summarize({ Children: [] });
+    return m.machine === 'machine' && m.blocks === 0 && m.sensors === 0 &&
+           m.hottest === null && m.maxLoad === null && m.active === false
+      ? true : JSON.stringify(m);
+  });
+
   // ── map bridge (bridge.js) ────────────────────────────────────────────────
   var frag = window.OHMBridge.fragment(window.OHM_DEMO());
   t('bridge: SpaceAPI v14 envelope', function () {

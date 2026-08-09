@@ -689,3 +689,28 @@ body.ttm-page {
 .ttm-sensor--hot .meterbar i { background: var(--ttm-danger); }
 .ttm-sensor--warn .val { color: var(--ttm-warning); }
 .ttm-sensor--hot .val { color: var(--ttm-danger); }
+
+/* ── ttm-statrow — machine overview strip (dashboard hierarchy apex) ── */
+.ttm-statrow { display: flex; flex-wrap: wrap; gap: var(--ttm-spacing-md) var(--ttm-spacing-xl); align-items: center; }
+.ttm-statrow .stat { display: inline-flex; align-items: baseline; gap: var(--ttm-spacing-sm); }
+.ttm-statrow .k { font: 400 var(--ttm-fs-caption) var(--ttm-font-mono); color: var(--ttm-text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.ttm-statrow b { font: 600 var(--ttm-fs-h4)/1.2 var(--ttm-font-mono); color: var(--ttm-text); }
+.ttm-statrow b.warn { color: var(--ttm-warning); }
+.ttm-statrow b.hot { color: var(--ttm-danger); }
+
+/* ── ttm-details — native disclosure, token-styled ── */
+.ttm-details > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: var(--ttm-spacing-sm); }
+.ttm-details > summary::-webkit-details-marker { display: none; }
+.ttm-details > summary::before { content: "▸"; color: var(--ttm-text-muted); transition: transform var(--ttm-transition-fast); }
+.ttm-details[open] > summary::before { transform: rotate(90deg); }
+.ttm-details > summary h2 { margin: 0; }
+.ttm-details > summary:focus-visible { outline: 2px solid var(--ttm-focus); outline-offset: 2px; }
+
+/* collapsible hardware blocks reuse the pattern at h3 level */
+details.ttm-hw > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: var(--ttm-spacing-sm); }
+details.ttm-hw > summary::-webkit-details-marker { display: none; }
+details.ttm-hw > summary .dot { width: .6rem; height: .6rem; border-radius: 50%; background: var(--ttm-success); flex: none; }
+details.ttm-hw > summary .dot.warn { background: var(--ttm-warning); }
+details.ttm-hw > summary .dot.hot { background: var(--ttm-danger); }
+details.ttm-hw > summary .n { margin-left: auto; font: 400 var(--ttm-fs-caption) var(--ttm-font-mono); color: var(--ttm-text-muted); }
+details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); outline-offset: 2px; }
