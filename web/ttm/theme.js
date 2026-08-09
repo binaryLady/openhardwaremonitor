@@ -349,7 +349,8 @@
     var badge = document.createElement('div');
     badge.className = 'ttm-footer-badge';
     badge.innerHTML = 'made with <span class="heart">❤</span> · <span class="brand-name gradient-text-rainbow">open source</span>';
-    document.body.appendChild(badge);
+    // in the footer flow — buildFooter guarantees one exists on every page
+    (document.querySelector('footer.ttm-footer') || document.body).appendChild(badge);
   });
 
   // set() persists then applies — apply() alone is for previews

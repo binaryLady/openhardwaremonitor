@@ -489,22 +489,15 @@
 }
 
 /* ── ttm-footer badge (required brand footer, TTM modes only) ── */
+/* sits in the universal footer flow — never floats over content */
 .ttm-footer-badge {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 6px;
-  z-index: var(--z-content);
+  display: block;
+  margin-top: .6rem;
   font: 400 11px/1 var(--ttm-font-mono);
   color: var(--ttm-text-muted);
-  background: color-mix(in srgb, var(--ttm-bg) 82%, transparent);
-  border-radius: var(--radius-md);
-  padding: 4px 10px;
-  pointer-events: none;
 }
 .ttm-footer-badge .heart { color: var(--ttm-hot-red); }
 .ttm-footer-badge .brand-name { font-family: var(--ttm-font-serif); }
-html:not([data-ttm-theme]) .ttm-footer-badge { display: none; }
 
 /* ── ttm-gate (stack.js) — spec dialog pattern ── */
 .ttm-gate {
