@@ -127,7 +127,8 @@
     html += '</fieldset>';
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
       '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close<br>' +
-      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>m</kbd> maps of making</div>';
+      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>c</kbd> components · ' +
+      '<kbd>t</kbd> test bench · <kbd>a</kbd> mission control · <kbd>m</kbd> maps of making</div>';
     panel.innerHTML = html;
     panel.querySelector('.ttm-menu__bernard .voice').textContent = greeting;
 
@@ -186,7 +187,8 @@
       var tag = (document.activeElement && document.activeElement.tagName) || '';
       if (/INPUT|TEXTAREA|SELECT/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === '?') { e.preventDefault(); isOpen() ? close() : open(); return; }
-      var routes = { d: '/', m: 'https://maps-of-making.vercel.app/' };
+      var routes = { d: '/', c: '/components/', t: '/test/', a: '/admin/',
+        m: 'https://maps-of-making.vercel.app/' };
       if (pendingG && Date.now() - pendingG < 1500 && routes[e.key]) {
         e.preventDefault();
         pendingG = 0;
