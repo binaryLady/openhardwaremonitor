@@ -324,6 +324,34 @@ window.addEventListener('load', function () {
     var doc = JSON.parse(window.OHMBridge.json(window.OHM_DEMO()));
     return doc.space === 'FORGE-01' ? true : 'roundtrip failed';
   });
+  t('bridge: Four Corners attribution present with honest defaults', function () {
+    var f = window.OHMBridge.fragment(window.OHM_FIXTURE).ext_fourcorners;
+    return f && f.authorship && /FORGE-01/.test(f.authorship.credit) &&
+           f.backstory && /Open Hardware Monitor/.test(f.backstory.text) &&
+           f.imagery && Array.isArray(f.imagery.media) &&
+           f.links && Array.isArray(f.links.links) ? true : JSON.stringify(f);
+  });
+  t('bridge: meta merges — url/location, Four Corners corners, logo', function () {
+    var doc = window.OHMBridge.fragment(window.OHM_FIXTURE, {
+      url: 'https://lab.example', location: { lat: 51.05, lon: 3.72 },
+      image: { static: 'https://lab.example/machine.jpg' },
+      fourCorners: { authorship: { credit: 'Sonia / TTM', license: 'CC BY-SA 4.0' } }
+    });
+    return doc.url === 'https://lab.example' && doc.location.lat === 51.05 &&
+           doc.logo === 'https://lab.example/machine.jpg' &&
+           doc.ext_fourcorners.authorship.credit === 'Sonia / TTM' &&
+           /Open Hardware Monitor/.test(doc.ext_fourcorners.backstory.text)
+      ? true : 'merge broken';
+  });
+  t('bridge: IIIF ImageService3 block well-formed when meta provides a service', function () {
+    var doc = window.OHMBridge.fragment(window.OHM_FIXTURE,
+      { image: { iiif: 'https://iiif.example/machine' } });
+    var s = doc.ext_iiif;
+    var none = window.OHMBridge.fragment(window.OHM_FIXTURE, {});
+    return s && s['@context'] === 'http://iiif.io/api/image/3/context.json' &&
+           s.id === 'https://iiif.example/machine' && s.type === 'ImageService3' &&
+           s.profile === 'level1' && !('ext_iiif' in none) ? true : JSON.stringify(s);
+  });
 
   // ── report ────────────────────────────────────────────────────────────────
   var tbl = document.getElementById('results');
