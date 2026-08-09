@@ -9,8 +9,8 @@ Demo deployment: **https://ohm.thetechmargin.com** — `?demo=1` loads a
 generated 32-sensor feed, so no hardware or install is required to evaluate
 it.
 
-Three theme worlds × light and dark modes — six variants, one token
-layer, all WCAG-AA-checked by the in-browser bench:
+Ten theme worlds × light and dark modes — twenty variants, one token
+layer, all WCAG-AA-checked by the in-browser bench. A sample:
 
 | | Dark mode | Light mode |
 |---|---|---|
@@ -26,9 +26,9 @@ layer, all WCAG-AA-checked by the in-browser bench:
   the poll history, and a hero band of stat tiles (activity, hottest
   temperature, peak load, counts).
 - **Design system** (`web/ttm/`) — a single token layer (colors, type,
-  spacing, motion, z-index) consumed by one component library; three theme
-  worlds, each in light and dark, all six verified against WCAG 2.1 AA
-  by computed contrast checks; site-wide
+  spacing, motion, z-index) consumed by one component library; ten theme
+  worlds, each in light and dark, all twenty verified against WCAG 2.1
+  AA by computed contrast checks; site-wide
   whitelabeling via published config, with per-visitor overrides taking
   precedence. The application ships unbranded; identity is configuration.
 - **Publishing bridge** (`web/bridge.js`) — generates a SpaceAPI v14
@@ -39,14 +39,14 @@ layer, all WCAG-AA-checked by the in-browser bench:
   [OKW](https://github.com/iop-alliance/OpenKnowWhere) manufacturing
   capabilities, for registration on
   [Maps of Making](https://maps.thetechmargin.com).
-- **Test bench** (`web/test/`) — 71 in-browser assertions covering the
+- **Test bench** (`web/test/`) — 100 in-browser assertions covering the
   sensor core, the bridge (including the extension contracts), theming,
   the whitelabel runtime, and WCAG contrast computed from live token
   values. Runs from `file://` or the deployed site; no build step.
 
 | Component gallery (`/components/`) | Test bench (`/test/`) |
 |---|---|
-| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows with sparklines, stat tiles](docs/screenshots/components.png) | ![Test bench with 71 passing assertions](docs/screenshots/test-bench.png) |
+| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows with sparklines, stat tiles](docs/screenshots/components.png) | ![Test bench with 100 passing assertions](docs/screenshots/test-bench.png) |
 
 ## Keyboard & accessibility
 
@@ -57,7 +57,7 @@ The dashboard is fully keyboard-operable: <kbd>d</kbd> demo ·
 re-render). Every page opens with a skip-to-content link; the drawer
 menu manages focus per the ARIA disclosure pattern; WCAG 2.1 AA contrast
 is computed from live token values by the test bench on every run, across
-all six theme variants; `prefers-reduced-motion` collapses all animation and slows
+all twenty theme variants; `prefers-reduced-motion` collapses all animation and slows
 polling. The full table lives in [`web/README.md`](web/README.md).
 
 ## Demo URLs

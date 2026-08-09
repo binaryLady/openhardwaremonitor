@@ -356,6 +356,7 @@
   border: 1.5px solid var(--ttm-border);
   border-radius: var(--radius-sm);
   display: flex;
+  flex-wrap: wrap;
   gap: .35rem;
 }
 .ttm-menu__theme legend {
