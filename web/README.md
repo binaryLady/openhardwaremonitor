@@ -117,6 +117,16 @@ chromium --headless --dump-dom "file://$PWD/web/test/index.html?nogate=1" \
 ## Deploy
 
 `build-web.sh` stages `web/` into `public/`; `vercel.json` carries the
-build command. Optional Supabase (visitor gate + telemetry, `ohm_` tables):
-run `supabase/schema.sql`, set `SUPABASE_URL` / `SUPABASE_ANON_KEY` in the
-deployment env, redeploy. Without them everything runs local-only.
+build command. Optional Supabase (visitor gate + telemetry + whitelabel,
+`ohm_` tables): run `supabase/schema.sql`, set `SUPABASE_URL` /
+`SUPABASE_ANON_KEY` in the deployment env, redeploy. Without them
+everything runs local-only.
+
+Security model (hardened for a shared database): the anon key can only
+call whitelisted RPCs — validated, size-capped writes for the gate and
+telemetry, a boolean admin probe, and public reads of the whitelabel
+config. Visitor PII is never readable with the anon key. Mission
+Control's reads and publishes require the **operator token** (set once in
+`ohm_admin_secrets` per the instructions in `schema.sql`; the UI asks for
+it and keeps it in sessionStorage only), and `is_admin` can only be
+granted from the SQL editor.

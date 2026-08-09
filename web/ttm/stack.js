@@ -50,7 +50,7 @@
     if (!queue.length) return;
     var batch = queue.splice(0, queue.length);
     if (!sb) { console.debug('[ttm telemetry local-only]', batch); return; }
-    sb.from('ohm_telemetry_events').insert(batch).then(function (r) {
+    sb.rpc('ohm_track', { p_events: batch }).then(function (r) {
       if (r.error) console.warn('[ttm] telemetry insert failed:', r.error.message);
     });
   }
@@ -128,10 +128,9 @@
       done(); // clear the modal immediately — entry never waits on the network
       if (sb) {
         try {
-          sb.from('ohm_visitors').upsert(
-            { name: name, email: email, last_seen: new Date().toISOString(), user_agent: navigator.userAgent.slice(0, 250) },
-            { onConflict: 'email' }
-          ).then(function (r) {
+          sb.rpc('ohm_gate_signin', {
+            p_name: name, p_email: email, p_ua: navigator.userAgent.slice(0, 250)
+          }).then(function (r) {
             if (r.error) console.warn('[ttm] visitor save failed (kept locally):', r.error.message);
           }).catch(function (e) { console.warn('[ttm] visitor save failed (kept locally):', e.message); });
         } catch (e) { console.warn('[ttm] visitor save failed (kept locally):', e.message); }
@@ -153,8 +152,8 @@
     if (!sb) return Promise.resolve(true);
     var v = visitor();
     if (!v || !v.email) return Promise.resolve(false);
-    return sb.from('ohm_visitors').select('is_admin').eq('email', v.email).maybeSingle()
-      .then(function (r) { return !!(r.data && r.data.is_admin); },
+    return sb.rpc('ohm_is_admin', { p_email: v.email })
+      .then(function (r) { return r.data === true; },
             function () { return false; });
   }
 
