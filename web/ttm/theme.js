@@ -17,7 +17,9 @@
     { href: '/',         name: 'Dashboard',       desc: 'live hardware sensors' },
     { href: '/?demo=1',  name: 'Demo feed',       desc: 'animated mock sensor data' },
     { group: 'Operator tools' },
-    { href: '/admin/',   name: 'Mission Control', desc: 'telemetry · visitors (admin)' },
+    { href: '/admin/',      name: 'Mission Control', desc: 'telemetry · visitors (admin)' },
+    { href: '/components/', name: 'Components',      desc: 'the TTM stack, end to end' },
+    { href: '/test/',       name: 'Test bench',      desc: '42 self-checks in the browser' },
     { group: 'Network' },
     { href: 'https://maps-of-making.vercel.app/', name: 'Maps of Making',
       desc: 'where the map bridge publishes to' },
@@ -81,8 +83,16 @@
     panel.setAttribute('aria-label', 'Site menu');
     panel.setAttribute('aria-hidden', 'true');
 
+    // Meet Bernard — the keeper greets you at the door, by the name you gave
+    // at the gate. Voice per the character bible: em-dash, typewriter, amber,
+    // they/them, short sentences. Name is injected as text, never HTML.
+    var visitorName = '';
+    try { visitorName = (JSON.parse(localStorage.getItem('ttm_visitor')) || {}).name || ''; } catch (e) {}
+    var greeting = (visitorName ? '\u2014 ' + visitorName + '. ' : '\u2014 ') +
+      "Bernard (they/them), keeper of 'Mother Sands'. Your machine's hum carries to the map.";
     var html = '<div class="ttm-menu__head"><span class="ttm-menu__title">Menu</span>' +
       '<button type="button" class="ttm-menu__close" aria-label="Close menu">×</button></div>';
+    html += '<a class="ttm-menu__bernard" href="https://maps-of-making.vercel.app/genjson/"><span class="voice"></span></a>';
     // This page's actions: buttons proxy the dashboard's own controls.
     var ACTIONS = [
       { id: 'connect',     name: 'Connect',     desc: 'poll a machine’s data.json' },
@@ -117,8 +127,10 @@
     html += '</fieldset>';
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
       '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close<br>' +
-      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>m</kbd> maps of making</div>';
+      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>c</kbd> components · ' +
+      '<kbd>t</kbd> test bench · <kbd>a</kbd> mission control · <kbd>m</kbd> maps of making</div>';
     panel.innerHTML = html;
+    panel.querySelector('.ttm-menu__bernard .voice').textContent = greeting;
 
     function isOpen() { return panel.classList.contains('is-open'); }
     function open() {
@@ -175,7 +187,8 @@
       var tag = (document.activeElement && document.activeElement.tagName) || '';
       if (/INPUT|TEXTAREA|SELECT/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === '?') { e.preventDefault(); isOpen() ? close() : open(); return; }
-      var routes = { d: '/', m: 'https://maps-of-making.vercel.app/' };
+      var routes = { d: '/', c: '/components/', t: '/test/', a: '/admin/',
+        m: 'https://maps-of-making.vercel.app/' };
       if (pendingG && Date.now() - pendingG < 1500 && routes[e.key]) {
         e.preventDefault();
         pendingG = 0;

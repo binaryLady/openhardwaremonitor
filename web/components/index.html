@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en" data-ttm-theme="ttm">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TTM Stack — Components</title>
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" href="/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-icon.png" />
+<link rel="stylesheet" href="/ttm/tokens.css" />
+<link rel="stylesheet" href="/ttm/components.css" />
+<script src="/ttm/config.js"></script>
+<script src="/vendor/supabase.js"></script>
+<script src="/ttm/theme.js"></script>
+<script src="/ttm/toast.js"></script>
+<script src="/ttm/stack.js"></script>
+</head>
+<body class="ttm-page">
+<main class="ttm-main">
+  <header class="ttm-header">
+    <h1>Components <span class="gradient-text-rainbow">· the TTM stack</span></h1>
+    <span class="ttm-crumb">every primitive, end to end — flip the theme (<kbd>t</kbd> on the
+    dashboard, or the menu) and watch the tokens carry all of it</span>
+  </header>
+
+  <div class="ttm-grid ttm-grid--wide">
+
+    <section class="ttm-card" aria-labelledby="c-type">
+      <h2 class="ttm-card__title" id="c-type">Type &amp; color</h2>
+      <p style="font-family:var(--ttm-font-sans)">Poppins body — <b>semibold</b></p>
+      <p style="font-family:var(--ttm-font-serif)">Pacifico moments</p>
+      <p style="font-family:var(--ttm-font-mono)">Geist Mono telemetry</p>
+      <p><span class="gradient-text-rainbow" style="font-weight:700">the signature rainbow</span></p>
+      <div class="ttm-row" aria-label="Brand swatches">
+        <span class="ttm-badge" style="color:var(--ttm-pink);border-color:var(--ttm-pink)">pink</span>
+        <span class="ttm-badge" style="color:var(--ttm-lime);border-color:var(--ttm-lime)">lime</span>
+        <span class="ttm-badge" style="color:var(--ttm-cyan);border-color:var(--ttm-cyan)">cyan</span>
+        <span class="ttm-badge" style="color:var(--ttm-hot-red);border-color:var(--ttm-hot-red)">hot-red</span>
+        <span class="ttm-badge" style="color:var(--ttm-goldenrod);border-color:var(--ttm-goldenrod)">goldenrod</span>
+      </div>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="c-buttons">
+      <h2 class="ttm-card__title" id="c-buttons">Buttons &amp; badges</h2>
+      <div class="ttm-row">
+        <button class="ttm-btn-primary" id="toast-demo">Primary · toast</button>
+        <button class="ttm-btn-outline">Outline</button>
+      </div>
+      <div class="ttm-row" style="margin-top:.6rem">
+        <span class="ttm-badge">idle</span>
+        <span class="ttm-badge ttm-badge--success">success</span>
+        <span class="ttm-badge ttm-badge--warning">warning</span>
+        <span class="ttm-badge ttm-badge--danger">danger</span>
+      </div>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="c-forms">
+      <h2 class="ttm-card__title" id="c-forms">Forms</h2>
+      <div class="ttm-srcbar" style="margin-bottom:.8rem">
+        <input type="url" class="ttm-input" placeholder="http://machine:8085/data.json" aria-label="Example URL input">
+        <button class="ttm-btn-primary">Connect</button>
+      </div>
+      <div class="ttm-row" style="align-items:center;gap:1rem">
+        <label class="ttm-switch"><input type="checkbox" checked aria-label="Example switch"><span class="track"></span></label>
+        <input type="color" value="#e904e5" aria-label="Example color picker">
+        <input type="range" min="0" max="100" value="60" aria-label="Example range" style="flex:1">
+        <span class="ttm-select" style="position:relative"><select aria-label="Example select"><option>ttm</option><option>terminal</option><option>zine</option></select></span>
+      </div>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="c-data">
+      <h2 class="ttm-card__title" id="c-data">Data — kv · bar · table</h2>
+      <div class="kv"><span class="k">machine</span><span class="v">FORGE-01</span></div>
+      <div class="kv"><span class="k">state</span><span class="v">active</span></div>
+      <div class="bar"><span class="lab">cpu</span><span class="track"><span class="fill" style="width:64%;background:var(--ttm-cyan)"></span></span><span class="n">64%</span></div>
+      <div class="bar"><span class="lab">gpu</span><span class="track"><span class="fill" style="width:81%;background:var(--ttm-warning)"></span></span><span class="n">81%</span></div>
+      <table><thead><tr><th>sensor</th><th>value</th></tr></thead>
+        <tbody><tr><td>Core (Tctl/Tdie)</td><td>63.4 °C</td></tr><tr><td>GPU Core</td><td>71.2 °C</td></tr></tbody></table>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="c-sensors">
+      <h2 class="ttm-card__title" id="c-sensors">Sensor rows (dashboard)</h2>
+      <details class="ttm-hw" open>
+        <summary><span class="dot warn" aria-hidden="true"></span><h3>NVIDIA GeForce RTX 3080</h3><span class="n">3 sensors</span></summary>
+        <div class="ttm-sensor"><span class="nm">GPU Core</span><span class="meterbar" aria-hidden="true"><i style="width:76%"></i></span><span class="val">1,743 MHz</span></div>
+        <div class="ttm-sensor ttm-sensor--warn"><span class="nm">GPU Core</span><span class="meterbar" aria-hidden="true"><i style="width:83%"></i></span><span class="val">74.8 °C</span></div>
+        <div class="ttm-sensor ttm-sensor--hot"><span class="nm">GPU Hot Spot</span><span class="meterbar" aria-hidden="true"><i style="width:96%"></i></span><span class="val">88.1 °C</span></div>
+      </details>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="c-strip">
+      <h2 class="ttm-card__title" id="c-strip">Machine strip &amp; receipt</h2>
+      <div class="ttm-statrow" style="margin-bottom:.8rem">
+        <span class="stat"><b class="gradient-text-rainbow">FORGE-01</b><span class="ttm-badge ttm-badge--success">active</span></span>
+        <span class="stat"><span class="k">hottest</span><b class="warn">74.8 °C</b></span>
+      </div>
+      <details class="ttm-details">
+        <summary><h2 class="ttm-card__title" style="margin:0">Receipt (disclosure)</h2></summary>
+        <pre class="ttm-receipt">{ "space": "FORGE-01", "state": { "open": true } }</pre>
+      </details>
+    </section>
+
+  </div>
+
+  <footer class="ttm-footer">one token layer, one component library, every surface ·
+    <span class="ttm-kbd-hints"><kbd>?</kbd> menu · <kbd>g</kbd> chords navigate</span></footer>
+</main>
+<script>
+  document.getElementById('toast-demo').addEventListener('click', function () {
+    window.TTMToast && TTMToast.show('The stack is alive end to end.', { type: 'success' });
+    window.TTMStack && TTMStack.track('components_toast_demo', {});
+  });
+</script>
+</body>
+</html>

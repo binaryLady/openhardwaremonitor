@@ -714,3 +714,39 @@ details.ttm-hw > summary .dot.warn { background: var(--ttm-warning); }
 details.ttm-hw > summary .dot.hot { background: var(--ttm-danger); }
 details.ttm-hw > summary .n { margin-left: auto; font: 400 var(--ttm-fs-caption) var(--ttm-font-mono); color: var(--ttm-text-muted); }
 details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); outline-offset: 2px; }
+
+/* ── ttm-menu__bernard — the keeper greets at the door (amber band) ── */
+.ttm-menu__bernard {
+  display: block;
+  margin: 0 0 1rem;
+  padding: .8rem .85rem;
+  border: 1.5px solid var(--ttm-border);
+  border-radius: var(--radius-sm);
+  background: var(--ttm-bg-alt);
+  text-decoration: none;
+}
+.ttm-menu__bernard .voice {
+  font-family: 'Special Elite', var(--ttm-font-mono);
+  font-size: .95rem;
+  line-height: 1.5;
+  color: var(--ttm-goldenrod); /* lamplit amber — Bernard's band */
+}
+.ttm-menu__bernard:hover { background: var(--ttm-surface-alt); }
+
+/* ── visual pop — glow where the data is alive, gradients where it moves ── */
+.ttm-badge--live {
+  color: var(--ttm-success);
+  border-color: var(--ttm-success);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ttm-success) 45%, transparent);
+}
+.ttm-sensor .meterbar i {
+  background: linear-gradient(90deg, var(--ttm-cyan), var(--ttm-lime));
+}
+.ttm-sensor--warn .meterbar i { background: var(--ttm-warning); }
+.ttm-sensor--hot .meterbar i {
+  background: var(--ttm-danger);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ttm-danger) 60%, transparent);
+}
+details.ttm-hw > summary:hover { background: var(--ttm-wash); border-radius: var(--radius-sm); }
+.ttm-card { transition: border-color var(--ttm-transition-fast); }
+.ttm-card:hover { border-color: color-mix(in srgb, var(--ttm-control) 35%, var(--ttm-border)); }
