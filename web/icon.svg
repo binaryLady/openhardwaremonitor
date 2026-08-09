@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Maps of Making network glyph, OHM edition: true iridescence. Two crossing
-     spectral sweeps — a jewel-tone base and a screen-blended interference
-     sheen with narrow specular bands — over a tight glow halo. The color
-     appears to shift across the mark, oil-film style. -->
+<!-- Maps of Making network glyph, OHM edition: iridescent pearl. The strokes
+     sweep the pastel spectrum (coral, pale pink, periwinkle, ice blue, pale
+     lime) over a soft halo, and the gradient itself drifts back and forth on
+     an 8s ease loop — browsers that render live SVG favicons shimmer; the
+     ico/png assets carry the static frame. -->
 <svg viewBox="0 0 14 14" width="14" height="14" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <defs>
-    <!-- base sweep: deep jewel spectral -->
-    <linearGradient id="ga" gradientUnits="userSpaceOnUse" x1="1.5" y1="11.5" x2="12.5" y2="2.5">
-      <stop offset="0"    stop-color="#00f5ff"/>
-      <stop offset="0.26" stop-color="#7a3cff"/>
-      <stop offset="0.55" stop-color="#E904E5"/>
-      <stop offset="0.78" stop-color="#ff0080"/>
-      <stop offset="1"    stop-color="#ff9500"/>
+    <!-- pearl spectrum, doubled so the shimmer can travel and wrap -->
+    <linearGradient id="pearl" gradientUnits="userSpaceOnUse" x1="0" y1="12" x2="28" y2="0">
+      <stop offset="0"    stop-color="#ff9a9e"/>
+      <stop offset="0.10" stop-color="#fecfef"/>
+      <stop offset="0.20" stop-color="#a1c4fd"/>
+      <stop offset="0.30" stop-color="#c2e9fb"/>
+      <stop offset="0.40" stop-color="#d4fc79"/>
+      <stop offset="0.50" stop-color="#ff9a9e"/>
+      <stop offset="0.60" stop-color="#fecfef"/>
+      <stop offset="0.70" stop-color="#a1c4fd"/>
+      <stop offset="0.80" stop-color="#c2e9fb"/>
+      <stop offset="0.90" stop-color="#d4fc79"/>
+      <stop offset="1"    stop-color="#ff9a9e"/>
+      <animateTransform attributeName="gradientTransform" type="translate"
+        values="0 0; -14 0; 0 0" dur="8s" calcMode="spline"
+        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1" repeatCount="indefinite"/>
     </linearGradient>
-    <!-- crossing interference sheen: narrow bright bands, screen-blended -->
-    <linearGradient id="gb" gradientUnits="userSpaceOnUse" x1="3" y1="1.5" x2="11" y2="12.5">
-      <stop offset="0"    stop-color="#a1ff00" stop-opacity="0.9"/>
-      <stop offset="0.20" stop-color="#a1ff00" stop-opacity="0"/>
-      <stop offset="0.33" stop-color="#ffffff" stop-opacity="1"/>
-      <stop offset="0.40" stop-color="#09FFF0" stop-opacity="0"/>
-      <stop offset="0.66" stop-color="#09FFF0" stop-opacity="0.95"/>
-      <stop offset="0.80" stop-color="#09FFF0" stop-opacity="0"/>
-      <stop offset="1"    stop-color="#ffd08a" stop-opacity="0.9"/>
-    </linearGradient>
-    <filter id="halo" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="0.35"/></filter>
+    <filter id="halo" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="0.4"/></filter>
     <g id="mark">
       <circle cx="10.625213" cy="3.3747871" r="1.4500852" fill="none" style="stroke-width:0.906303"/>
       <circle cx="10.625213" cy="10.625213" r="1.4500852" fill="none" style="stroke-width:0.906303"/>
@@ -33,7 +33,6 @@
     </g>
   </defs>
   <rect width="14" height="14" fill="#0d1117"/>
-  <use href="#mark" xlink:href="#mark" stroke="url(#ga)" filter="url(#halo)" opacity="0.75"/>
-  <use href="#mark" xlink:href="#mark" stroke="url(#ga)"/>
-  <use href="#mark" xlink:href="#mark" stroke="url(#gb)" style="mix-blend-mode:screen"/>
+  <use href="#mark" xlink:href="#mark" stroke="url(#pearl)" filter="url(#halo)" opacity="0.8"/>
+  <use href="#mark" xlink:href="#mark" stroke="url(#pearl)"/>
 </svg>
