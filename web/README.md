@@ -9,6 +9,10 @@ demo feed, `/components/` for the design-stack gallery, `/test/` for the
 self-test bench, `/admin/` for operators). Also served at
 https://openhardwaremonitor.vercel.app.
 
+| Dark (default) | Terminal theme |
+|---|---|
+| ![Dashboard, warm-dark theme](../docs/screenshots/dashboard-dark.png) | ![Dashboard, terminal theme](../docs/screenshots/dashboard-terminal.png) |
+
 ## Use cases
 
 - **Workshop presence on the open map** — the machine publishes a SpaceAPI
