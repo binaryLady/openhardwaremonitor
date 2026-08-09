@@ -25,7 +25,7 @@ demo feed, `/test/` for the self-test bench, `/admin/` for operators).
   sensors from a seeded generator; the same seed gives every student the
   same bytes for reproducible exercises.
 - **Design-system reference** — `/components/` shows the whole TTM stack
-  end to end; `/test/` proves it (45 checks, incl. WCAG contrast); the
+  end to end; `/test/` proves it (48 checks, incl. WCAG contrast); the
   token layer whitelabels from Mission Control's editor — live preview,
   save on device, or publish site-wide via `ohm_site_config`.
 - **Fork it for your own feed** — `parse.js`/`bridge.js` are pure and
@@ -44,7 +44,7 @@ demo feed, `/test/` for the self-test bench, `/admin/` for operators).
 | `ttm/` | the TTM stack: tokens, components, theme switcher, whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
 | `admin/` | operator page; renders only for visitors flagged `is_admin` |
 | `components/` | end-to-end gallery of the component stack |
-| `test/` | the bench: 45 assertions, runs from `file://` or `/test/` |
+| `test/` | the bench: 48 assertions, runs from `file://` or `/test/` |
 
 ## Data contract
 
@@ -90,10 +90,17 @@ at the top of `bridge.js`):
 - **IIIF Image API 3** (`ext_iiif`, iiif.io) — an `ImageService3` block so
   any IIIF viewer can deep-zoom the machine photo; `logo` carries the
   static fallback image.
+- **Manufacturing capabilities** (`ext_tags` + `ext_okw`) — Wikidata QIDs
+  and OKW equipment records per the OHM×Maps-of-Making integration plan:
+  QIDs are the shared vocabulary hub between MoM's activity ontology
+  (`owl:sameAs`) and Open Hardware Manager's OKW records, so the machine's
+  live signal is discoverable by capability queries ("find spaces that can
+  laser-cut") the moment those systems ingest it. Set `meta.capabilities`
+  (QIDs) and `meta.equipment` (OKW field names).
 
 ## Tests
 
-Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 45
+Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 48
 assertions: the TTM stack (tokens incl. the full theme-able vocabulary,
 the whitelabel loader,
 theming across all three terminal selectors, whitelabel runtime, toasts,
