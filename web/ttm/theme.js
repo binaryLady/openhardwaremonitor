@@ -8,8 +8,12 @@
 // Theme precedence: visitor choice → admin default → config default.
 (function () {
   'use strict';
-  var THEMES = ['ttm', 'terminal', 'zine'];
-  var THEME_LABELS = { 'ttm': 'Warm', 'terminal': 'Terminal', 'zine': 'Zine' };
+  var THEMES = ['ttm', 'terminal', 'zine', 'ocean', 'forest', 'synthwave',
+    'ember', 'mono', 'blueprint', 'bubblegum'];
+  var THEME_LABELS = { 'ttm': 'Warm', 'terminal': 'Terminal', 'zine': 'Zine',
+    'ocean': 'Ocean', 'forest': 'Forest', 'synthwave': 'Synthwave',
+    'ember': 'Ember', 'mono': 'Mono', 'blueprint': 'Blueprint',
+    'bubblegum': 'Bubblegum' };
   // Every theme supports both polarities; Auto follows the OS. theme.js
   // resolves the choice into a concrete data-ttm-mode attribute before
   // paint, so tokens.css defines each variant exactly once.

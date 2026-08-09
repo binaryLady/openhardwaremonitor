@@ -132,8 +132,9 @@ page-level shortcuts skip any key arriving `defaultPrevented`.
 - **Light and dark in every preset** — each theme names a *world*
   (warm, terminal, zine) and carries both polarities: warm-light ivory,
   CRT-phosphor terminal-dark, inverted-photocopy zine-dark. The mode follows
-  the OS until you touch the ☀/☾ toggle in the page header; all six
-  combinations are WCAG-AA-checked by the bench on every run.
+  the OS until you touch the ☀/☾ toggle in the page header; all twenty
+  combinations (ten worlds × two modes) are WCAG-AA-checked by the
+  bench on every run.
 - **Reduced motion respected end to end** — `prefers-reduced-motion`
   collapses every transition *and* animation (flash, pulse, shimmer),
   and polling relaxes from 5 s to 20 s so values stop fluttering.
