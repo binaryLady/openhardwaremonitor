@@ -114,33 +114,39 @@ namespace OpenHardwareMonitor.Utilities {
       HttpListenerRequest request = context.Request;
 
       var requestedFile = request.RawUrl.Substring(1);
+
+      // the dashboard routes on query strings (?demo=1); resources do not
+      int query = requestedFile.IndexOf('?');
+      if (query >= 0)
+        requestedFile = requestedFile.Substring(0, query);
+
       if (requestedFile == "data.json") {
         SendJSON(context.Response);
         return;
       }
 
       if (requestedFile.Contains("images_icon")) {
-        ServeResourceImage(context.Response, 
+        ServeResourceImage(context.Response,
           requestedFile.Replace("images_icon/", ""));
         return;
       }
 
-      // default file to be served
-      if (string.IsNullOrEmpty(requestedFile))
-        requestedFile = "index.html";
+      // default document, for the root and for sub-pages (test/, admin/, ...)
+      if (string.IsNullOrEmpty(requestedFile) || requestedFile.EndsWith("/"))
+        requestedFile += "index.html";
 
       string[] splits = requestedFile.Split('.');
       string ext = splits[splits.Length - 1];
-      ServeResourceFile(context.Response, 
+      ServeResourceFile(context.Response,
         "Web." + requestedFile.Replace('/', '.'), ext);
     }
 
     private void ServeResourceFile(HttpListenerResponse response, string name, 
       string ext) 
     {
-      // resource names do not support the hyphen
-      name = "OpenHardwareMonitor.Resources." + 
-        name.Replace("custom-theme", "custom_theme");
+      // note: folder names with hyphens are not embeddable (MSBuild mangles
+      // them to underscores in manifest names); file names keep hyphens
+      name = "OpenHardwareMonitor.Resources." + name;
 
       string[] names =
         Assembly.GetExecutingAssembly().GetManifestResourceNames();
@@ -220,6 +226,9 @@ namespace OpenHardwareMonitor.Utilities {
       byte[] buffer = Encoding.UTF8.GetBytes(responseContent);
 
       response.AddHeader("Cache-Control", "no-cache");
+      // sensor data is read-only and the server is LAN-scoped; the header
+      // lets a dashboard served from another local origin poll this machine
+      response.AddHeader("Access-Control-Allow-Origin", "*");
 
       response.ContentLength64 = buffer.Length;
       response.ContentType = "application/json";
@@ -303,6 +312,9 @@ namespace OpenHardwareMonitor.Utilities {
         case ".js": return "application/x-javascript";
         case ".mp3": return "audio/mpeg";
         case ".png": return "image/png";
+        case ".svg": return "image/svg+xml";
+        case ".ico": return "image/x-icon";
+        case ".json": return "application/json";
         case ".pdf": return "application/pdf";
         case ".ppt": return "application/vnd.ms-powerpoint";
         case ".zip": return "application/zip";

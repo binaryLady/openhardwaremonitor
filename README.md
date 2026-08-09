@@ -2,8 +2,12 @@
 
 This fork adds a static web dashboard for Open Hardware Monitor's embedded
 sensor server, together with a tokenized design system, a whitelabel layer,
-and a SpaceAPI publishing bridge. All additions live under [`web/`](web/);
-the C# application is unmodified.
+and a SpaceAPI publishing bridge. The dashboard lives under [`web/`](web/)
+and is also embedded into the application itself: the C# web server serves
+it at `http://machine:8085/`, replacing the original jQuery UI, so a
+machine shows the modern dashboard same-origin — no CORS or mixed-content
+obstacles. The sensor code is unmodified; the C# changes are confined to
+`Utilities/HttpServer.cs` (serving, CORS header) and the project file.
 
 Demo deployment: **https://ohm.thetechmargin.com** — `?demo=1` loads a
 generated 32-sensor feed, so no hardware or install is required to evaluate

@@ -1,8 +1,10 @@
 # TTM web dashboard
 
 A static browser dashboard for the machine running Open Hardware Monitor's
-embedded web server. No build step, no framework, no tracking — the C#
-application is untouched.
+embedded web server. No build step, no framework, no tracking. This tree
+is the single source: Vercel deploys it as-is, and the C# application
+embeds the same files, so `http://machine:8085/` serves this dashboard
+same-origin with live sensors out of the box.
 
 Live demo: **https://ohm.thetechmargin.com** (`?demo=1` for the animated
 demo feed, `/components/` for the design-stack gallery, `/test/` for the
@@ -66,9 +68,13 @@ chip under the mainboard) becomes its own block.
 Thresholds (conservative defaults, in `parse.js`): temperature ≥ 70 °C
 warn / ≥ 85 °C hot; load ≥ 80 % warn / ≥ 95 % hot.
 
-CORS note: the embedded server sends no `Access-Control-Allow-Origin`
-header, so a deployed dashboard cannot poll a machine cross-origin. Serve
-the page from the same origin, use a local proxy, or use demo data.
+CORS note: this fork's embedded server sends
+`Access-Control-Allow-Origin: *` on `/data.json`, so a dashboard served
+from another **local** origin can poll the machine. The HTTPS deployment
+still cannot reach `http://machine:8085` — browsers block mixed content —
+which is exactly why the application now serves the dashboard itself,
+same-origin. (Upstream builds without the header need a local proxy or
+demo data.)
 
 ## UX
 
