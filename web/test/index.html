@@ -79,6 +79,26 @@ window.addEventListener('load', function () {
     document.documentElement.setAttribute('data-ttm-theme', 'ttm'); // restore
     return bg === bgTTM ? true : 'fallback --ttm-bg=' + bg;
   });
+  t('tokens: spacing, motion, hover, scrollbar vocabulary present', function () {
+    return ['--ttm-spacing-md', '--ttm-transition-fast', '--ttm-pink-hover',
+            '--ttm-scrollbar-thumb'].every(function (v) { return cssVar(v) !== ''; })
+      ? true : 'missing token group';
+  });
+  t('theme: terminal palette identical across all three spec selectors', function () {
+    var probe = document.createElement('div');
+    document.body.appendChild(probe);
+    var got = ['terminal', null, null].map(function (cls, i) {
+      probe.removeAttribute('class'); probe.removeAttribute('data-theme');
+      probe.removeAttribute('data-ttm-theme');
+      if (i === 0) probe.className = 'terminal';
+      if (i === 1) probe.setAttribute('data-theme', 'terminal');
+      if (i === 2) probe.setAttribute('data-ttm-theme', 'terminal');
+      return cssVar('--ttm-bg', probe) + '/' + cssVar('--ttm-pink-hover', probe);
+    });
+    probe.remove();
+    return got[0] === got[1] && got[1] === got[2] && got[0].indexOf('#f2ede1') === 0
+      ? true : got.join(' | ');
+  });
   t('theme.js: burger menu injected with theme radios', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
