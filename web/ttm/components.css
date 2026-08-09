@@ -590,6 +590,26 @@ body.ttm-page {
 }
 .ttm-main { max-width: 64rem; margin: 0 auto; }
 .ttm-header { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+/* iridescent rule under the header — the brand shimmer as a themed border */
+.ttm-header::after {
+  content: "";
+  flex-basis: 100%;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(120deg,
+    var(--ttm-irid-a), var(--ttm-irid-b), var(--ttm-irid-c),
+    var(--ttm-irid-d), var(--ttm-irid-e), var(--ttm-irid-a));
+  background-size: 400% 400%;
+  animation: ttm-iridescence 8s ease infinite;
+}
+@keyframes ttm-iridescence {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ttm-header::after { animation: none; }
+}
 .ttm-header h1 { font-size: var(--ttm-fs-h3); font-weight: 600; margin: 0; }
 .ttm-crumb { font-family: var(--ttm-font-mono); font-size: var(--ttm-fs-caption); color: var(--ttm-text-muted); }
 .ttm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); grid-auto-flow: dense; gap: 1rem; }
