@@ -39,6 +39,10 @@
 window.addEventListener('load', function () {
   'use strict';
   var results = [];
+  // pin mode: base-value assertions expect the ttm-dark root; restored at the end
+  var prevMode = null;
+  try { prevMode = localStorage.getItem('ttm_mode'); } catch (e) {}
+  window.TTMTheme.setMode('dark');
   // strict: only `true` passes; any other return value is the failure detail
   function t(name, fn) {
     try { var v = fn(); results.push({ name: name, ok: v === true, detail: v === true ? '' : String(v) }); }
@@ -129,6 +133,28 @@ window.addEventListener('load', function () {
     return got[0] === got[1] && got[1] === got[2] && got[0].indexOf('#ffffff') === 0
       ? true : got.join(' | ');
   });
+  t('modes: every theme renders distinct light and dark grounds', function () {
+    var probe = document.createElement('div');
+    document.body.appendChild(probe);
+    var fails = [];
+    ['ttm', 'terminal', 'zine'].forEach(function (th) {
+      probe.setAttribute('data-ttm-theme', th);
+      probe.setAttribute('data-ttm-mode', 'light');
+      var light = cssVar('--ttm-bg', probe);
+      probe.setAttribute('data-ttm-mode', 'dark');
+      var dark = cssVar('--ttm-bg', probe);
+      if (!light || !dark || light === dark) fails.push(th + ': light=' + light + ' dark=' + dark);
+    });
+    probe.remove();
+    return fails.length === 0 ? true : fails.join('; ');
+  });
+  t('modes: TTMTheme exposes mode/setMode/MODES and menu has mode radios', function () {
+    var T = window.TTMTheme;
+    return typeof T.mode === 'function' && typeof T.setMode === 'function' &&
+      Array.isArray(T.MODES) && T.MODES.length === 3 &&
+      document.querySelectorAll('input[name="ttm-mode-pick"]').length === 3
+      ? true : 'mode API or radios missing';
+  });
   t('theme.js: burger menu injected with theme radios', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
@@ -136,9 +162,10 @@ window.addEventListener('load', function () {
 
   // ── WCAG 2.1 contrast (the W3C check) ─────────────────────────────────────
   // resolve any token (including var() chains) to rgb via a live probe
-  function resolveColor(token, themeAttr) {
+  function resolveColor(token, themeAttr, modeAttr) {
     var probe = document.createElement('span');
     if (themeAttr) probe.setAttribute('data-ttm-theme', themeAttr);
+    if (modeAttr) probe.setAttribute('data-ttm-mode', modeAttr);
     probe.style.color = 'var(' + token + ')';
     document.body.appendChild(probe);
     var rgb = getComputedStyle(probe).color.match(/\d+(\.\d+)?/g).map(Number);
@@ -174,19 +201,22 @@ window.addEventListener('load', function () {
     ['--ttm-control', '--ttm-bg'],
     ['--ttm-focus', '--ttm-bg']
   ];
-  ['ttm', 'terminal', 'zine'].forEach(function (theme) {
-    t('wcag: AA 4.5:1 for all text/status pairs — ' + theme + ' theme', function () {
+  [['ttm', 'dark'], ['ttm', 'light'], ['terminal', 'light'], ['terminal', 'dark'],
+   ['zine', 'light'], ['zine', 'dark']].forEach(function (combo) {
+    var theme = combo[0], mode = combo[1];
+    var label = theme + ' · ' + mode;
+    t('wcag: AA 4.5:1 for all text/status pairs — ' + label, function () {
       var fails = [];
       AA_PAIRS.forEach(function (p) {
-        var r = contrast(resolveColor(p[0], theme), resolveColor(p[1], theme));
+        var r = contrast(resolveColor(p[0], theme, mode), resolveColor(p[1], theme, mode));
         if (r < 4.5) fails.push(p[0] + ' on ' + p[1] + ' = ' + r.toFixed(2));
       });
       return fails.length === 0 ? true : fails.join('; ');
     });
-    t('wcag: 3:1 for interactive chrome (1.4.11) — ' + theme + ' theme', function () {
+    t('wcag: 3:1 for interactive chrome (1.4.11) — ' + label, function () {
       var fails = [];
       UI_PAIRS.forEach(function (p) {
-        var r = contrast(resolveColor(p[0], theme), resolveColor(p[1], theme));
+        var r = contrast(resolveColor(p[0], theme, mode), resolveColor(p[1], theme, mode));
         if (r < 3) fails.push(p[0] + ' on ' + p[1] + ' = ' + r.toFixed(2));
       });
       return fails.length === 0 ? true : fails.join('; ');
@@ -531,6 +561,13 @@ window.addEventListener('load', function () {
     host.remove();
     return base !== hot && base !== '' ? true : 'base=' + base + ' hot=' + hot;
   });
+
+  // restore the visitor's own mode choice
+  try {
+    if (prevMode === null) localStorage.removeItem('ttm_mode');
+    else localStorage.setItem('ttm_mode', prevMode);
+  } catch (e) {}
+  window.TTMTheme.apply(window.TTMTheme.current());
 
   // ── report ────────────────────────────────────────────────────────────────
   var tbl = document.getElementById('results');

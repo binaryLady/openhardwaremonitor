@@ -9,7 +9,13 @@
 (function () {
   'use strict';
   var THEMES = ['ttm', 'terminal', 'zine'];
-  var THEME_LABELS = { 'ttm': 'Dark', 'terminal': 'Terminal', 'zine': 'Zine' };
+  var THEME_LABELS = { 'ttm': 'Warm', 'terminal': 'Terminal', 'zine': 'Zine' };
+  // Every theme supports both polarities; Auto follows the OS. theme.js
+  // resolves the choice into a concrete data-ttm-mode attribute before
+  // paint, so tokens.css defines each variant exactly once.
+  var MODES = ['auto', 'light', 'dark'];
+  var MODE_LABELS = { 'auto': 'Auto', 'light': 'Light', 'dark': 'Dark' };
+  var mediaDark = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
   var ALLOWED_TOKEN = /^--(ttm|z|radius)-[a-z-]+$/;
   // Information hierarchy: the product first, publishing second, operator
   // tools last, each with a role line so the list reads as a sitemap.
@@ -54,16 +60,41 @@
     applyCustom(tokens || {});
   }
   function resetCustom() { setCustom({}); }
+  function currentMode() {
+    var v = stored('ttm_mode');
+    return MODES.indexOf(v) !== -1 ? v : 'auto';
+  }
+  function resolveMode() {
+    var m = currentMode();
+    if (m !== 'auto') return m;
+    return mediaDark && mediaDark.matches ? 'dark' : 'light';
+  }
   function apply(theme) {
     if (theme) document.documentElement.setAttribute('data-ttm-theme', theme);
     else document.documentElement.removeAttribute('data-ttm-theme');
-    document.querySelectorAll('.ttm-menu__theme input').forEach(function (r) {
+    document.documentElement.setAttribute('data-ttm-mode', resolveMode());
+    document.querySelectorAll('.ttm-menu__theme input[name="ttm-theme-pick"]').forEach(function (r) {
       r.checked = r.value === theme;
     });
+    document.querySelectorAll('.ttm-menu__theme input[name="ttm-mode-pick"]').forEach(function (r) {
+      r.checked = r.value === currentMode();
+    });
+  }
+  function setMode(mode) {
+    if (MODES.indexOf(mode) === -1) return false;
+    try { localStorage.setItem('ttm_mode', mode); } catch (e) {}
+    apply(currentTheme());
+    return true;
   }
 
   apply(currentTheme());
   applyCustom(getCustom());
+  // Auto mode tracks the OS live
+  if (mediaDark && mediaDark.addEventListener) {
+    mediaDark.addEventListener('change', function () {
+      if (currentMode() === 'auto') apply(currentTheme());
+    });
+  }
 
   function buildMenu() {
     // current-page key includes the demo flag, so Dashboard (/) and
@@ -134,6 +165,13 @@
       var id = 'ttm-theme-' + t;
       html += '<label for="' + id + '"><input type="radio" id="' + id + '" name="ttm-theme-pick" value="' + t + '"' +
         (currentTheme() === t ? ' checked' : '') + '><span>' + THEME_LABELS[t] + '</span></label>';
+    });
+    html += '</fieldset>';
+    html += '<fieldset class="ttm-menu__theme"><legend>Light / dark</legend>';
+    MODES.forEach(function (m) {
+      var id = 'ttm-mode-' + m;
+      html += '<label for="' + id + '"><input type="radio" id="' + id + '" name="ttm-mode-pick" value="' + m + '"' +
+        (currentMode() === m ? ' checked' : '') + '><span>' + MODE_LABELS[m] + '</span></label>';
     });
     html += '</fieldset>';
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
@@ -233,6 +271,13 @@
       if (target) { target.click(); target.focus(); }
     });
     panel.addEventListener('change', function (e) {
+      if (e.target.name === 'ttm-mode-pick') {
+        setMode(e.target.value);
+        if (window.TTMToast) window.TTMToast.show(
+          MODE_LABELS[e.target.value] + ' mode.', { type: 'success', timeout: 2500 });
+        if (window.TTMStack) window.TTMStack.track('mode_change', { mode: e.target.value });
+        return;
+      }
       if (e.target.name !== 'ttm-theme-pick') return;
       try { localStorage.setItem('ttm_theme', e.target.value); } catch (err) {}
       apply(e.target.value);
@@ -293,6 +338,7 @@
 
   window.TTMTheme = {
     apply: apply, set: set, current: currentTheme, THEMES: THEMES,
+    mode: currentMode, setMode: setMode, MODES: MODES,
     getCustom: getCustom, setCustom: setCustom, resetCustom: resetCustom,
   };
 })();
