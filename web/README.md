@@ -7,6 +7,30 @@ application is untouched.
 Live: https://openhardwaremonitor.vercel.app (`?demo=1` for the animated
 demo feed, `/test/` for the self-test bench, `/admin/` for operators).
 
+## Use cases
+
+- **Workshop presence on the open map** — the machine publishes a SpaceAPI
+  signal to Maps of Making: running hardware means the space reads *open*,
+  temperatures and fans travel as sensors, Four Corners keeps authorship
+  attached, IIIF serves the machine photo zoomable. Bernard, keeper of
+  Mother Sands, greets visitors in the menu and points them to the
+  workshop.
+- **Monitor wall / lab display** — full-screen the dashboard on a spare
+  screen beside the machine; the summary strip is readable across the
+  room, warn/hot states glow, polling pauses when the tab hides.
+- **Kiosk in terminal dress** — the terminal theme (paper, mono,
+  WCAG-checked) suits e-ink-ish kiosks and print-adjacent setups; flip
+  live with <kbd>t</kbd> or persist it site-wide via `config.js`.
+- **Classroom / demo without hardware** — `?demo=1` serves 32 animated
+  sensors from a seeded generator; the same seed gives every student the
+  same bytes for reproducible exercises.
+- **Design-system reference** — `/components/` shows the whole TTM stack
+  end to end; `/test/` proves it (42 checks, incl. WCAG contrast); the
+  token layer whitelabels via `TTMTheme.setCustom`.
+- **Fork it for your own feed** — `parse.js`/`bridge.js` are pure and
+  DOM-free: point them at any display-string sensor tree and the rest of
+  the stack comes along.
+
 ## Module map
 
 | File | Role |
@@ -18,7 +42,8 @@ demo feed, `/test/` for the self-test bench, `/admin/` for operators).
 | `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape |
 | `ttm/` | the TTM stack: tokens, components, theme switcher, toasts, gate/telemetry (see `/THEMING.md`) |
 | `admin/` | operator page; renders only for visitors flagged `is_admin` |
-| `test/` | the bench: 24 assertions, runs from `file://` or `/test/` |
+| `components/` | end-to-end gallery of the component stack |
+| `test/` | the bench: 42 assertions, runs from `file://` or `/test/` |
 
 ## Data contract
 
@@ -41,7 +66,9 @@ the page from the same origin, use a local proxy, or use demo data.
 ## UX
 
 - keyboard: <kbd>d</kbd> demo · <kbd>/</kbd> connect · <kbd>t</kbd>
-  dark/terminal theme · <kbd>Esc</kbd> pause · <kbd>?</kbd> drawer menu
+  dark/terminal theme · <kbd>Esc</kbd> pause · <kbd>?</kbd> drawer menu ·
+  <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd>
+  navigates dashboard / components / test bench / mission control / maps
 - polling pauses when the tab is hidden and resumes on return; under
   `prefers-reduced-motion` it stretches to 20 s
 - the status badge is a polite live region; warn/hot rows carry explanatory
@@ -65,9 +92,12 @@ at the top of `bridge.js`):
 
 ## Tests
 
-Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 24
-assertions: 14 over the TTM stack (tokens, theming, toasts, gate,
-telemetry) and 10 over the sensor core and map bridge. Results land in
+Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 42
+assertions: the TTM stack (tokens incl. the full theme-able vocabulary,
+theming across all three terminal selectors, whitelabel runtime, toasts,
+gate, telemetry), WCAG 2.1 contrast computed from live tokens in both
+themes, the sensor core, seeded demo/fixture data, and the map bridge
+with its Four Corners and IIIF extensions. Results land in
 `window.__TTM_TEST_RESULTS` for headless harnesses:
 
 ```bash
