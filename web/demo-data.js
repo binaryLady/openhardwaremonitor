@@ -9,7 +9,19 @@
   'use strict';
 
   let id = 0;
-  const jitter = (base, spread) => base + (Math.random() - 0.5) * 2 * spread;
+  let rand = Math.random;
+
+  // mulberry32 — tiny seeded PRNG so tests get a byte-stable tree
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const jitter = (base, spread) => base + (rand() - 0.5) * 2 * spread;
 
   const sensor = (name, fmt, base, spread, min, max) => {
     const v = jitter(base, spread);
@@ -33,7 +45,10 @@
   const volt = v => v.toFixed(3) + ' V';
   const gb = v => v.toFixed(1) + ' GB';
 
-  window.OHM_DEMO = function () {
+  // OHM_DEMO()      — jittered tree, animates like a live feed
+  // OHM_DEMO(seed)  — deterministic tree for tests (same seed, same bytes)
+  window.OHM_DEMO = function (seed) {
+    rand = (seed === undefined) ? Math.random : mulberry32(seed >>> 0);
     id = 0;
     const root = { id: id++, Text: 'Sensor', Children: [], Min: 'Min', Value: 'Value', Max: 'Max', ImageURL: '' };
 

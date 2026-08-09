@@ -47,6 +47,22 @@ the page from the same origin, use a local proxy, or use demo data.
 - the status badge is a polite live region; warn/hot rows carry explanatory
   titles rather than color alone
 
+## Publishing to open maps (SpaceAPI · Four Corners · IIIF)
+
+The map-bridge fragment (`bridge.js`) is a SpaceAPI v14 document: register
+its URL on Maps of Making and the machine appears as a space signal —
+activity as `state.open`, temperatures and fans as `sensors`, refreshed by
+the heartbeat. Two open protocols ride along as `ext_*` extensions,
+configured per site via `window.OHM_BRIDGE_META` (see the shape documented
+at the top of `bridge.js`):
+
+- **Four Corners** (`ext_fourcorners`, fourcornersproject.org) —
+  attribution that travels with the signal: authorship/license, backstory
+  (defaults to honest provenance of the telemetry), related imagery, links.
+- **IIIF Image API 3** (`ext_iiif`, iiif.io) — an `ImageService3` block so
+  any IIIF viewer can deep-zoom the machine photo; `logo` carries the
+  static fallback image.
+
 ## Tests
 
 Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 24

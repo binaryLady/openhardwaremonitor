@@ -78,5 +78,31 @@
     return null;
   }
 
-  window.OHMParse = { num, categoryOf, flatten, stateOf, meterPct };
+  /**
+   * One-look machine summary for the dashboard's overview strip:
+   * {machine, blocks, sensors, fans, active, hottest, maxLoad} — hottest and
+   * maxLoad are {hw, name, value, n, state} or null when the feed has none.
+   */
+  function summarize(root) {
+    const blocks = flatten(root);
+    const machineNode = (root.Children || [])[0];
+    let hottest = null, maxLoad = null, fans = 0, sensors = 0;
+    blocks.forEach(b => b.sensors.forEach(s => {
+      sensors++;
+      if (s.cat === 'fan') fans++;
+      if (s.n == null) return;
+      if (s.cat === 'temperature' && (!hottest || s.n > hottest.n))
+        hottest = { hw: b.name, name: s.name, value: s.value, n: s.n, state: stateOf(s) };
+      if (s.cat === 'load' && (!maxLoad || s.n > maxLoad.n))
+        maxLoad = { hw: b.name, name: s.name, value: s.value, n: s.n, state: stateOf(s) };
+    }));
+    return {
+      machine: machineNode ? machineNode.Text : 'machine',
+      blocks: blocks.length, sensors, fans,
+      active: !!(maxLoad && maxLoad.n > 5),
+      hottest, maxLoad
+    };
+  }
+
+  window.OHMParse = { num, categoryOf, flatten, stateOf, meterPct, summarize };
 })();

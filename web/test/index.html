@@ -14,6 +14,7 @@
 <script src="../parse.js"></script>
 <script src="../bridge.js"></script>
 <script src="../demo-data.js"></script>
+<script src="fixtures/data.sample.js"></script>
 <style>
   .pass{color:var(--ttm-success);font-weight:700}
   .fail{color:var(--ttm-danger);font-weight:700}
@@ -78,9 +79,123 @@ window.addEventListener('load', function () {
     document.documentElement.setAttribute('data-ttm-theme', 'ttm'); // restore
     return bg === bgTTM ? true : 'fallback --ttm-bg=' + bg;
   });
+  t('tokens: spacing, motion, hover, scrollbar vocabulary present', function () {
+    return ['--ttm-spacing-md', '--ttm-transition-fast', '--ttm-pink-hover',
+            '--ttm-scrollbar-thumb'].every(function (v) { return cssVar(v) !== ''; })
+      ? true : 'missing token group';
+  });
+  t('theme: terminal palette identical across all three spec selectors', function () {
+    var probe = document.createElement('div');
+    document.body.appendChild(probe);
+    var got = ['terminal', null, null].map(function (cls, i) {
+      probe.removeAttribute('class'); probe.removeAttribute('data-theme');
+      probe.removeAttribute('data-ttm-theme');
+      if (i === 0) probe.className = 'terminal';
+      if (i === 1) probe.setAttribute('data-theme', 'terminal');
+      if (i === 2) probe.setAttribute('data-ttm-theme', 'terminal');
+      return cssVar('--ttm-bg', probe) + '/' + cssVar('--ttm-pink-hover', probe);
+    });
+    probe.remove();
+    return got[0] === got[1] && got[1] === got[2] && got[0].indexOf('#f2ede1') === 0
+      ? true : got.join(' | ');
+  });
   t('theme.js: burger menu injected with theme radios', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
+  });
+
+  // ── WCAG 2.1 contrast (the W3C check) ─────────────────────────────────────
+  // resolve any token (including var() chains) to rgb via a live probe
+  function resolveColor(token, themeAttr) {
+    var probe = document.createElement('span');
+    if (themeAttr) probe.setAttribute('data-ttm-theme', themeAttr);
+    probe.style.color = 'var(' + token + ')';
+    document.body.appendChild(probe);
+    var rgb = getComputedStyle(probe).color.match(/\d+(\.\d+)?/g).map(Number);
+    probe.remove();
+    return rgb;
+  }
+  function luminance(rgb) {
+    var c = rgb.slice(0, 3).map(function (v) {
+      v /= 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function contrast(a, b) {
+    var la = luminance(a), lb = luminance(b);
+    return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+  }
+  var AA_PAIRS = [
+    ['--ttm-text', '--ttm-bg'],
+    ['--ttm-text', '--ttm-surface'],
+    ['--ttm-text-secondary', '--ttm-surface'],
+    ['--ttm-text-muted', '--ttm-surface'],
+    ['--ttm-on-accent', '--ttm-accent-cta'],
+    ['--ttm-success', '--ttm-bg'],
+    ['--ttm-danger', '--ttm-bg'],
+    ['--ttm-warning', '--ttm-bg'],
+    ['--ttm-info', '--ttm-bg']
+  ];
+  // WCAG 1.4.11 non-text: 3:1 for interactive chrome. Borders are exempt by
+  // design: cards/dividers are decorative, and inputs are identified by
+  // background + label, not border alone.
+  var UI_PAIRS = [
+    ['--ttm-control', '--ttm-bg'],
+    ['--ttm-focus', '--ttm-bg']
+  ];
+  ['ttm', 'terminal'].forEach(function (theme) {
+    t('wcag: AA 4.5:1 for all text/status pairs — ' + theme + ' theme', function () {
+      var fails = [];
+      AA_PAIRS.forEach(function (p) {
+        var r = contrast(resolveColor(p[0], theme), resolveColor(p[1], theme));
+        if (r < 4.5) fails.push(p[0] + ' on ' + p[1] + ' = ' + r.toFixed(2));
+      });
+      return fails.length === 0 ? true : fails.join('; ');
+    });
+    t('wcag: 3:1 for interactive chrome (1.4.11) — ' + theme + ' theme', function () {
+      var fails = [];
+      UI_PAIRS.forEach(function (p) {
+        var r = contrast(resolveColor(p[0], theme), resolveColor(p[1], theme));
+        if (r < 3) fails.push(p[0] + ' on ' + p[1] + ' = ' + r.toFixed(2));
+      });
+      return fails.length === 0 ? true : fails.join('; ');
+    });
+  });
+
+  // ── whitelabel runtime (TTMTheme) ─────────────────────────────────────────
+  t('whitelabel: TTMTheme API surface complete', function () {
+    var T = window.TTMTheme;
+    return T && ['apply', 'set', 'current', 'THEMES', 'getCustom', 'setCustom',
+      'resetCustom'].every(function (k) { return k in T; }) ? true : 'missing keys';
+  });
+  t('whitelabel: setCustom applies + persists a valid token override', function () {
+    window.TTMTheme.setCustom({ '--ttm-pink': '#123456' });
+    var applied = document.documentElement.style.getPropertyValue('--ttm-pink') === '#123456';
+    var stored = (window.TTMTheme.getCustom() || {})['--ttm-pink'] === '#123456';
+    window.TTMTheme.resetCustom();
+    var cleared = document.documentElement.style.getPropertyValue('--ttm-pink') === '';
+    return applied && stored && cleared ? true :
+      'applied=' + applied + ' stored=' + stored + ' cleared=' + cleared;
+  });
+  t('whitelabel: overrides outside --ttm/--z/--radius are rejected', function () {
+    window.TTMTheme.setCustom({ 'background-image': 'url(x)', '--evil-token': 'red' });
+    var root = document.documentElement.style;
+    var ok = root.getPropertyValue('background-image') === '' &&
+             root.getPropertyValue('--evil-token') === '';
+    window.TTMTheme.resetCustom();
+    return ok ? true : 'invalid key leaked through';
+  });
+  t('whitelabel: set() persists and applies a theme', function () {
+    var before = localStorage.getItem('ttm_theme');
+    var ok = window.TTMTheme.set('terminal') === true &&
+             document.documentElement.getAttribute('data-ttm-theme') === 'terminal' &&
+             localStorage.getItem('ttm_theme') === 'terminal' &&
+             window.TTMTheme.set('bogus') === false;
+    if (before === null) localStorage.removeItem('ttm_theme');
+    else localStorage.setItem('ttm_theme', before);
+    window.TTMTheme.apply('ttm');
+    return ok ? true : 'set() broken';
   });
 
   // ── toasts ────────────────────────────────────────────────────────────────
@@ -153,6 +268,42 @@ window.addEventListener('load', function () {
            P.meterPct({ cat: 'clock', value: '', n: null }) === null ? true : 'bad meter';
   });
 
+  // ── demo data + fixtures ──────────────────────────────────────────────────
+  t('demo: seeded OHM_DEMO is deterministic', function () {
+    return JSON.stringify(window.OHM_DEMO(42)) === JSON.stringify(window.OHM_DEMO(42)) &&
+           JSON.stringify(window.OHM_DEMO(42)) !== JSON.stringify(window.OHM_DEMO(7))
+      ? true : 'seeding broken';
+  });
+  t('fixture: frozen tree matches OHM_DEMO(42)', function () {
+    return JSON.stringify(window.OHM_FIXTURE) === JSON.stringify(window.OHM_DEMO(42))
+      ? true : 'fixture drifted — regenerate per its header comment';
+  });
+  t('fixture: parses to the canonical 5 blocks / 32 sensors', function () {
+    var bl = P.flatten(window.OHM_FIXTURE);
+    var n = bl.reduce(function (a, b) { return a + b.sensors.length; }, 0);
+    return bl.length === 5 && n === 32 ? true : 'blocks=' + bl.length + ' sensors=' + n;
+  });
+
+  t('parse: summarize distills the fixture (machine, counts, hottest, load)', function () {
+    var m = P.summarize(window.OHM_FIXTURE);
+    var manualHot = null;
+    P.flatten(window.OHM_FIXTURE).forEach(function (b) {
+      b.sensors.forEach(function (s) {
+        if (s.cat === 'temperature' && s.n != null && (!manualHot || s.n > manualHot)) manualHot = s.n;
+      });
+    });
+    return m.machine === 'FORGE-01' && m.blocks === 5 && m.sensors === 32 &&
+           m.fans === 3 && typeof m.active === 'boolean' &&
+           m.hottest && m.hottest.n === manualHot && m.maxLoad && m.maxLoad.n > 0
+      ? true : JSON.stringify(m).slice(0, 120);
+  });
+  t('parse: summarize survives an empty tree', function () {
+    var m = P.summarize({ Children: [] });
+    return m.machine === 'machine' && m.blocks === 0 && m.sensors === 0 &&
+           m.hottest === null && m.maxLoad === null && m.active === false
+      ? true : JSON.stringify(m);
+  });
+
   // ── map bridge (bridge.js) ────────────────────────────────────────────────
   var frag = window.OHMBridge.fragment(window.OHM_DEMO());
   t('bridge: SpaceAPI v14 envelope', function () {
@@ -172,6 +323,34 @@ window.addEventListener('load', function () {
   t('bridge: json() emits parseable pretty JSON', function () {
     var doc = JSON.parse(window.OHMBridge.json(window.OHM_DEMO()));
     return doc.space === 'FORGE-01' ? true : 'roundtrip failed';
+  });
+  t('bridge: Four Corners attribution present with honest defaults', function () {
+    var f = window.OHMBridge.fragment(window.OHM_FIXTURE).ext_fourcorners;
+    return f && f.authorship && /FORGE-01/.test(f.authorship.credit) &&
+           f.backstory && /Open Hardware Monitor/.test(f.backstory.text) &&
+           f.imagery && Array.isArray(f.imagery.media) &&
+           f.links && Array.isArray(f.links.links) ? true : JSON.stringify(f);
+  });
+  t('bridge: meta merges — url/location, Four Corners corners, logo', function () {
+    var doc = window.OHMBridge.fragment(window.OHM_FIXTURE, {
+      url: 'https://lab.example', location: { lat: 51.05, lon: 3.72 },
+      image: { static: 'https://lab.example/machine.jpg' },
+      fourCorners: { authorship: { credit: 'Sonia / TTM', license: 'CC BY-SA 4.0' } }
+    });
+    return doc.url === 'https://lab.example' && doc.location.lat === 51.05 &&
+           doc.logo === 'https://lab.example/machine.jpg' &&
+           doc.ext_fourcorners.authorship.credit === 'Sonia / TTM' &&
+           /Open Hardware Monitor/.test(doc.ext_fourcorners.backstory.text)
+      ? true : 'merge broken';
+  });
+  t('bridge: IIIF ImageService3 block well-formed when meta provides a service', function () {
+    var doc = window.OHMBridge.fragment(window.OHM_FIXTURE,
+      { image: { iiif: 'https://iiif.example/machine' } });
+    var s = doc.ext_iiif;
+    var none = window.OHMBridge.fragment(window.OHM_FIXTURE, {});
+    return s && s['@context'] === 'http://iiif.io/api/image/3/context.json' &&
+           s.id === 'https://iiif.example/machine' && s.type === 'ImageService3' &&
+           s.profile === 'level1' && !('ext_iiif' in none) ? true : JSON.stringify(s);
   });
 
   // ── report ────────────────────────────────────────────────────────────────

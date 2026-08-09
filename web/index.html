@@ -30,20 +30,32 @@
   </div>
 
   <div class="ttm-grid ttm-grid--wide">
+    <section class="ttm-card full" id="machine-card" aria-labelledby="h-machine" hidden>
+      <h2 class="ttm-card__title" id="h-machine">Machine</h2>
+      <div class="ttm-statrow">
+        <span class="stat"><b id="m-name">—</b><span class="ttm-badge" id="m-state">idle</span></span>
+        <span class="stat"><span class="k">hottest</span><b id="m-hot">—</b></span>
+        <span class="stat"><span class="k">peak load</span><b id="m-load">—</b></span>
+        <span class="stat"><span class="k">sensors</span><b id="m-count">—</b></span>
+      </div>
+    </section>
+
     <section class="ttm-card full" aria-labelledby="h-sensors">
       <h2 class="ttm-card__title" id="h-sensors">Sensors</h2>
       <div id="tree" class="ttm-grid ttm-grid--wide"><p class="ttm-note">Connect to a machine running Open Hardware Monitor's remote web server, or load demo data.</p></div>
     </section>
 
     <section class="ttm-card full" aria-labelledby="h-map">
-      <h2 class="ttm-card__title" id="h-map">Map bridge — publish this machine as a space signal</h2>
-      <p class="ttm-note">Generates a SpaceAPI-style fragment from the live sensors: the machine's activity
-      becomes <code>state.open</code>, temperatures and fans become <code>sensors</code>. Host it at a URL
-      you control and register it on Maps of Making — the heartbeat does the rest.</p>
-      <pre class="ttm-receipt" id="bridge">— connect or load demo data first —</pre>
-      <div class="ttm-row">
-        <button class="ttm-btn-outline" id="copy-bridge" disabled>Copy JSON</button>
-      </div>
+      <details class="ttm-details">
+        <summary><h2 class="ttm-card__title" id="h-map">Map bridge — publish this machine as a space signal</h2></summary>
+        <p class="ttm-note">Generates a SpaceAPI-style fragment from the live sensors: the machine's activity
+        becomes <code>state.open</code>, temperatures and fans become <code>sensors</code>. Host it at a URL
+        you control and register it on Maps of Making — the heartbeat does the rest.</p>
+        <pre class="ttm-receipt" id="bridge">— connect or load demo data first —</pre>
+        <div class="ttm-row">
+          <button class="ttm-btn-outline" id="copy-bridge" disabled>Copy JSON</button>
+        </div>
+      </details>
     </section>
   </div>
 

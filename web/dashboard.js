@@ -28,17 +28,31 @@
 
   function render(root) {
     const blocks = flatten(root);
+    // remember which blocks the user collapsed — polling must not undo it
+    const collapsed = {};
+    els.tree.querySelectorAll('details.ttm-hw').forEach(d => {
+      collapsed[d.dataset.hw] = !d.open;
+    });
     els.tree.textContent = '';
     if (!blocks.length) {
       els.tree.innerHTML = '<p class="ttm-note">No sensors in the feed.</p>';
       return;
     }
     blocks.forEach(block => {
-      const card = document.createElement('div');
+      const card = document.createElement('details');
       card.className = 'ttm-hw';
-      const h = document.createElement('h3');
-      h.textContent = block.name;
-      card.appendChild(h);
+      card.dataset.hw = block.name;
+      card.open = !collapsed[block.name];
+      const worst = block.sensors.reduce((w, s) => {
+        const st = stateOf(s);
+        return st === 'hot' || w === 'hot' ? 'hot' : (st || w);
+      }, '');
+      const sum = document.createElement('summary');
+      sum.innerHTML = '<span class="dot' + (worst ? ' ' + worst : '') +
+        '" aria-hidden="true"></span>' +
+        '<h3>' + esc(block.name) + '</h3>' +
+        '<span class="n">' + block.sensors.length + ' sensors</span>';
+      card.appendChild(sum);
       let lastGroup = null;
       block.sensors.forEach(s => {
         if (s.group !== lastGroup) {
@@ -75,8 +89,26 @@
   function apply(root) {
     lastTree = root;
     render(root);
+    renderSummary(window.OHMParse.summarize(root));
     els.bridge.textContent = window.OHMBridge.json(root);
     els.copy.disabled = false;
+  }
+
+  function renderSummary(m) {
+    $('#machine-card').hidden = false;
+    $('#m-name').textContent = m.machine;
+    const st = $('#m-state');
+    st.textContent = m.active ? 'active' : 'idle';
+    st.className = 'ttm-badge' + (m.active ? ' ttm-badge--success' : '');
+    const hot = $('#m-hot');
+    hot.textContent = m.hottest ? m.hottest.value : '—';
+    hot.className = m.hottest && m.hottest.state ? m.hottest.state : '';
+    hot.title = m.hottest ? m.hottest.hw + ' / ' + m.hottest.name : '';
+    const load = $('#m-load');
+    load.textContent = m.maxLoad ? m.maxLoad.value : '—';
+    load.className = m.maxLoad && m.maxLoad.state ? m.maxLoad.state : '';
+    load.title = m.maxLoad ? m.maxLoad.hw + ' / ' + m.maxLoad.name : '';
+    $('#m-count').textContent = m.sensors + ' across ' + m.blocks + ' devices · ' + m.fans + ' fans';
   }
 
   function setStatus(txt, tone) {
@@ -163,8 +195,7 @@
     else if (e.key === 't') {
       const cur = document.documentElement.getAttribute('data-ttm-theme') || 'ttm';
       const next = cur === 'terminal' ? 'ttm' : 'terminal';
-      document.documentElement.setAttribute('data-ttm-theme', next);
-      try { localStorage.setItem('ttm_theme', next); } catch (_) {}
+      window.TTMTheme.set(next);
       toast('Theme: ' + (next === 'terminal' ? 'terminal' : 'dark'), { timeout: 1500 });
     }
     else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }

@@ -99,26 +99,66 @@
 
   /* Elevation */
   --ttm-shadow: 0 0 0 1.5px var(--ttm-border), 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* Spacing scale (spec §Spacing) — components and whitelabel share it */
+  --ttm-spacing-xs: 0.25rem;
+  --ttm-spacing-sm: 0.5rem;
+  --ttm-spacing-md: 1rem;
+  --ttm-spacing-lg: 1.5rem;
+  --ttm-spacing-xl: 2rem;
+  --ttm-spacing-2xl: 3rem;
+  --ttm-spacing-3xl: 4rem;
+
+  /* Motion (spec §Transitions) — reduced-motion collapses these globally */
+  --ttm-transition-fast: 150ms ease;
+  --ttm-transition-normal: 200ms ease;
+  --ttm-transition-slow: 300ms ease;
+
+  /* Accent hover variants (spec §Brand Colors) */
+  --ttm-pink-hover: #c903c5;
+  --ttm-lime-hover: #8ae600;
+  --ttm-cyan-hover: #07ccc0;
+  --ttm-hot-red-hover: #e60073;
+  --ttm-goldenrod-hover: #e68600;
+
+  /* Scrollbar (spec §Scrollbar) */
+  --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-cyan) 30%, transparent);
+  --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-cyan) 50%, transparent);
+  --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
 }
 
-/* Terminal theme — spec API (.terminal / [data-theme="terminal"]) */
-.terminal,
-[data-theme="terminal"] {
+/* Terminal theme — one palette, three spec-compatible selectors:
+   .terminal / [data-theme="terminal"] (spec API) and [data-ttm-theme="terminal"]
+   (site-wide attr set by theme.js). Defined once — :is() keeps them in sync. */
+:is(.terminal, [data-theme="terminal"], [data-ttm-theme="terminal"]) {
   --ttm-bg: #f2ede1;
   --ttm-bg-alt: #e9e2d2;
   --ttm-surface: #e9e2d2;
   --ttm-surface-alt: #ddd4c0;
   --ttm-text: #2b2a28;
   --ttm-text-secondary: #4a4844;
-  --ttm-text-muted: #6f6b63;
+  --ttm-text-muted: #635f57;   /* AA 4.9:1 on surface — #6f6b63 measured 4.11 */
   --ttm-text-faint: #a09a8c;
   --ttm-border: #c9c0aa;
   --ttm-border-subtle: #ddd4c0;
-  --ttm-pink: #e85d9c;
+  --ttm-pink: #b83570;         /* deep rose: light on-accent ink passes AA (4.7:1) */
   --ttm-lime: #7c9f35;
   --ttm-cyan: #09d3c5;
   --ttm-hot-red: #ff5555;
   --ttm-goldenrod: #f1a942;
+  --ttm-pink-hover: #a52e63;
+  --ttm-lime-hover: #6b8c2c;
+  --ttm-cyan-hover: #08b8ab;
+  --ttm-hot-red-hover: #e64444;
+  --ttm-goldenrod-hover: #dd9631;
+  /* Status + chrome accents re-derived for the light ground — the bright
+     dark-theme values measure 1.1–3.2:1 here; these pass AA/1.4.11 */
+  --ttm-success: #166534;
+  --ttm-danger: #b91c1c;
+  --ttm-warning: #8a5a00;
+  --ttm-info: #0f6674;
+  --ttm-control: #0f6674;
+  --ttm-focus: #0f6674;
   --ttm-overlay: rgba(43, 42, 40, 0.5);
   --ttm-glass: rgba(242, 237, 225, 0.9);
   --ttm-wash: rgba(43, 42, 40, 0.04);
@@ -127,34 +167,21 @@
   --ttm-font-serif: var(--ttm-font-mono);
   --ttm-on-accent: #f2ede1;
   --ttm-shadow: 3px 3px 0 var(--ttm-text);
+  /* Re-declare derived role tokens: custom-property var()s substitute where
+     DECLARED, so without these a terminal-themed subtree would inherit the
+     dark theme's already-resolved values from :root */
+  --ttm-accent-cta: var(--ttm-pink);
+  --ttm-scrollbar-thumb: color-mix(in srgb, var(--ttm-cyan) 30%, transparent);
+  --ttm-scrollbar-thumb-hover: color-mix(in srgb, var(--ttm-cyan) 50%, transparent);
+  --ttm-scrollbar-track: color-mix(in srgb, var(--ttm-bg) 50%, transparent);
 }
 
-/* Site-wide theme attr (theme.js) doubles as the spec's terminal selector */
-[data-ttm-theme="terminal"] {
-  --ttm-bg: #f2ede1;
-  --ttm-bg-alt: #e9e2d2;
-  --ttm-surface: #e9e2d2;
-  --ttm-surface-alt: #ddd4c0;
-  --ttm-text: #2b2a28;
-  --ttm-text-secondary: #4a4844;
-  --ttm-text-muted: #6f6b63;
-  --ttm-text-faint: #a09a8c;
-  --ttm-border: #c9c0aa;
-  --ttm-border-subtle: #ddd4c0;
-  --ttm-pink: #e85d9c;
-  --ttm-lime: #7c9f35;
-  --ttm-cyan: #09d3c5;
-  --ttm-hot-red: #ff5555;
-  --ttm-goldenrod: #f1a942;
-  --ttm-overlay: rgba(43, 42, 40, 0.5);
-  --ttm-glass: rgba(242, 237, 225, 0.9);
-  --ttm-wash: rgba(43, 42, 40, 0.04);
-  --ttm-wash-hover: rgba(43, 42, 40, 0.08);
-  --ttm-font-sans: var(--ttm-font-mono);
-  --ttm-font-serif: var(--ttm-font-mono);
-  --ttm-on-accent: #f2ede1;
-  --ttm-shadow: 3px 3px 0 var(--ttm-text);
-}
+/* Token-driven scrollbars (spec §Scrollbar) */
+* { scrollbar-width: thin; scrollbar-color: var(--ttm-scrollbar-thumb) var(--ttm-scrollbar-track); }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: var(--ttm-scrollbar-track); border-radius: var(--radius-sm); }
+*::-webkit-scrollbar-thumb { background: var(--ttm-scrollbar-thumb); border-radius: var(--radius-sm); }
+*::-webkit-scrollbar-thumb:hover { background: var(--ttm-scrollbar-thumb-hover); }
 
 /* Signature rainbow gradient (spec §Gradients) */
 .gradient-text-rainbow {
