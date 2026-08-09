@@ -12,6 +12,7 @@
     brand: { name: '', tagline: '', footer_name: '', footer_hidden: false, page_title: '' },
     theme: { 'default': null, tokens: {} },
     gate: { enabled: true, title: '', body: '', fine: '' },
+    contact: { email: '', website: '', github: '', mastodon: '', bluesky: '', x: '' },
   };
   var CACHE_KEY = 'ohm_site_config';
   var TTL_MS = 60000;
@@ -91,6 +92,8 @@
       applyBrand(config);
     }
     applyTheme(config);
+    // consumers that render config (menu contact links) re-render on this
+    try { document.dispatchEvent(new CustomEvent('ttm:brand')); } catch (e) {}
   }
 
   // Boot: cached config immediately; remote refresh when stale.

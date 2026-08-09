@@ -211,6 +211,16 @@ window.addEventListener('load', function () {
     return b && b.footer_name === '' && g && g.enabled === true &&
            th && typeof th.tokens === 'object' ? true : 'defaults wrong';
   });
+  t('brand.js: contact section defaults (email/website/socials, all empty)', function () {
+    var c = window.TTMBrand.get('contact');
+    return c && ['email', 'website', 'github', 'mastodon', 'bluesky', 'x']
+      .every(function (k) { return c[k] === ''; }) ? true : JSON.stringify(c);
+  });
+  t('menu: contact block exists and stays hidden while unconfigured', function () {
+    var nav = document.querySelector('.ttm-menu__contactnav');
+    return nav !== null && nav.hidden === true ? true :
+      'nav=' + !!nav + ' hidden=' + (nav && nav.hidden);
+  });
   t('brand.js: gate copy is the hook stack.js reads', function () {
     var g = window.TTMBrand.get('gate');
     return typeof g.title === 'string' && typeof g.body === 'string' &&
@@ -444,6 +454,15 @@ window.addEventListener('load', function () {
     N.closeMenu();
     var closed = !N.menuOpen() &&
       document.activeElement === document.querySelector('.ttm-burger');
+    // This test parked the browser's sequential-focus starting point on the
+    // burger (blur alone does not clear it), which would send the visitor's
+    // first Tab into the page tail instead of the skip link. A transient
+    // sentinel at the top of body resets the starting point to document start.
+    var sentinel = document.createElement('span');
+    sentinel.tabIndex = -1;
+    document.body.insertBefore(sentinel, document.body.firstChild);
+    sentinel.focus();
+    sentinel.remove();
     return opened && closed ? true : 'opened=' + opened + ' closed=' + closed;
   });
 

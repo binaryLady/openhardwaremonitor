@@ -65,6 +65,23 @@
           <div class="ttm-swatch-grid ttm-gap-top" id="wl-tokens"></div>
         </div>
         <div>
+          <h3 class="ttm-card__title">Contact &amp; social</h3>
+          <label class="ttm-note" for="wl-c-email">contact email</label>
+          <input class="ttm-input" id="wl-c-email" type="email" placeholder="you@example.com">
+          <label class="ttm-note" for="wl-c-website">website</label>
+          <input class="ttm-input" id="wl-c-website" type="url" placeholder="https://example.com">
+          <label class="ttm-note" for="wl-c-github">github</label>
+          <input class="ttm-input" id="wl-c-github" type="url" placeholder="https://github.com/you">
+          <label class="ttm-note" for="wl-c-mastodon">mastodon</label>
+          <input class="ttm-input" id="wl-c-mastodon" type="url" placeholder="https://hachyderm.io/@you">
+          <label class="ttm-note" for="wl-c-bluesky">bluesky</label>
+          <input class="ttm-input" id="wl-c-bluesky" type="url" placeholder="https://bsky.app/profile/you">
+          <label class="ttm-note" for="wl-c-x">x</label>
+          <input class="ttm-input" id="wl-c-x" type="url" placeholder="https://x.com/you">
+          <p class="ttm-note">Published links appear in the site menu on every
+          page. Only http(s) URLs render; anything else is dropped.</p>
+        </div>
+        <div>
           <h3 class="ttm-card__title">Gate</h3>
           <label class="ttm-note ttm-inline">
             <span class="ttm-switch"><input type="checkbox" id="wl-gate-on" checked><span class="track"></span></span>
@@ -260,6 +277,10 @@
     });
 
     var b = TTMBrand.get('brand'), th = TTMBrand.get('theme'), g = TTMBrand.get('gate');
+    var c = TTMBrand.get('contact');
+    ['email', 'website', 'github', 'mastodon', 'bluesky', 'x'].forEach(function(k){
+      $('#wl-c-' + k).value = c[k] || '';
+    });
     $('#wl-title').value = b.page_title || ''; $('#wl-tagline').value = b.tagline || '';
     $('#wl-footer').value = b.footer_name || ''; $('#wl-footer-hide').checked = !!b.footer_hidden;
     $('#wl-default').value = (th['default'] === null || th['default'] === undefined) ? 'ttm' : th['default'];
@@ -308,7 +329,14 @@
                  footer_name: $('#wl-footer').value, footer_hidden: $('#wl-footer-hide').checked },
         theme: { 'default': $('#wl-default').value, tokens: editedTokens() },
         gate:  { enabled: $('#wl-gate-on').checked, title: $('#wl-gate-title').value,
-                 body: $('#wl-gate-body').value, fine: $('#wl-gate-fine').value }
+                 body: $('#wl-gate-body').value, fine: $('#wl-gate-fine').value },
+        contact: (function(){
+          var out = {};
+          ['email', 'website', 'github', 'mastodon', 'bluesky', 'x'].forEach(function(k){
+            out[k] = $('#wl-c-' + k).value.trim().slice(0, 300);
+          });
+          return out;
+        })()
       };
       sb.rpc('ohm_publish_config', { p_token: token, p_config: config }).then(function(r){
         if (r.error) { toast('Publish failed: ' + r.error.message, { type: 'error' }); return; }
