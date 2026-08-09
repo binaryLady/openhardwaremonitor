@@ -308,9 +308,10 @@
     };
   }
 
+  // Universal chrome: the mode toggle is fixed beside the burger on every
+  // page — part of the site shell, not any page's header markup.
   function buildModeToggle() {
-    var header = document.querySelector('.ttm-header');
-    if (!header || header.querySelector('.ttm-modetoggle')) return;
+    if (document.querySelector('.ttm-modetoggle')) return;
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'ttm-modetoggle';
@@ -319,12 +320,31 @@
       setMode(next);
       if (window.TTMStack) window.TTMStack.track('mode_change', { mode: next });
     });
-    header.appendChild(b);
+    document.body.appendChild(b);
     apply(currentTheme()); // paint the glyph
+  }
+
+  // Universal footer: every page carries the same closing line — pages keep
+  // their own first line; missing footers are created.
+  function buildFooter() {
+    var footer = document.querySelector('footer.ttm-footer');
+    if (!footer) {
+      footer = document.createElement('footer');
+      footer.className = 'ttm-footer';
+      (document.querySelector('.ttm-main') || document.body).appendChild(footer);
+    }
+    if (footer.querySelector('.ttm-kbd-hints')) return;
+    var hints = document.createElement('span');
+    hints.className = 'ttm-kbd-hints';
+    hints.innerHTML = '<kbd>?</kbd> menu · <kbd>g</kbd> chords navigate · ' +
+      '\u2600/\u263E mode · <kbd>Tab</kbd> skip link';
+    footer.appendChild(document.createElement('br'));
+    footer.appendChild(hints);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     buildModeToggle();
+    buildFooter();
     buildMenu();
     var badge = document.createElement('div');
     badge.className = 'ttm-footer-badge';

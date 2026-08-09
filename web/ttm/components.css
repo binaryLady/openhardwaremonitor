@@ -596,7 +596,8 @@ body.ttm-page {
   padding: 1.5rem 1.25rem 4rem;
 }
 .ttm-main { max-width: 64rem; margin: 0 auto; }
-.ttm-header { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+/* every page title clears the fixed chrome cluster (mode toggle + burger) */
+.ttm-header { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; padding-right: 7rem; }
 /* iridescent rule under the header — the brand shimmer as a themed border */
 .ttm-header::after {
   content: "";
@@ -880,13 +881,15 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 
 /* ── ttm-modetoggle — light/dark flip in the page header (brand pattern) ── */
 .ttm-modetoggle {
-  margin-left: auto;
-  align-self: center;
+  position: fixed;
+  top: 14px;
+  right: 68px;   /* burger is at right:14px, 44px wide — 10px gutter */
+  z-index: var(--z-header);
   width: 44px;
   height: 44px;
   border-radius: 50%;
   border: 1.5px solid var(--ttm-border);
-  background: transparent;
+  background: var(--ttm-surface);
   color: var(--ttm-text);
   font-size: 1.05rem;
   line-height: 1;
