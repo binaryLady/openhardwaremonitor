@@ -150,6 +150,22 @@
     }
   });
 
+  // keyboard: d demo · / focus url · t theme · esc pause — never while typing
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^(input|textarea|select)$/i.test(e.target.tagName)) return;
+    if (e.key === 'd') { startDemo(); }
+    else if (e.key === '/') { e.preventDefault(); els.url.focus(); }
+    else if (e.key === 't') {
+      const cur = document.documentElement.getAttribute('data-ttm-theme') || 'ttm';
+      const next = cur === 'terminal' ? 'ttm' : 'terminal';
+      document.documentElement.setAttribute('data-ttm-theme', next);
+      try { localStorage.setItem('ttm_theme', next); } catch (_) {}
+      toast('Theme: ' + (next === 'terminal' ? 'terminal' : 'dark'), { timeout: 1500 });
+    }
+    else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }
+  });
+
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { stop(); }
     else if (mode === 'demo') startDemo();
