@@ -129,10 +129,12 @@
 (function(){
   'use strict';
   window.__ttmAdminBoot = function(){
-  var $ = function(s){ return document.querySelector(s); };
+  var $ = function(sel){ return document.querySelector(sel); };
   var sb = window.TTMStack.supabase();
+  var toast = function(m,o){ window.TTMToast && TTMToast.show(m, o || {}); };
   var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g,
     function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var token = null;
 
   initWhitelabel();
 
@@ -144,26 +146,63 @@
     return;
   }
 
-  var dayAgo = new Date(Date.now() - 24*3600*1000).toISOString();
+  // ── operator token: the credential for all reads + publishes ──
+  // Kept in sessionStorage only (cleared when the tab closes). Set it in
+  // Supabase per supabase/schema.sql → "SET YOUR TOKEN".
+  function askToken(msg){
+    $('#visitors').innerHTML = '<p class="ttm-note">' + esc(msg || 'Operator token required.') + '</p>';
+    $('#events').innerHTML =
+      '<div class="ttm-srcbar"><input type="password" class="ttm-input" id="op-token" ' +
+      'placeholder="operator token" aria-label="Operator token">' +
+      '<button class="ttm-btn-primary" id="op-token-go">Unlock</button></div>' +
+      '<p class="ttm-note">The token set in <code>ohm_admin_secrets</code> ' +
+      '(see supabase/schema.sql). Held in this tab only.</p>';
+    $('#op-token-go').addEventListener('click', tryToken);
+    $('#op-token').addEventListener('keydown', function(e){ if (e.key === 'Enter') tryToken(); });
+    $('#op-token').focus();
+  }
+  function tryToken(){
+    var t = $('#op-token').value.trim();
+    if (!t) return;
+    verify(t);
+  }
+  function verify(t){
+    sb.rpc('ohm_admin_stats', { p_token: t }).then(function(r){
+      if (r.error) {
+        try { sessionStorage.removeItem('ohm_admin_token'); } catch(e){}
+        askToken('That token was not accepted.');
+        return;
+      }
+      token = t;
+      try { sessionStorage.setItem('ohm_admin_token', t); } catch(e){}
+      var total = (r.data && r.data[0] && r.data[0].total_events) || 0;
+      $('#st-total').textContent = total;
+      loadData();
+    });
+  }
 
-  sb.from('ohm_telemetry_events').select('event,session_id', { count: 'exact' })
-    .gte('ts', dayAgo).limit(1000)
-    .then(function(r){
+  function loadData(){
+    sb.rpc('ohm_admin_events', { p_token: token, p_limit: 1000 }).then(function(r){
       if (r.error) throw r.error;
       var rows = r.data || [];
-      $('#st-views').textContent = rows.filter(function(e){ return e.event === 'page_view'; }).length;
-      $('#st-sessions').textContent = new Set(rows.map(function(e){ return e.session_id; })).size;
-      $('#st-gates').textContent = rows.filter(function(e){ return e.event === 'gate_complete'; }).length;
-    })
-    .catch(function(e){ console.warn('[admin] stats failed:', e.message); });
+      var dayAgo = Date.now() - 24*3600*1000;
+      var day = rows.filter(function(e){ return new Date(e.ts).getTime() >= dayAgo; });
+      $('#st-views').textContent = day.filter(function(e){ return e.event === 'page_view'; }).length;
+      $('#st-sessions').textContent = new Set(day.map(function(e){ return e.session_id; })).size;
+      $('#st-gates').textContent = day.filter(function(e){ return e.event === 'gate_complete'; }).length;
+      var recent = rows.slice(0, 100);
+      if (!recent.length) { $('#events').innerHTML = '<p class="ttm-note">no events yet</p>'; return; }
+      var html = '<table class="ttm-table"><thead><tr><th>when</th><th>event</th><th>page</th><th>session</th><th>visitor</th></tr></thead><tbody>';
+      recent.forEach(function(e){
+        html += '<tr><td class="mono">' + esc((e.ts || '').slice(5, 16).replace('T', ' ')) + '</td>' +
+          '<td>' + esc(e.event) + '</td><td class="mono">' + esc(e.page) + '</td>' +
+          '<td class="mono">' + esc((e.session_id || '').slice(0, 10)) + '</td>' +
+          '<td class="mono">' + esc(e.visitor_email || '') + '</td></tr>';
+      });
+      $('#events').innerHTML = html + '</tbody></table>';
+    }).catch(function(e){ $('#events').innerHTML = '<p class="ttm-note">telemetry read failed: ' + esc(e.message) + '</p>'; });
 
-  sb.from('ohm_telemetry_events').select('*', { count: 'exact', head: true })
-    .then(function(r){ if (!r.error) $('#st-total').textContent = r.count; });
-
-  sb.from('ohm_visitors')
-    .select('name,email,first_seen,last_seen,is_admin')
-    .order('last_seen', { ascending: false }).limit(50)
-    .then(function(r){
+    sb.rpc('ohm_admin_visitors', { p_token: token }).then(function(r){
       if (r.error) throw r.error;
       var rows = r.data || [];
       if (!rows.length) { $('#visitors').innerHTML = '<p class="ttm-note">no sign-ins yet</p>'; return; }
@@ -174,33 +213,15 @@
           '<td>' + (v.is_admin ? '<span class="ttm-badge ttm-badge--success">admin</span>' : '') + '</td></tr>';
       });
       $('#visitors').innerHTML = html + '</tbody></table>';
-    })
-    .catch(function(e){ $('#visitors').innerHTML = '<p class="ttm-note">visitors read failed: ' + esc(e.message) + '</p>'; });
+    }).catch(function(e){ $('#visitors').innerHTML = '<p class="ttm-note">visitors read failed: ' + esc(e.message) + '</p>'; });
+  }
 
-  sb.from('ohm_telemetry_events')
-    .select('ts,event,page,session_id,visitor_email')
-    .order('ts', { ascending: false }).limit(100)
-    .then(function(r){
-      if (r.error) throw r.error;
-      var rows = r.data || [];
-      if (!rows.length) { $('#events').innerHTML = '<p class="ttm-note">no events yet</p>'; return; }
-      var html = '<table class="ttm-table"><thead><tr><th>when</th><th>event</th><th>page</th><th>session</th><th>visitor</th></tr></thead><tbody>';
-      rows.forEach(function(e){
-        html += '<tr><td class="mono">' + esc((e.ts || '').slice(5, 16).replace('T', ' ')) + '</td>' +
-          '<td>' + esc(e.event) + '</td><td class="mono">' + esc(e.page) + '</td>' +
-          '<td class="mono">' + esc((e.session_id || '').slice(0, 10)) + '</td>' +
-          '<td class="mono">' + esc(e.visitor_email || '') + '</td></tr>';
-      });
-      $('#events').innerHTML = html + '</tbody></table>';
-    })
-    .catch(function(e){ $('#events').innerHTML = '<p class="ttm-note">telemetry read failed: ' + esc(e.message) + '</p>'; });
-  };
+  var stored = null;
+  try { stored = sessionStorage.getItem('ohm_admin_token'); } catch(e){}
+  if (stored) verify(stored); else askToken();
 
   // ── Whitelabel editor: live preview → save on device → publish site-wide ──
   function initWhitelabel(){
-    var $ = function(sel){ return document.querySelector(sel); };
-    var sb = window.TTMStack.supabase();
-    var toast = function(m,o){ window.TTMToast && TTMToast.show(m, o || {}); };
     var TOKENS = [
       ['--ttm-pink','pink'], ['--ttm-cyan','cyan'], ['--ttm-lime','lime'],
       ['--ttm-goldenrod','goldenrod'], ['--ttm-hot-red','hot-red'],
@@ -216,7 +237,6 @@
       return '#' + m.slice(0,3).map(function(v){ return (+v).toString(16).padStart(2,'0'); }).join('');
     }
 
-    // build token pickers from live values
     var wrap = $('#wl-tokens');
     TOKENS.forEach(function(t){
       var lab = document.createElement('label');
@@ -226,7 +246,6 @@
       wrap.appendChild(lab);
     });
 
-    // prefill from published config
     var b = TTMBrand.get('brand'), th = TTMBrand.get('theme'), g = TTMBrand.get('gate');
     $('#wl-title').value = b.page_title || ''; $('#wl-tagline').value = b.tagline || '';
     $('#wl-footer').value = b.footer_name || ''; $('#wl-footer-hide').checked = !!b.footer_hidden;
@@ -242,12 +261,10 @@
     function editedTokens(){
       var out = {};
       wrap.querySelectorAll('[data-token]').forEach(function(inp){
-        if (inp.value.toLowerCase() !== toHex(cssVar(inp.dataset.token)).toLowerCase() ||
-            inp.dataset.dirty) out[inp.dataset.token] = inp.value;
+        if (inp.dataset.dirty) out[inp.dataset.token] = inp.value;
       });
       return out;
     }
-    // live preview
     wrap.addEventListener('input', function(e){
       if (!e.target.dataset.token) return;
       e.target.dataset.dirty = '1';
@@ -272,14 +289,15 @@
     }
     $('#wl-publish').addEventListener('click', function(){
       if (!sb) return;
-      var rows = [
-        { key: 'brand', value: { page_title: $('#wl-title').value, tagline: $('#wl-tagline').value,
-            footer_name: $('#wl-footer').value, footer_hidden: $('#wl-footer-hide').checked } },
-        { key: 'theme', value: { 'default': $('#wl-default').value, tokens: editedTokens() } },
-        { key: 'gate',  value: { enabled: $('#wl-gate-on').checked, title: $('#wl-gate-title').value,
-            body: $('#wl-gate-body').value, fine: $('#wl-gate-fine').value } }
-      ];
-      sb.from('ohm_site_config').upsert(rows).then(function(r){
+      if (!token) { toast('Unlock with the operator token first.', { type: 'warning' }); return; }
+      var config = {
+        brand: { page_title: $('#wl-title').value, tagline: $('#wl-tagline').value,
+                 footer_name: $('#wl-footer').value, footer_hidden: $('#wl-footer-hide').checked },
+        theme: { 'default': $('#wl-default').value, tokens: editedTokens() },
+        gate:  { enabled: $('#wl-gate-on').checked, title: $('#wl-gate-title').value,
+                 body: $('#wl-gate-body').value, fine: $('#wl-gate-fine').value }
+      };
+      sb.rpc('ohm_publish_config', { p_token: token, p_config: config }).then(function(r){
         if (r.error) { toast('Publish failed: ' + r.error.message, { type: 'error' }); return; }
         TTMBrand.refresh().then(function(){ toast('Published site-wide.', { type: 'success' }); });
         window.TTMStack.track('whitelabel_publish', {});
@@ -296,6 +314,7 @@
       toast('Device overrides cleared.', { type: 'success', timeout: 2000 });
     });
   }
+  };
 })();
 </script>
 </body>
