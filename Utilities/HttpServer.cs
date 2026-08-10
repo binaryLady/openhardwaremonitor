@@ -114,33 +114,60 @@ namespace OpenHardwareMonitor.Utilities {
       HttpListenerRequest request = context.Request;
 
       var requestedFile = request.RawUrl.Substring(1);
+
+      // the dashboard routes carry query strings (?demo=1, ?nogate=1)
+      int query = requestedFile.IndexOf('?');
+      if (query >= 0)
+        requestedFile = requestedFile.Substring(0, query);
+
       if (requestedFile == "data.json") {
         SendJSON(context.Response);
         return;
       }
 
       if (requestedFile.Contains("images_icon")) {
-        ServeResourceImage(context.Response, 
+        ServeResourceImage(context.Response,
           requestedFile.Replace("images_icon/", ""));
         return;
       }
 
-      // default file to be served
+      // directory routes (/plot/, /gadget/, /report/, /components/)
       if (string.IsNullOrEmpty(requestedFile))
         requestedFile = "index.html";
+      else if (requestedFile.EndsWith("/"))
+        requestedFile += "index.html";
+      else {
+        string lastSegment =
+          requestedFile.Substring(requestedFile.LastIndexOf('/') + 1);
+        if (!lastSegment.Contains(".")) {
+          // extensionless directory request: redirect to the trailing-slash
+          // form so the page's relative URLs resolve against the directory
+          context.Response.StatusCode = 301;
+          context.Response.AddHeader("Location",
+            "/" + requestedFile + "/" + request.Url.Query);
+          context.Response.Close();
+          return;
+        }
+      }
 
       string[] splits = requestedFile.Split('.');
       string ext = splits[splits.Length - 1];
-      ServeResourceFile(context.Response, 
+      ServeResourceFile(context.Response,
         "Web." + requestedFile.Replace('/', '.'), ext);
     }
 
-    private void ServeResourceFile(HttpListenerResponse response, string name, 
-      string ext) 
+    private void ServeResourceFile(HttpListenerResponse response, string name,
+      string ext)
     {
-      // resource names do not support the hyphen
-      name = "OpenHardwareMonitor.Resources." + 
-        name.Replace("custom-theme", "custom_theme");
+      ServeResourceFile(response, name, ext, 200);
+    }
+
+    private void ServeResourceFile(HttpListenerResponse response, string name,
+      string ext, int statusCode)
+    {
+      // web assets are embedded with explicit LogicalNames that mirror their
+      // URL paths verbatim (hyphens included), so no name mangling is needed
+      name = "OpenHardwareMonitor.Resources." + name;
 
       string[] names =
         Assembly.GetExecutingAssembly().GetManifestResourceNames();
@@ -148,6 +175,7 @@ namespace OpenHardwareMonitor.Utilities {
         if (names[i].Replace('\\', '.') == name) {
           using (Stream stream = Assembly.GetExecutingAssembly().
             GetManifestResourceStream(names[i])) {
+            response.StatusCode = statusCode;
             response.ContentType = GetcontentType("." + ext);
             response.ContentLength64 = stream.Length;
             byte[] buffer = new byte[512 * 1024];
@@ -164,8 +192,16 @@ namespace OpenHardwareMonitor.Utilities {
             } catch (InvalidOperationException) { 
             }
             return;
-          }          
+          }
         }
+      }
+
+      // unknown route: serve the app's styled 404 page (guard against the
+      // 404 page itself being the miss)
+      string notFound = "OpenHardwareMonitor.Resources.Web.404.html";
+      if (name != notFound) {
+        ServeResourceFile(response, "Web.404.html", "html", 404);
+        return;
       }
 
       response.StatusCode = 404;
@@ -184,6 +220,9 @@ namespace OpenHardwareMonitor.Utilities {
 
             Image image = Image.FromStream(stream);
             response.ContentType = "image/png";
+            // icons are referenced by ImageURL in data.json; cross-origin
+            // dashboards need them readable too
+            response.AddHeader("Access-Control-Allow-Origin", "*");
             try {
               Stream output = response.OutputStream;
               using (MemoryStream ms = new MemoryStream()) {
@@ -220,6 +259,10 @@ namespace OpenHardwareMonitor.Utilities {
       byte[] buffer = Encoding.UTF8.GetBytes(responseContent);
 
       response.AddHeader("Cache-Control", "no-cache");
+      // the sensor tree is read-only, unauthenticated GET data; the header
+      // lets a dashboard served from another origin (e.g. the hosted TTM
+      // deployment pointed at http://localhost) poll it
+      response.AddHeader("Access-Control-Allow-Origin", "*");
 
       response.ContentLength64 = buffer.Length;
       response.ContentType = "application/json";
@@ -298,12 +341,15 @@ namespace OpenHardwareMonitor.Utilities {
         case ".gif": return "image/gif";
         case ".htm":
         case ".html": return "text/html";
+        case ".ico": return "image/x-icon";
         case ".jpg":
         case ".jpeg": return "image/jpeg";
-        case ".js": return "application/x-javascript";
+        case ".js": return "text/javascript";
+        case ".json": return "application/json";
         case ".mp3": return "audio/mpeg";
         case ".png": return "image/png";
         case ".pdf": return "application/pdf";
+        case ".svg": return "image/svg+xml";
         case ".ppt": return "application/vnd.ms-powerpoint";
         case ".zip": return "application/zip";
         case ".txt": return "text/plain";

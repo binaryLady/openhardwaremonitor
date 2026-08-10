@@ -1,8 +1,14 @@
 # TTM web dashboard
 
 A static browser dashboard for the machine running Open Hardware Monitor's
-embedded web server. No build step, no framework, no tracking — the C#
-application is untouched.
+embedded web server. No build step, no framework, no tracking.
+
+The desktop application **serves this dashboard itself**: `web/` is
+embedded into the executable (OpenHardwareMonitor.csproj → `HttpServer.cs`)
+and replaces the legacy jQuery UI, so `http://localhost:<port>/` opens the
+TTM app same-origin — live data by default, no CORS or mixed-content walls.
+The same files deploy statically to the hosted demo below; `test/` and
+`admin/` are site-ops surfaces and are not embedded.
 
 Live demo: **https://ohm.thetechmargin.com** (`?demo=1` for the animated
 demo feed, `/components/` for the design-stack gallery, `/test/` for the
@@ -36,7 +42,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
   sensors from a seeded generator; the same seed gives every student the
   same bytes for reproducible exercises.
 - **Design-system reference** — `/components/` shows the whole TTM stack
-  end to end; `/test/` proves it (117 checks, incl. WCAG contrast across
+  end to end; `/test/` proves it (120 checks, incl. WCAG contrast across
   all twenty theme variants); the token layer whitelabels from Mission
   Control's editor — live preview, save on device, or publish site-wide
   via `ohm_site_config`.
@@ -59,7 +65,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `ttm/` | the TTM stack: tokens, components, site chrome + theme switcher (`theme.js`), whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
 | `admin/` | Mission Control: tiered operator page (visitor/operator) |
 | `components/` | end-to-end gallery of the component stack (unlisted) |
-| `test/` | the bench: 117 assertions, runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
+| `test/` | the bench: 120 assertions at runtime (81 registered cases; the contrast suite expands across all 20 theme×mode variants), runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
 | `404.html` / `500.html` | error surfaces, same stack and chrome |
 
 ## Data contract
@@ -76,9 +82,14 @@ chip under the mainboard) becomes its own block.
 Thresholds (conservative defaults, in `parse.js`): temperature ≥ 70 °C
 warn / ≥ 85 °C hot; load ≥ 80 % warn / ≥ 95 % hot.
 
-CORS note: the embedded server sends no `Access-Control-Allow-Origin`
-header, so a deployed dashboard cannot poll a machine cross-origin. Serve
-the page from the same origin, use a local proxy, or use demo data.
+CORS note: the embedded server sends `Access-Control-Allow-Origin: *` on
+`/data.json` and the icon endpoint (the data is read-only, unauthenticated
+GET), so the hosted dashboard can poll `http://localhost:<port>` — browsers
+exempt loopback from mixed-content blocking. Polling a *different* machine
+over plain http from an https page is still blocked by the browser (mixed
+content), independent of CORS: for that, open the machine's own served
+dashboard, use a local proxy, or use demo data. Served same-origin by the
+app, none of this applies — the page connects to `/data.json` automatically.
 
 ## GUI parity
 
@@ -247,8 +258,9 @@ at the top of `bridge.js`):
 
 ## Tests
 
-Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 117
-assertions: the TTM stack (tokens incl. the full theme-able vocabulary,
+Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 120
+assertions at runtime (81 registered cases; the contrast suite expands per
+theme×mode): the TTM stack (tokens incl. the full theme-able vocabulary,
 the whitelabel loader and runtime, legacy theme selectors, toasts, gate,
 telemetry), WCAG 2.1 contrast computed from live tokens across all
 twenty theme×mode combinations, the chrome contract (pure-chrome

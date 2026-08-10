@@ -54,6 +54,20 @@
     var src = { mode: 'none', url: null };
     var fails = 0;
     var paused = false; // an explicit pause outlives tab switches
+    var probed = false; // same-origin probe fires at most once per page
+
+    // When the desktop app itself serves this page, its own /data.json is
+    // one fetch away on the same origin — connect to it instead of showing
+    // the connect posture. Anywhere else (the hosted deployment, file://)
+    // the probe misses once, silently, and the posture stands.
+    function probeSameOrigin() {
+      if (probed || location.protocol === 'file:') return;
+      probed = true;
+      fetch('/data.json', { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) return;
+        return r.json().then(function () { useLive(location.origin); });
+      }).catch(function () {});
+    }
     function note(txt, tone) { if (o.onStatus) o.onStatus(txt, tone); }
     function stop() { if (timer) { clearInterval(timer); timer = null; } }
 
@@ -75,7 +89,7 @@
       paused = false;
       src = resolve();
       fails = 0;
-      if (src.mode === 'none') { note('no machine', ''); return; }
+      if (src.mode === 'none') { note('no machine', ''); probeSameOrigin(); return; }
       tick();
       timer = setInterval(tick, POLL_MS);
     }
