@@ -449,6 +449,19 @@ window.addEventListener('load', function () {
            G.colsClass({ value: false, min: false, max: false }) === 'gui-cols-3'
       ? true : 'bad mapping';
   });
+  t('gui: family is shared components — inline gadget modifier, series ink', function () {
+    var g = document.createElement('aside');
+    g.className = 'ttm-gadget ttm-gadget--inline';
+    var chip = document.createElement('span');
+    chip.className = 'ttm-plotchip plot-s0';
+    var ref = document.createElement('span');
+    ref.style.color = 'var(--ttm-pink)';
+    document.body.appendChild(g); document.body.appendChild(chip); document.body.appendChild(ref);
+    var pos = getComputedStyle(g).position;
+    var ink = getComputedStyle(chip).color === getComputedStyle(ref).color;
+    g.remove(); chip.remove(); ref.remove();
+    return pos === 'static' && ink ? true : 'pos=' + pos + ' seriesInk=' + ink;
+  });
 
   t('parse: app fidelity — min/max carried, ungrouped leaf sensors kept', function () {
     var carried = demoBlocks.every(function (b) {

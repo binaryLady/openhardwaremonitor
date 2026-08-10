@@ -798,6 +798,8 @@ textarea.ttm-input { height: auto; min-height: 6rem; padding: .55rem .7rem; resi
   border-radius: var(--radius-sm);
 }
 .ttm-gadget__close:hover { color: var(--ttm-text); background: var(--ttm-wash-hover); }
+/* inline variant — the same component in flow (gallery docs, embeds) */
+.ttm-gadget--inline { position: static; width: auto; max-width: 16rem; }
 
 /* fresh reading: one soft flash, token-timed; reduced motion collapses it */
 @keyframes ttm-val-fresh { from { background: var(--ttm-wash-hover); } to { background: transparent; } }
