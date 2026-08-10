@@ -51,6 +51,8 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `index.html` | the page: source bar, sensor grid, map-bridge receipt |
 | `parse.js` | **pure sensor core** (`window.OHMParse`): display-string parsing, tree flattening, thresholds, meter scaling |
 | `gui-core.js` | **pure GUI core** (`window.OHMGui`): the desktop application's features — Fahrenheit display, Save Report, hide/rename/plot prefs, column layout |
+| `feed.js` | **shared app feed** (`window.OHMFeed`): the saved machine loads live, demo only when explicitly chosen, otherwise the route asks to connect; wires the srcbar every route carries |
+| `plot/` · `gadget/` · `report/` | the desktop windows as routes: PlotPanel, SensorGadget, ReportForm — same feed, shared preferences |
 | `bridge.js` | **map bridge** (`window.OHMBridge`): SpaceAPI v14 fragment for Maps of Making |
 | `dashboard.js` | rendering + data flow: polling, status, toasts, shortcuts |
 | `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape |
@@ -82,7 +84,10 @@ the page from the same origin, use a local proxy, or use demo data.
 ## GUI parity
 
 The desktop application's GUI runs through this skin (View card on the
-dashboard; pure logic in `gui-core.js`, bench-proven):
+dashboard; pure logic in `gui-core.js`, bench-proven). The app's separate
+windows are also **served as routes** — `/plot/`, `/gadget/`, `/report/` —
+riding the same feed (`feed.js` resolves the dashboard's source) and the
+same on-device preferences:
 
 - **Plot** (`PlotPanel.cs`) — plot any sensors from Manage mode; series
   draw in the brand hues from the poll history, normalized to their own
@@ -137,7 +142,7 @@ in a field.
 | <kbd>m</kbd> | flip light/dark mode (site-wide) |
 | <kbd>Esc</kbd> | pause polling |
 | <kbd>?</kbd> | open / close the site menu (focus moves in) |
-| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>r</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / RFQ / test bench / mission control / Maps of Making |
+| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>r</kbd>/<kbd>p</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / RFQ / plot / test bench / mission control / Maps of Making |
 | <kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>j</kbd>/<kbd>k</kbd> | move between device cards in the sensor tree |
 | <kbd>Home</kbd>/<kbd>End</kbd> | first / last device card |
 | <kbd>←</kbd>/<kbd>→</kbd> | collapse / expand the focused card |

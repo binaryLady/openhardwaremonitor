@@ -597,7 +597,7 @@ window.addEventListener('load', function () {
   });
   t('nav: TTMNav API surface complete', function () {
     var N = window.TTMNav;
-    return N && ['d', 'r', 't', 'a', 'm'].every(function (k) { return k in N.routes; }) &&
+    return N && ['d', 'r', 't', 'a', 'm', 'p'].every(function (k) { return k in N.routes; }) &&
            typeof N.chordPending === 'function' && typeof N.openMenu === 'function' &&
            typeof N.closeMenu === 'function' && typeof N.menuOpen === 'function'
       ? true : 'missing keys';
@@ -707,7 +707,8 @@ window.addEventListener('load', function () {
   var GUARD_NAME = 'standardized: no page-local <style> or static inline styles anywhere';
   var standardizationSweep = Promise.all(
     ['/index.html', '/rfq/index.html', '/admin/index.html',
-     '/components/index.html', '/404.html', '/500.html']
+     '/components/index.html', '/plot/index.html', '/gadget/index.html',
+     '/report/index.html', '/404.html', '/500.html']
     .map(function (u) { return fetch(u).then(function (r) { return r.text(); })
       .then(function (html) {
         var styleBlocks = (html.match(/<style>/g) || []).length;
