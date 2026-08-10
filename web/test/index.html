@@ -561,6 +561,27 @@ window.addEventListener('load', function () {
     return opened && closed ? true : 'opened=' + opened + ' closed=' + closed;
   });
 
+  t('tokenized: legacy unprefixed components are gone (.kv/.bar/.note/table)', function () {
+    var host = document.createElement('div');
+    host.innerHTML = '<div class="kv"></div><div class="bar"></div><p class="note">x</p><table><tr><td>x</td></tr></table>';
+    document.body.appendChild(host);
+    var kv = getComputedStyle(host.querySelector('.kv')).display;
+    var bar = getComputedStyle(host.querySelector('.bar')).display;
+    var td = getComputedStyle(host.querySelector('td')).borderBottomWidth;
+    host.remove();
+    return kv === 'block' && bar === 'block' && td === '0px'
+      ? true : 'kv=' + kv + ' bar=' + bar + ' td-border=' + td;
+  });
+  t('tokenized: control type rides the scale (buttons = --ttm-fs-small)', function () {
+    var b = document.createElement('button');
+    b.className = 'ttm-btn-primary';
+    document.body.appendChild(b);
+    var fs = getComputedStyle(b).fontSize;
+    b.remove();
+    var expect = getComputedStyle(document.documentElement).getPropertyValue('--ttm-fs-small').trim();
+    var px = parseFloat(expect) * 16 + 'px';
+    return fs === px ? true : 'button=' + fs + ' token=' + expect;
+  });
   // ── overhaul components: stat tiles, sparklines, meter ramps ─────────────
   t('tiles: .ttm-tile carries surface, border and big value type', function () {
     var tile = document.createElement('div'); tile.className = 'ttm-tile';

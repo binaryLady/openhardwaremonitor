@@ -17,34 +17,6 @@
     padding: 1.1rem 1.25rem;
   }
 
-  .ttm-card h2 {
-    font-family: var(--ttm-font-mono);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    font-size: var(--ttm-fs-caption);
-    color: var(--ttm-text-muted);
-    margin: 0 0 .8rem;
-  }
-
-  .kv { display: flex; justify-content: space-between; gap: .6rem; padding: .3rem 0;
-    border-bottom: 1px solid var(--ttm-border-subtle); font-size: var(--ttm-fs-small); }
-
-  .kv:last-child { border-bottom: none; }
-
-  .kv .k { color: var(--ttm-text-muted); }
-
-  .kv .v { font-family: var(--ttm-font-mono); }
-
-  .bar { display: flex; align-items: center; gap: .55rem; margin: .3rem 0; font-size: var(--ttm-fs-caption); }
-
-  .bar .lab { font-family: var(--ttm-font-mono); width: 5.6rem; color: var(--ttm-text-secondary); }
-
-  .bar .track { flex: 1; height: 10px; background: var(--ttm-surface-alt); border-radius: 5px; overflow: hidden; }
-
-  .bar .fill { height: 100%; border-radius: 5px; }
-
-  .bar .n { font-family: var(--ttm-font-mono); width: 3.2rem; text-align: right; color: var(--ttm-text-muted); }
-
   .ttm-badge {
     display: inline-block;
     font: 600 0.68rem/1 var(--ttm-font-mono);
@@ -62,7 +34,7 @@
   .ttm-badge--danger  { color: var(--ttm-danger);  border-color: var(--ttm-danger); }
 
   .ttm-btn-primary, .ttm-btn-outline {
-    font: 600 13px/1 var(--ttm-font-sans);
+    font: 600 var(--ttm-fs-small)/1 var(--ttm-font-sans);
     border-radius: var(--radius-md);
     padding: .6rem 1rem;
     min-height: 44px;
@@ -89,7 +61,7 @@
     color: var(--ttm-text);
     border: 1px solid var(--ttm-border);
     border-radius: var(--radius-sm);
-    font: 500 13px var(--ttm-font-sans);
+    font: 500 var(--ttm-fs-small) var(--ttm-font-sans);
     padding: 0 2rem 0 .7rem;
     height: 40px;
     cursor: pointer;
@@ -191,39 +163,6 @@
     .ttm-switch .track, .ttm-switch .track::after { transition: none; }
   }
 
-  .meter { position: relative; width: 130px; height: 130px; margin: .4rem auto; }
-
-  .meter svg { transform: rotate(-90deg); }
-
-  .meter .arc-track { stroke: var(--ttm-surface-alt); }
-
-  .meter .val { position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; font-family: var(--ttm-font-mono); }
-
-  .meter .val b { font-size: 1.7rem; }
-
-  .meter .val span { font-size: 0.62rem; color: var(--ttm-text-muted); text-transform: uppercase; letter-spacing: .08em; }
-
-  table { border-collapse: collapse; width: 100%; font-size: var(--ttm-fs-caption); font-family: var(--ttm-font-mono); }
-
-  th, td { border-bottom: 1px solid var(--ttm-border-subtle); padding: .35rem .4rem; text-align: left; }
-
-  th { color: var(--ttm-text-muted); text-transform: uppercase; font-size: 0.62rem; letter-spacing: .08em; }
-
-  .note { font-size: var(--ttm-fs-caption); color: var(--ttm-text-muted); }
-
-  footer.ttm-footer {
-    margin-top: 2.5rem; padding-top: 1.4rem;
-    border-top: 1px solid var(--ttm-border);
-    text-align: center;
-    font: 400 var(--ttm-fs-small) var(--ttm-font-mono);
-    color: var(--ttm-text-muted);
-  }
-
-  footer .heart { color: var(--ttm-hot-red); }
-
-  footer .bn { font-family: var(--ttm-font-serif); font-size: 1rem; }
-@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
 
 /* ── ttm-burger + ttm-menu (theme.js) — all routes + theme, collapsed ── */
 .ttm-burger {
@@ -674,7 +613,7 @@ body.ttm-page {
   color: var(--ttm-text);
   border: 1px solid var(--ttm-border);
   border-radius: var(--radius-sm);
-  font: 400 13px var(--ttm-font-mono);
+  font: 400 var(--ttm-fs-small) var(--ttm-font-mono);
   padding: 0 .7rem;
   height: 40px;
 }
@@ -854,24 +793,6 @@ details.ttm-hw > summary .dot.warn { background: var(--ttm-warning); }
 details.ttm-hw > summary .dot.hot { background: var(--ttm-danger); }
 details.ttm-hw > summary .n { margin-left: auto; font: 400 var(--ttm-fs-caption) var(--ttm-font-mono); color: var(--ttm-text-muted); }
 details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); outline-offset: 2px; }
-
-/* ── ttm-menu__bernard — the keeper greets at the door (amber band) ── */
-.ttm-menu__bernard {
-  display: block;
-  margin: 0 0 var(--ttm-spacing-md);
-  padding: .8rem .85rem;
-  border: 1.5px solid var(--ttm-border);
-  border-radius: var(--radius-sm);
-  background: var(--ttm-bg-alt);
-  text-decoration: none;
-}
-.ttm-menu__bernard .voice {
-  font-family: var(--ttm-font-voice);
-  font-size: .95rem;
-  line-height: 1.5;
-  color: var(--ttm-goldenrod); /* lamplit amber — Bernard's band */
-}
-.ttm-menu__bernard:hover { background: var(--ttm-surface-alt); }
 
 /* ── ttm-modetoggle — light/dark flip in the page header (brand pattern) ── */
 .ttm-modetoggle {

@@ -71,13 +71,13 @@
     </section>
 
     <section class="ttm-card" aria-labelledby="c-data">
-      <h2 class="ttm-card__title" id="c-data">Data — kv · bar · table</h2>
-      <div class="kv"><span class="k">machine</span><span class="v">FORGE-01</span></div>
-      <div class="kv"><span class="k">state</span><span class="v">active</span></div>
-      <div class="bar"><span class="lab">cpu</span><span class="track"><span class="fill" style="width:64%;background:var(--ttm-cyan)"></span></span><span class="n">64%</span></div>
-      <div class="bar"><span class="lab">gpu</span><span class="track"><span class="fill" style="width:81%;background:var(--ttm-warning)"></span></span><span class="n">81%</span></div>
-      <table><thead><tr><th>sensor</th><th>value</th></tr></thead>
-        <tbody><tr><td>Core (Tctl/Tdie)</td><td>63.4 °C</td></tr><tr><td>GPU Core</td><td>71.2 °C</td></tr></tbody></table>
+      <h2 class="ttm-card__title" id="c-data">Data — kv · meter · table</h2>
+      <div class="ttm-kv"><span class="k">machine</span><span class="v">FORGE-01</span></div>
+      <div class="ttm-kv"><span class="k">state</span><span class="v">active</span></div>
+      <div class="ttm-sensor"><span class="nm">cpu</span><span class="meterbar" aria-hidden="true"><i style="width:64%"></i></span><span class="val">64%</span></div>
+      <div class="ttm-sensor ttm-sensor--warn"><span class="nm">gpu</span><span class="meterbar" aria-hidden="true"><i style="width:81%"></i></span><span class="val">81%</span></div>
+      <div class="ttm-tablewrap"><table class="ttm-table"><thead><tr><th>sensor</th><th>value</th></tr></thead>
+        <tbody><tr><td>Core (Tctl/Tdie)</td><td>63.4 °C</td></tr><tr><td>GPU Core</td><td>71.2 °C</td></tr></tbody></table></div>
     </section>
 
     <section class="ttm-card" aria-labelledby="c-sensors">
