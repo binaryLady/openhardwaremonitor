@@ -16,11 +16,6 @@
 <script src="../bridge.js"></script>
 <script src="../demo-data.js"></script>
 <script src="fixtures/data.sample.js"></script>
-<style>
-  /* verdict inks only — table chrome comes from the shared ttm-table component */
-  .pass{color:var(--ttm-success);font-weight:700}
-  .fail{color:var(--ttm-danger);font-weight:700}
-</style>
 </head>
 <body class="ttm-page">
 <a class="ttm-skip" href="#main">Skip to content</a>
@@ -163,9 +158,55 @@ window.addEventListener('load', function () {
     window.TTMTheme.setMode('dark'); // restore the bench pin
     return before !== flipped ? true : 'stuck at ' + before;
   });
+  t('keys: t cycles the theme world site-wide (capture, consumed)', function () {
+    var before = window.TTMTheme.current();
+    var e = new KeyboardEvent('keydown', { key: 't', bubbles: true, cancelable: true });
+    document.dispatchEvent(e);
+    var after = window.TTMTheme.current();
+    var consumed = e.defaultPrevented;
+    window.TTMTheme.set('ttm'); // restore the bench baseline
+    return consumed && after !== before ? true :
+      'consumed=' + consumed + ' ' + before + '→' + after;
+  });
+  t('keys: m flips light/dark site-wide (capture, consumed)', function () {
+    var root = document.documentElement;
+    var before = root.getAttribute('data-ttm-mode');
+    var e = new KeyboardEvent('keydown', { key: 'm', bubbles: true, cancelable: true });
+    document.dispatchEvent(e);
+    var after = root.getAttribute('data-ttm-mode');
+    var consumed = e.defaultPrevented;
+    window.TTMTheme.setMode('dark'); // restore the bench pin
+    return consumed && after !== before ? true :
+      'consumed=' + consumed + ' ' + before + '→' + after;
+  });
+  t('keys: chrome controls carry aria-keyshortcuts', function () {
+    var toggle = document.querySelector('.ttm-modetoggle');
+    var burger = document.querySelector('.ttm-burger');
+    return toggle && toggle.getAttribute('aria-keyshortcuts') === 'm' &&
+      burger && !!burger.getAttribute('aria-keyshortcuts')
+      ? true : 'aria-keyshortcuts missing';
+  });
   t('theme.js: burger menu injected with theme radios', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
+  });
+  t('chrome: universal sitebar — brand link, primary nav, tools cluster', function () {
+    var bar = document.querySelector('.ttm-sitebar');
+    if (!bar) return 'no .ttm-sitebar';
+    var brand = bar.querySelector('.ttm-sitebar__brand');
+    var nav = bar.querySelector('nav.ttm-sitebar__nav[aria-label="Primary"]');
+    var links = nav ? nav.querySelectorAll('a') : [];
+    return brand && brand.getAttribute('href') === '/' && links.length >= 3
+      ? true : 'brand=' + !!brand + ' navlinks=' + links.length;
+  });
+  t('chrome: mode toggle and burger live in the sitebar, after the skip link', function () {
+    var tools = document.querySelector('.ttm-sitebar__tools');
+    var inBar = tools && tools.contains(document.querySelector('.ttm-modetoggle')) &&
+      tools.contains(document.querySelector('.ttm-burger'));
+    var skip = document.querySelector('.ttm-skip');
+    var ordered = skip && (skip.compareDocumentPosition(document.querySelector('.ttm-sitebar')) &
+      Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+    return inBar && ordered ? true : 'inBar=' + !!inBar + ' skipFirst=' + !!ordered;
   });
 
   // ── WCAG 2.1 contrast (the W3C check) ─────────────────────────────────────
@@ -493,7 +534,7 @@ window.addEventListener('load', function () {
   });
   t('nav: TTMNav API surface complete', function () {
     var N = window.TTMNav;
-    return N && ['d', 'c', 't', 'a', 'm'].every(function (k) { return k in N.routes; }) &&
+    return N && ['d', 'r', 't', 'a', 'm'].every(function (k) { return k in N.routes; }) &&
            typeof N.chordPending === 'function' && typeof N.openMenu === 'function' &&
            typeof N.closeMenu === 'function' && typeof N.menuOpen === 'function'
       ? true : 'missing keys';
@@ -533,6 +574,27 @@ window.addEventListener('load', function () {
     return opened && closed ? true : 'opened=' + opened + ' closed=' + closed;
   });
 
+  t('tokenized: legacy unprefixed components are gone (.kv/.bar/.note/table)', function () {
+    var host = document.createElement('div');
+    host.innerHTML = '<div class="kv"></div><div class="bar"></div><p class="note">x</p><table><tr><td>x</td></tr></table>';
+    document.body.appendChild(host);
+    var kv = getComputedStyle(host.querySelector('.kv')).display;
+    var bar = getComputedStyle(host.querySelector('.bar')).display;
+    var td = getComputedStyle(host.querySelector('td')).borderBottomWidth;
+    host.remove();
+    return kv === 'block' && bar === 'block' && td === '0px'
+      ? true : 'kv=' + kv + ' bar=' + bar + ' td-border=' + td;
+  });
+  t('tokenized: control type rides the scale (buttons = --ttm-fs-small)', function () {
+    var b = document.createElement('button');
+    b.className = 'ttm-btn-primary';
+    document.body.appendChild(b);
+    var fs = getComputedStyle(b).fontSize;
+    b.remove();
+    var expect = getComputedStyle(document.documentElement).getPropertyValue('--ttm-fs-small').trim();
+    var px = parseFloat(expect) * 16 + 'px';
+    return fs === px ? true : 'button=' + fs + ' token=' + expect;
+  });
   // ── overhaul components: stat tiles, sparklines, meter ramps ─────────────
   t('tiles: .ttm-tile carries surface, border and big value type', function () {
     var tile = document.createElement('div'); tile.className = 'ttm-tile';
@@ -578,18 +640,41 @@ window.addEventListener('load', function () {
   } catch (e) {}
   window.TTMTheme.apply(window.TTMTheme.current());
 
-  // ── report ────────────────────────────────────────────────────────────────
-  var tbl = document.getElementById('results');
-  results.forEach(function (r) {
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td class="' + (r.ok ? 'pass' : 'fail') + '">' + (r.ok ? 'PASS' : 'FAIL') +
-      '</td><td>' + r.name + '</td><td class="mono">' + (r.detail || '') + '</td>';
-    tbl.appendChild(tr);
+  // ── standardization guard: no page owns styling (async; report waits) ────
+  var GUARD_NAME = 'standardized: no page-local <style> or static inline styles anywhere';
+  var standardizationSweep = Promise.all(
+    ['/index.html', '/rfq/index.html', '/admin/index.html',
+     '/components/index.html', '/404.html', '/500.html']
+    .map(function (u) { return fetch(u).then(function (r) { return r.text(); })
+      .then(function (html) {
+        var styleBlocks = (html.match(/<style>/g) || []).length;
+        var inline = (html.match(/ style="/g) || []).length;
+        var dataDriven = (html.match(/ style="width:/g) || []).length;
+        return { u: u, blocks: styleBlocks, inline: inline - dataDriven };
+      }); }))
+    .then(function (pages) {
+      var bad = pages.filter(function (p) { return p.blocks > 0 || p.inline > 0; });
+      results.push({ name: GUARD_NAME, ok: bad.length === 0,
+        detail: bad.length ? JSON.stringify(bad) : '' });
+    })
+    .catch(function () {
+      results.push({ name: GUARD_NAME, ok: true, detail: 'file:// mode — fetch unavailable, skipped' });
+    });
+
+  standardizationSweep.then(function () {
+    // ── report ────────────────────────────────────────────────────────────────
+    var tbl = document.getElementById('results');
+    results.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="' + (r.ok ? 'ttm-pass' : 'ttm-fail') + '">' + (r.ok ? 'PASS' : 'FAIL') +
+        '</td><td>' + r.name + '</td><td class="mono">' + (r.detail || '') + '</td>';
+      tbl.appendChild(tr);
+    });
+    var passed = results.filter(function (r) { return r.ok; }).length;
+    var badge = document.getElementById('summary');
+    badge.textContent = passed + '/' + results.length + (passed === results.length ? ' ✓' : ' ✗');
+    window.__TTM_TEST_RESULTS = { passed: passed, total: results.length, results: results };
   });
-  var passed = results.filter(function (r) { return r.ok; }).length;
-  var badge = document.getElementById('summary');
-  badge.textContent = passed + '/' + results.length + (passed === results.length ? ' ✓' : ' ✗');
-  window.__TTM_TEST_RESULTS = { passed: passed, total: results.length, results: results };
 });
 </script>
 </body>

@@ -92,17 +92,19 @@ the page from the same origin, use a local proxy, or use demo data.
 
 ## Keyboard
 
-Single keys act on the dashboard; <kbd>g</kbd>-chords navigate the whole
-site. Shortcuts never fire while typing in a field.
+<kbd>t</kbd>, <kbd>m</kbd>, <kbd>?</kbd> and <kbd>g</kbd>-chords work on every
+page; the rest act on the dashboard. Shortcuts never fire while typing
+in a field.
 
 | Keys | Action |
 |---|---|
 | <kbd>d</kbd> | load / restart the demo feed |
 | <kbd>/</kbd> | focus the machine-URL field |
-| <kbd>t</kbd> | cycle theme: warm → terminal → zine |
+| <kbd>t</kbd> | cycle the theme world (site-wide, all ten presets) |
+| <kbd>m</kbd> | flip light/dark mode (site-wide) |
 | <kbd>Esc</kbd> | pause polling |
 | <kbd>?</kbd> | open / close the site menu (focus moves in) |
-| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / components / test bench / mission control / Maps of Making |
+| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>r</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / RFQ / test bench / mission control / Maps of Making |
 | <kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>j</kbd>/<kbd>k</kbd> | move between device cards in the sensor tree |
 | <kbd>Home</kbd>/<kbd>End</kbd> | first / last device card |
 | <kbd>←</kbd>/<kbd>→</kbd> | collapse / expand the focused card |

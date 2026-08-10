@@ -1,6 +1,7 @@
 // TTM theme + navigation controller.
-// Injects one accessible hamburger (fixed, top-right, every page that loads
-// this script) collapsing: site routes in hierarchy order, then theme choice.
+// Injects the universal site header (brand · primary nav · mode toggle ·
+// hamburger) on every page that loads this script; the hamburger collapses
+// the full sitemap in hierarchy order, then theme choice.
 // A11y per the TTM spec + ARIA disclosure/menu practices: aria-expanded /
 // aria-controls, focus moves in on open, Tab is trapped, Escape and backdrop
 // close and return focus, aria-current marks the page you are on, 44px
@@ -25,9 +26,9 @@
   var ROUTES = [
     { href: '/',         name: 'Dashboard',       desc: 'live hardware sensors' },
     { href: '/?demo=1',  name: 'Demo feed',       desc: 'animated mock sensor data' },
+    { href: '/rfq/',     name: 'Generate RFQ',    desc: 'request a quote from this workshop' },
     { group: 'Operator tools' },
     { href: '/admin/',      name: 'Mission Control', desc: 'telemetry · visitors (admin)' },
-    { href: '/components/', name: 'Components',      desc: 'the design stack, end to end' },
     { href: '/test/',       name: 'Test bench',      desc: 'the stack proves itself in-browser' },
     { group: 'Network' },
     { href: 'https://maps.thetechmargin.com/', name: 'Maps of Making',
@@ -125,11 +126,47 @@
     });
   }
 
-  function buildMenu() {
-    // current-page key includes the demo flag, so Dashboard (/) and
-    // Demo feed (/?demo=1) mark aria-current distinctly
-    var here = location.pathname.replace(/index\.html$/, '') +
+  // current-page key includes the demo flag, so Dashboard (/) and
+  // Demo feed (/?demo=1) mark aria-current distinctly
+  function hereKey() {
+    return location.pathname.replace(/index\.html$/, '') +
       (new URLSearchParams(location.search).has('demo') ? '?demo=1' : '');
+  }
+
+  // Universal site header: brand wordmark, the primary routes inline
+  // (desktop; the burger carries the full sitemap everywhere), and the
+  // tools cluster the mode toggle + burger mount into. Sits after the
+  // skip link so that stays the first tab stop on every page.
+  function buildSitebar() {
+    if (document.querySelector('.ttm-sitebar')) return;
+    var here = hereKey();
+    var PRIMARY = [
+      { href: '/',       name: 'Dashboard' },
+      { href: '/rfq/',   name: 'RFQ' },
+      { href: '/admin/', name: 'Mission Control' },
+    ];
+    var bar = document.createElement('header');
+    bar.className = 'ttm-sitebar';
+    var html = '<div class="ttm-sitebar__inner">' +
+      '<a class="ttm-sitebar__brand" href="/">' +
+      '<span class="ttm-sitebar__logo gradient-text-rainbow">ttm</span>' +
+      '<span class="ttm-sitebar__name" data-brand-sitename>hardware monitor</span></a>' +
+      '<nav class="ttm-sitebar__nav" aria-label="Primary">';
+    PRIMARY.forEach(function (r) {
+      html += '<a href="' + r.href + '"' +
+        (here === r.href ? ' aria-current="page"' : '') + '>' + r.name + '</a>';
+    });
+    html += '</nav><span class="ttm-sitebar__tools"></span></div>';
+    bar.innerHTML = html;
+    var skip = document.querySelector('.ttm-skip');
+    document.body.insertBefore(bar, skip ? skip.nextSibling : document.body.firstChild);
+  }
+  function chromeTools() {
+    return document.querySelector('.ttm-sitebar__tools') || document.body;
+  }
+
+  function buildMenu() {
+    var here = hereKey();
     var burger = document.createElement('button');
     burger.className = 'ttm-burger';
     burger.type = 'button';
@@ -137,6 +174,7 @@
     burger.setAttribute('aria-expanded', 'false');
     burger.setAttribute('aria-controls', 'ttm-menu');
     burger.setAttribute('aria-haspopup', 'true');
+    burger.setAttribute('aria-keyshortcuts', 'Shift+Slash');
     burger.innerHTML = '<span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>';
 
     var backdrop = document.createElement('div');
@@ -197,9 +235,12 @@
     });
     html += '</fieldset>';
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
-      '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close<br>' +
-      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>c</kbd> components · ' +
+      '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close &nbsp; ' +
+      '<kbd>t</kbd> next theme &nbsp; <kbd>m</kbd> light/dark<br>' +
+      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>r</kbd> RFQ · ' +
       '<kbd>t</kbd> test bench · <kbd>a</kbd> mission control · <kbd>m</kbd> maps of making<br>' +
+      'dashboard: <kbd>d</kbd> demo · <kbd>/</kbd> connect · <kbd>Esc</kbd> pause · ' +
+      '<kbd>\u2191</kbd><kbd>\u2193</kbd> sensor cards<br>' +
       '<kbd>Tab</kbd> from the top reaches a skip-to-content link on every page</div>';
     panel.innerHTML = html;
     panel.querySelector('.ttm-menu__bernard .voice').textContent = greeting;
@@ -302,7 +343,7 @@
     });
 
     document.body.appendChild(backdrop);
-    document.body.appendChild(burger);
+    chromeTools().appendChild(burger);
     document.body.appendChild(panel);
 
     // ── Keyboard shortcuts: ? lands you in the menu; g-then-key navigates ──
@@ -310,7 +351,7 @@
     // a consumed chord key (g-then-t) arrives at page handlers with
     // defaultPrevented set, and they must skip it (dashboard.js does).
     var pendingG = 0;
-    var CHORD_ROUTES = { d: '/', c: '/components/', t: '/test/', a: '/admin/',
+    var CHORD_ROUTES = { d: '/', r: '/rfq/', t: '/test/', a: '/admin/',
       m: 'https://maps.thetechmargin.com/' };
     document.addEventListener('keydown', function (e) {
       var tag = (document.activeElement && document.activeElement.tagName) || '';
@@ -322,8 +363,27 @@
         location.href = CHORD_ROUTES[e.key];
         return;
       }
-      if (e.key === 'g') { pendingG = Date.now(); e.preventDefault(); }
-      else pendingG = 0;
+      if (e.key === 'g') { pendingG = Date.now(); e.preventDefault(); return; }
+      pendingG = 0;
+      // site-wide single keys: t cycles the theme world, m flips light/dark.
+      // Consumed here (capture + preventDefault) so page handlers skip them.
+      if (e.key === 't') {
+        e.preventDefault();
+        var next = THEMES[(THEMES.indexOf(currentTheme()) + 1) % THEMES.length];
+        set(next);
+        if (window.TTMToast) window.TTMToast.show(THEME_LABELS[next] + ' theme.', { timeout: 1500 });
+        if (window.TTMStack) window.TTMStack.track('theme_change', { theme: next });
+        return;
+      }
+      if (e.key === 'm') {
+        e.preventDefault();
+        var mode = resolveMode() === 'dark' ? 'light' : 'dark';
+        setMode(mode);
+        if (window.TTMToast) window.TTMToast.show(
+          (mode === 'dark' ? 'Dark' : 'Light') + ' mode.', { timeout: 1500 });
+        if (window.TTMStack) window.TTMStack.track('mode_change', { mode: mode });
+        return;
+      }
     }, true);
 
     // Small public surface so pages (and the test bench) can see the
@@ -335,19 +395,20 @@
     };
   }
 
-  // Universal chrome: the mode toggle is fixed beside the burger on every
-  // page — part of the site shell, not any page's header markup.
+  // Universal chrome: the mode toggle sits beside the burger in the
+  // sitebar's tools cluster — part of the site shell, not any page's markup.
   function buildModeToggle() {
     if (document.querySelector('.ttm-modetoggle')) return;
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'ttm-modetoggle';
+    b.setAttribute('aria-keyshortcuts', 'm');
     b.addEventListener('click', function () {
       var next = resolveMode() === 'dark' ? 'light' : 'dark';
       setMode(next);
       if (window.TTMStack) window.TTMStack.track('mode_change', { mode: next });
     });
-    document.body.appendChild(b);
+    chromeTools().appendChild(b);
     apply(currentTheme()); // paint the glyph
   }
 
@@ -364,12 +425,13 @@
     var hints = document.createElement('span');
     hints.className = 'ttm-kbd-hints';
     hints.innerHTML = '<kbd>?</kbd> menu · <kbd>g</kbd> chords navigate · ' +
-      '\u2600/\u263E mode · <kbd>Tab</kbd> skip link';
+      '<kbd>t</kbd> theme · <kbd>m</kbd> light/dark · <kbd>Tab</kbd> skip link';
     footer.appendChild(document.createElement('br'));
     footer.appendChild(hints);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    buildSitebar();
     buildModeToggle();
     buildFooter();
     buildMenu();
