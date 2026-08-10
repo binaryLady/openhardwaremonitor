@@ -36,7 +36,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
   sensors from a seeded generator; the same seed gives every student the
   same bytes for reproducible exercises.
 - **Design-system reference** — `/components/` shows the whole TTM stack
-  end to end; `/test/` proves it (109 checks, incl. WCAG contrast across
+  end to end; `/test/` proves it (117 checks, incl. WCAG contrast across
   all twenty theme variants); the token layer whitelabels from Mission
   Control's editor — live preview, save on device, or publish site-wide
   via `ohm_site_config`.
@@ -51,16 +51,15 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `index.html` | the page: source bar, sensor grid, map-bridge receipt |
 | `parse.js` | **pure sensor core** (`window.OHMParse`): display-string parsing, tree flattening, thresholds, meter scaling |
 | `gui-core.js` | **pure GUI core** (`window.OHMGui`): the desktop application's features — Fahrenheit display, Save Report, hide/rename/plot prefs, column layout |
-| `feed.js` | **shared app feed** (`window.OHMFeed`): the saved machine loads live, demo only when explicitly chosen, otherwise the route asks to connect; wires the srcbar every route carries |
+| `feed.js` | **the app's one feed** (`window.OHMFeed`): resolves the source, reads it, wires the srcbar and tab-visibility. Every page — dashboard included — enters here; demo is a *source*, not a branch |
 | `plot/` · `gadget/` · `report/` | the desktop windows as routes: PlotPanel, SensorGadget, ReportForm — same feed, shared preferences |
 | `bridge.js` | **map bridge** (`window.OHMBridge`): SpaceAPI v14 fragment for Maps of Making |
-| `dashboard.js` | rendering + data flow: polling, status, toasts, shortcuts |
-| `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape |
+| `dashboard.js` | rendering, GUI features, shortcuts — it owns no poll path of its own; data arrives from `feed.js` |
+| `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape, read through the same path a machine is |
 | `ttm/` | the TTM stack: tokens, components, site chrome + theme switcher (`theme.js`), whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
-| `rfq/` | Generate RFQ: job form → composed RFQ document → email/copy |
 | `admin/` | Mission Control: tiered operator page (visitor/operator) |
 | `components/` | end-to-end gallery of the component stack (unlisted) |
-| `test/` | the bench: 109 assertions, runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
+| `test/` | the bench: 117 assertions, runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
 | `404.html` / `500.html` | error surfaces, same stack and chrome |
 
 ## Data contract
@@ -86,8 +85,16 @@ the page from the same origin, use a local proxy, or use demo data.
 The desktop application's GUI runs through this skin (View card on the
 dashboard; pure logic in `gui-core.js`, bench-proven). The app's separate
 windows are also **served as routes** — `/plot/`, `/gadget/`, `/report/` —
-riding the same feed (`feed.js` resolves the dashboard's source) and the
-same on-device preferences:
+riding the same feed and the same on-device preferences.
+
+Every page shares one source pipeline (`feed.js`): resolve → read → render.
+A live machine and the demo feed are both *sources* read through that one
+path, so there is a single place data enters the app, a single status path,
+and a single failure path. Precedence is explicit demo (`?demo=1`, the Demo
+button, or the last mode chosen) → the saved machine → nothing, in which
+case the page shows its connect posture rather than substituting mock data.
+Connect from any page and every page follows; <kbd>Esc</kbd> pauses, and the
+pause outlives a tab switch.
 
 - **Plot** (`PlotPanel.cs`) — plot any sensors from Manage mode; series
   draw in the brand hues from the poll history, normalized to their own
@@ -103,6 +110,17 @@ same on-device preferences:
   transform on the server's own strings (<kbd>u</kbd>).
 - **Save Report** (`ReportForm.cs`) — a plain-text report of the whole
   tree, downloaded client-side.
+- **Submit Report** (`ReportForm.cs` → `sendButton_Click`, on `/report/`) —
+  the application's own submission to the project: the report plus an
+  optional comment and email, posted form-urlencoded to
+  `openhardwaremonitor.org/report.php` as `type=hardware` with the app's
+  version. The payload is byte-for-byte what the desktop app posts
+  (bench-pinned). Two honest limits: the endpoint is http-only, so an
+  https page says the browser blocks it and offers the submission to copy
+  rather than a button that cannot work; and the endpoint sends no CORS
+  headers, so a completed request is reported as *sent*, never as
+  confirmed-delivered. Reports carry a `Source:` line noting they were
+  built from `data.json` by the web dashboard.
 - **Reset Min/Max** — clears the local reading history; live min/max
   columns come from the server and reset with it.
 
@@ -142,7 +160,8 @@ in a field.
 | <kbd>m</kbd> | flip light/dark mode (site-wide) |
 | <kbd>Esc</kbd> | pause polling |
 | <kbd>?</kbd> | open / close the site menu (focus moves in) |
-| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>r</kbd>/<kbd>p</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / RFQ / plot / test bench / mission control / Maps of Making |
+| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>p</kbd>/<kbd>g</kbd>/<kbd>r</kbd> | go to dashboard / plot / gadget / report |
+| <kbd>g</kbd> then <kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to test bench / mission control / Maps of Making |
 | <kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>j</kbd>/<kbd>k</kbd> | move between device cards in the sensor tree |
 | <kbd>Home</kbd>/<kbd>End</kbd> | first / last device card |
 | <kbd>←</kbd>/<kbd>→</kbd> | collapse / expand the focused card |
@@ -228,7 +247,7 @@ at the top of `bridge.js`):
 
 ## Tests
 
-Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 109
+Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 117
 assertions: the TTM stack (tokens incl. the full theme-able vocabulary,
 the whitelabel loader and runtime, legacy theme selectors, toasts, gate,
 telemetry), WCAG 2.1 contrast computed from live tokens across all

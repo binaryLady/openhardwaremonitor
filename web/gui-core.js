@@ -27,6 +27,9 @@
     lines.push('Open Hardware Monitor Report');
     lines.push('');
     lines.push('Time: ' + when);
+    // provenance: whoever receives this should know it was built from the
+    // embedded server's data.json, not by the desktop app's own reporter
+    lines.push('Source: web dashboard, from the machine\'s data.json');
     lines.push('');
     lines.push('Sensors');
     lines.push('');
@@ -46,6 +49,36 @@
     })(root, 0);
     lines.push('');
     return lines.join('\n');
+  }
+
+  // ── Submit Report (GUI/ReportForm.cs sendButton_Click) ───────────────────
+  // The application posts the hardware report to its own project endpoint as
+  // application/x-www-form-urlencoded with exactly these five fields. We
+  // build the identical payload so a report submitted from here is the same
+  // artifact the desktop app would have sent.
+  var SUBMIT_ENDPOINT = 'http://openhardwaremonitor.org/report.php';
+  var APP_VERSION = '0.9.6.0'; // Properties/AssemblyVersion.cs
+
+  function submitPayload(reportText, comment, email) {
+    return {
+      type: 'hardware',
+      version: APP_VERSION,
+      report: String(reportText || ''),
+      comment: String(comment || ''),
+      email: String(email || ''),
+    };
+  }
+  function encodeForm(o) {
+    return Object.keys(o).map(function (k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(o[k]);
+    }).join('&');
+  }
+  // The endpoint is http-only. A page served over https cannot post to it —
+  // browsers block the mixed-content request — so say so instead of failing
+  // silently or claiming a delivery we cannot make.
+  function submitBlockedReason() {
+    if (location.protocol === 'https:') return 'mixed-content';
+    return null;
   }
 
   // ── preferences (hide / rename / plot / columns / unit / views) ──────────
@@ -108,5 +141,10 @@
     makePrefs: makePrefs,
     colsClass: colsClass,
     DEFAULTS: DEFAULTS,
+    SUBMIT_ENDPOINT: SUBMIT_ENDPOINT,
+    APP_VERSION: APP_VERSION,
+    submitPayload: submitPayload,
+    encodeForm: encodeForm,
+    submitBlockedReason: submitBlockedReason,
   };
 })();
