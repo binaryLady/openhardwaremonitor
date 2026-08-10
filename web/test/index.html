@@ -163,6 +163,34 @@ window.addEventListener('load', function () {
     window.TTMTheme.setMode('dark'); // restore the bench pin
     return before !== flipped ? true : 'stuck at ' + before;
   });
+  t('keys: t cycles the theme world site-wide (capture, consumed)', function () {
+    var before = window.TTMTheme.current();
+    var e = new KeyboardEvent('keydown', { key: 't', bubbles: true, cancelable: true });
+    document.dispatchEvent(e);
+    var after = window.TTMTheme.current();
+    var consumed = e.defaultPrevented;
+    window.TTMTheme.set('ttm'); // restore the bench baseline
+    return consumed && after !== before ? true :
+      'consumed=' + consumed + ' ' + before + '→' + after;
+  });
+  t('keys: m flips light/dark site-wide (capture, consumed)', function () {
+    var root = document.documentElement;
+    var before = root.getAttribute('data-ttm-mode');
+    var e = new KeyboardEvent('keydown', { key: 'm', bubbles: true, cancelable: true });
+    document.dispatchEvent(e);
+    var after = root.getAttribute('data-ttm-mode');
+    var consumed = e.defaultPrevented;
+    window.TTMTheme.setMode('dark'); // restore the bench pin
+    return consumed && after !== before ? true :
+      'consumed=' + consumed + ' ' + before + '→' + after;
+  });
+  t('keys: chrome controls carry aria-keyshortcuts', function () {
+    var toggle = document.querySelector('.ttm-modetoggle');
+    var burger = document.querySelector('.ttm-burger');
+    return toggle && toggle.getAttribute('aria-keyshortcuts') === 'm' &&
+      burger && !!burger.getAttribute('aria-keyshortcuts')
+      ? true : 'aria-keyshortcuts missing';
+  });
   t('theme.js: burger menu injected with theme radios', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;

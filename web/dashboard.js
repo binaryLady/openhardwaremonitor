@@ -282,13 +282,6 @@
     if (/^(input|textarea|select)$/i.test(e.target.tagName)) return;
     if (e.key === 'd') { startDemo(); }
     else if (e.key === '/') { e.preventDefault(); els.url.focus(); }
-    else if (e.key === 't') {
-      const themes = window.TTMTheme.THEMES;
-      const cur = window.TTMTheme.current();
-      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
-      window.TTMTheme.set(next);
-      toast('Theme: ' + ({ ttm: 'warm', terminal: 'terminal', zine: 'zine' }[next] || next), { timeout: 1500 });
-    }
     else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }
   });
 

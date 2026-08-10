@@ -137,6 +137,7 @@
     burger.setAttribute('aria-expanded', 'false');
     burger.setAttribute('aria-controls', 'ttm-menu');
     burger.setAttribute('aria-haspopup', 'true');
+    burger.setAttribute('aria-keyshortcuts', 'Shift+Slash');
     burger.innerHTML = '<span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>';
 
     var backdrop = document.createElement('div');
@@ -197,9 +198,12 @@
     });
     html += '</fieldset>';
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
-      '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close<br>' +
+      '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close &nbsp; ' +
+      '<kbd>t</kbd> next theme &nbsp; <kbd>m</kbd> light/dark<br>' +
       '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>c</kbd> components · ' +
       '<kbd>t</kbd> test bench · <kbd>a</kbd> mission control · <kbd>m</kbd> maps of making<br>' +
+      'dashboard: <kbd>d</kbd> demo · <kbd>/</kbd> connect · <kbd>Esc</kbd> pause · ' +
+      '<kbd>\u2191</kbd><kbd>\u2193</kbd> sensor cards<br>' +
       '<kbd>Tab</kbd> from the top reaches a skip-to-content link on every page</div>';
     panel.innerHTML = html;
     panel.querySelector('.ttm-menu__bernard .voice').textContent = greeting;
@@ -322,8 +326,27 @@
         location.href = CHORD_ROUTES[e.key];
         return;
       }
-      if (e.key === 'g') { pendingG = Date.now(); e.preventDefault(); }
-      else pendingG = 0;
+      if (e.key === 'g') { pendingG = Date.now(); e.preventDefault(); return; }
+      pendingG = 0;
+      // site-wide single keys: t cycles the theme world, m flips light/dark.
+      // Consumed here (capture + preventDefault) so page handlers skip them.
+      if (e.key === 't') {
+        e.preventDefault();
+        var next = THEMES[(THEMES.indexOf(currentTheme()) + 1) % THEMES.length];
+        set(next);
+        if (window.TTMToast) window.TTMToast.show(THEME_LABELS[next] + ' theme.', { timeout: 1500 });
+        if (window.TTMStack) window.TTMStack.track('theme_change', { theme: next });
+        return;
+      }
+      if (e.key === 'm') {
+        e.preventDefault();
+        var mode = resolveMode() === 'dark' ? 'light' : 'dark';
+        setMode(mode);
+        if (window.TTMToast) window.TTMToast.show(
+          (mode === 'dark' ? 'Dark' : 'Light') + ' mode.', { timeout: 1500 });
+        if (window.TTMStack) window.TTMStack.track('mode_change', { mode: mode });
+        return;
+      }
     }, true);
 
     // Small public surface so pages (and the test bench) can see the
@@ -342,6 +365,7 @@
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'ttm-modetoggle';
+    b.setAttribute('aria-keyshortcuts', 'm');
     b.addEventListener('click', function () {
       var next = resolveMode() === 'dark' ? 'light' : 'dark';
       setMode(next);
@@ -364,7 +388,7 @@
     var hints = document.createElement('span');
     hints.className = 'ttm-kbd-hints';
     hints.innerHTML = '<kbd>?</kbd> menu · <kbd>g</kbd> chords navigate · ' +
-      '\u2600/\u263E mode · <kbd>Tab</kbd> skip link';
+      '<kbd>t</kbd> theme · <kbd>m</kbd> light/dark · <kbd>Tab</kbd> skip link';
     footer.appendChild(document.createElement('br'));
     footer.appendChild(hints);
   }
