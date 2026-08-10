@@ -823,7 +823,8 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 .ttm-modetoggle:hover { background: var(--ttm-wash-hover); transform: rotate(15deg); }
 
 /* ── ttm-sitebar — the universal site header (theme.js, every page):
-      brand wordmark · primary nav · tools (mode toggle + burger).
+      brand wordmark · tools (mode toggle + burger). All navigation is
+      consolidated in the hamburger menu — the bar itself stays quiet.
       Sticky; bleeds across body.ttm-page's padding so it spans full width. ── */
 .ttm-sitebar {
   position: sticky;
@@ -846,41 +847,14 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 .ttm-sitebar__brand {
   display: inline-flex;
   align-items: center;
-  gap: .45rem;
+  gap: .35rem;
   min-height: 44px;
   text-decoration: none;
   color: var(--ttm-text);
   border-radius: var(--radius-sm);
+  font: 600 1rem/1 var(--ttm-font-sans);
 }
-.ttm-sitebar__logo { font-family: var(--ttm-font-serif); font-size: 1.2rem; line-height: 1; }
-.ttm-sitebar__name {
-  font: 600 var(--ttm-fs-caption)/1 var(--ttm-font-mono);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--ttm-text-muted);
-}
-.ttm-sitebar__nav { display: flex; gap: .15rem; }
-.ttm-sitebar__nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 .65rem;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid transparent;
-  font: 600 var(--ttm-fs-caption)/1 var(--ttm-font-mono);
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: var(--ttm-text-secondary);
-  text-decoration: none;
-}
-.ttm-sitebar__nav a:hover { background: var(--ttm-wash-hover); color: var(--ttm-text); }
-.ttm-sitebar__nav a[aria-current="page"] { color: var(--ttm-control); border-color: var(--ttm-control); }
 .ttm-sitebar__tools { margin-left: auto; display: inline-flex; align-items: center; gap: .5rem; }
-@media (max-width: 700px) {
-  /* the burger menu carries every route; the wordmark glyph stays */
-  .ttm-sitebar__nav { display: none; }
-  .ttm-sitebar__name { display: none; }
-}
 
 /* ── visual pop — glow where the data is alive, gradients where it moves ── */
 .ttm-badge--live {

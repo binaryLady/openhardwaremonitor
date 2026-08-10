@@ -51,10 +51,10 @@
   function applyBrand(config) {
     var b = config.brand || {};
     if (b.page_title) document.title = b.page_title;
-    var wm = document.querySelector('[data-brand-wordmark]');
-    if (wm && b.name) wm.textContent = '· ' + b.name;
-    var sn = document.querySelector('[data-brand-sitename]');
-    if (sn && b.name) sn.textContent = b.name;
+    // every wordmark carrier updates — the page header and the sitebar
+    if (b.name) document.querySelectorAll('[data-brand-wordmark]').forEach(function (wm) {
+      wm.textContent = '· ' + b.name;
+    });
     var crumb = document.querySelector('.ttm-header .ttm-crumb');
     if (crumb && b.tagline) crumb.textContent = b.tagline;
     var badgeName = document.querySelector('.ttm-footer-badge .brand-name');
