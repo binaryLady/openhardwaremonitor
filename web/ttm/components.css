@@ -441,12 +441,7 @@
   .ttm-toast--out { transition: none; }
 }
 
-/* ── Bernard's greeting in the menu ── */
-@font-face {
-  font-family: 'Special Elite';
-  src: url('/fonts/SpecialElite-Regular.woff2') format('woff2');
-  font-display: swap;
-}
+/* ── Bernard's greeting in the menu (Special Elite loads via theme.js) ── */
 .ttm-menu__bernard {
   display: block;
   margin: 0 0 var(--ttm-spacing-md);

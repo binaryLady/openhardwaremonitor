@@ -89,6 +89,27 @@
     return true;
   }
 
+  // Brand faces, loaded as universal chrome — the token stacks name
+  // Poppins/Pacifico/Special Elite/JetBrains Mono, but no page ever loaded
+  // them, so every surface silently fell back to system fonts.
+  (function loadFonts() {
+    if (document.querySelector('link[data-ttm-fonts]')) return;
+    [['preconnect', 'https://fonts.googleapis.com', false],
+     ['preconnect', 'https://fonts.gstatic.com', true]].forEach(function (p) {
+      var l = document.createElement('link');
+      l.rel = p[0]; l.href = p[1];
+      if (p[2]) l.crossOrigin = 'anonymous';
+      document.head.appendChild(l);
+    });
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.setAttribute('data-ttm-fonts', '');
+    css.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700' +
+      '&family=Pacifico&family=Special+Elite' +
+      '&family=JetBrains+Mono:wght@400;600;700&display=swap';
+    document.head.appendChild(css);
+  })();
+
   apply(currentTheme());
   applyCustom(getCustom());
   // Auto mode tracks the OS live
@@ -348,7 +369,7 @@
     buildMenu();
     var badge = document.createElement('div');
     badge.className = 'ttm-footer-badge';
-    badge.innerHTML = 'made with <span class="heart">❤</span> · <span class="brand-name gradient-text-rainbow">open source</span>';
+    badge.innerHTML = 'made with <span class="heart">❤</span> <span class="brand-name gradient-text-rainbow">open source</span>';
     // in the footer flow — buildFooter guarantees one exists on every page
     (document.querySelector('footer.ttm-footer') || document.body).appendChild(badge);
   });
