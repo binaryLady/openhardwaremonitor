@@ -30,6 +30,9 @@
     { group: 'Operator tools' },
     { href: '/admin/',      name: 'Mission Control', desc: 'telemetry · visitors (admin)' },
     { href: '/test/',       name: 'Test bench',      desc: 'the stack proves itself in-browser' },
+    { href: '/components/', name: 'Design stack',    desc: 'every component, end to end' },
+    { href: '/404.html',    name: 'Error — signal lost', desc: '404 surface preview' },
+    { href: '/500.html',    name: 'Error — overheated',  desc: '500 surface preview' },
     { group: 'Network' },
     { href: 'https://maps.thetechmargin.com/', name: 'Maps of Making',
       desc: 'where the map bridge publishes to' },
@@ -133,31 +136,19 @@
       (new URLSearchParams(location.search).has('demo') ? '?demo=1' : '');
   }
 
-  // Universal site header: brand wordmark, the primary routes inline
-  // (desktop; the burger carries the full sitemap everywhere), and the
-  // tools cluster the mode toggle + burger mount into. Sits after the
-  // skip link so that stays the first tab stop on every page.
+  // Universal site header: the site wordmark (same text as the page
+  // header carried before) and the tools cluster the mode toggle + burger
+  // mount into. All navigation is consolidated in the hamburger menu —
+  // no inline route links. Sits after the skip link so that stays the
+  // first tab stop on every page.
   function buildSitebar() {
     if (document.querySelector('.ttm-sitebar')) return;
-    var here = hereKey();
-    var PRIMARY = [
-      { href: '/',       name: 'Dashboard' },
-      { href: '/rfq/',   name: 'RFQ' },
-      { href: '/admin/', name: 'Mission Control' },
-    ];
     var bar = document.createElement('header');
     bar.className = 'ttm-sitebar';
-    var html = '<div class="ttm-sitebar__inner">' +
-      '<a class="ttm-sitebar__brand" href="/">' +
-      '<span class="ttm-sitebar__logo gradient-text-rainbow">ttm</span>' +
-      '<span class="ttm-sitebar__name" data-brand-sitename>hardware monitor</span></a>' +
-      '<nav class="ttm-sitebar__nav" aria-label="Primary">';
-    PRIMARY.forEach(function (r) {
-      html += '<a href="' + r.href + '"' +
-        (here === r.href ? ' aria-current="page"' : '') + '>' + r.name + '</a>';
-    });
-    html += '</nav><span class="ttm-sitebar__tools"></span></div>';
-    bar.innerHTML = html;
+    bar.innerHTML = '<div class="ttm-sitebar__inner">' +
+      '<a class="ttm-sitebar__brand" href="/">Hardware ' +
+      '<span class="gradient-text-rainbow" data-brand-wordmark>· open monitor</span></a>' +
+      '<span class="ttm-sitebar__tools"></span></div>';
     var skip = document.querySelector('.ttm-skip');
     document.body.insertBefore(bar, skip ? skip.nextSibling : document.body.firstChild);
   }

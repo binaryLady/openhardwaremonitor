@@ -190,14 +190,14 @@ window.addEventListener('load', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
   });
-  t('chrome: universal sitebar — brand link, primary nav, tools cluster', function () {
+  t('chrome: universal sitebar — brand link + tools only; nav lives in the menu', function () {
     var bar = document.querySelector('.ttm-sitebar');
     if (!bar) return 'no .ttm-sitebar';
     var brand = bar.querySelector('.ttm-sitebar__brand');
-    var nav = bar.querySelector('nav.ttm-sitebar__nav[aria-label="Primary"]');
-    var links = nav ? nav.querySelectorAll('a') : [];
-    return brand && brand.getAttribute('href') === '/' && links.length >= 3
-      ? true : 'brand=' + !!brand + ' navlinks=' + links.length;
+    var inlineNav = bar.querySelector('nav');
+    var menuRoutes = document.querySelectorAll('.ttm-menu nav a.ttm-menu__item[href]');
+    return brand && brand.getAttribute('href') === '/' && !inlineNav && menuRoutes.length >= 5
+      ? true : 'brand=' + !!brand + ' inlineNav=' + !!inlineNav + ' menuRoutes=' + menuRoutes.length;
   });
   t('chrome: mode toggle and burger live in the sitebar, after the skip link', function () {
     var tools = document.querySelector('.ttm-sitebar__tools');
