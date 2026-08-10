@@ -190,6 +190,24 @@ window.addEventListener('load', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
   });
+  t('chrome: universal sitebar — brand link, primary nav, tools cluster', function () {
+    var bar = document.querySelector('.ttm-sitebar');
+    if (!bar) return 'no .ttm-sitebar';
+    var brand = bar.querySelector('.ttm-sitebar__brand');
+    var nav = bar.querySelector('nav.ttm-sitebar__nav[aria-label="Primary"]');
+    var links = nav ? nav.querySelectorAll('a') : [];
+    return brand && brand.getAttribute('href') === '/' && links.length >= 3
+      ? true : 'brand=' + !!brand + ' navlinks=' + links.length;
+  });
+  t('chrome: mode toggle and burger live in the sitebar, after the skip link', function () {
+    var tools = document.querySelector('.ttm-sitebar__tools');
+    var inBar = tools && tools.contains(document.querySelector('.ttm-modetoggle')) &&
+      tools.contains(document.querySelector('.ttm-burger'));
+    var skip = document.querySelector('.ttm-skip');
+    var ordered = skip && (skip.compareDocumentPosition(document.querySelector('.ttm-sitebar')) &
+      Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+    return inBar && ordered ? true : 'inBar=' + !!inBar + ' skipFirst=' + !!ordered;
+  });
 
   // ── WCAG 2.1 contrast (the W3C check) ─────────────────────────────────────
   // resolve any token (including var() chains) to rgb via a live probe

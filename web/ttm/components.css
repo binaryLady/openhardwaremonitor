@@ -164,12 +164,9 @@
   }
 
 
-/* ── ttm-burger + ttm-menu (theme.js) — all routes + theme, collapsed ── */
+/* ── ttm-burger + ttm-menu (theme.js) — all routes + theme, collapsed ──
+   the burger sits in the universal sitebar's tools cluster, in flow */
 .ttm-burger {
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: var(--z-header);
   width: 44px;
   height: 44px;
   display: inline-flex;
@@ -180,7 +177,6 @@
   background: var(--ttm-surface);
   border: 1.5px solid var(--ttm-border);
   border-radius: var(--radius-sm);
-  box-shadow: var(--ttm-shadow);
   cursor: pointer;
   padding: 0;
 }
@@ -528,8 +524,7 @@ body.ttm-page {
   padding: 1.5rem 1.25rem 4rem;
 }
 .ttm-main { max-width: 64rem; margin: 0 auto; }
-/* every page title clears the fixed chrome cluster (mode toggle + burger) */
-.ttm-header { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; padding-right: 7rem; }
+.ttm-header { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
 /* iridescent rule under the header — the brand shimmer as a themed border */
 .ttm-header::after {
   content: "";
@@ -809,12 +804,8 @@ details.ttm-hw > summary .dot.hot { background: var(--ttm-danger); }
 details.ttm-hw > summary .n { margin-left: auto; font: 400 var(--ttm-fs-caption) var(--ttm-font-mono); color: var(--ttm-text-muted); }
 details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); outline-offset: 2px; }
 
-/* ── ttm-modetoggle — light/dark flip in the page header (brand pattern) ── */
+/* ── ttm-modetoggle — light/dark flip in the sitebar (brand pattern) ── */
 .ttm-modetoggle {
-  position: fixed;
-  top: 14px;
-  right: 68px;   /* burger is at right:14px, 44px wide — 10px gutter */
-  z-index: var(--z-header);
   width: 44px;
   height: 44px;
   display: inline-flex;
@@ -830,6 +821,66 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 }
 .ttm-modetoggle svg { width: 20px; height: 20px; display: block; }
 .ttm-modetoggle:hover { background: var(--ttm-wash-hover); transform: rotate(15deg); }
+
+/* ── ttm-sitebar — the universal site header (theme.js, every page):
+      brand wordmark · primary nav · tools (mode toggle + burger).
+      Sticky; bleeds across body.ttm-page's padding so it spans full width. ── */
+.ttm-sitebar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  margin: -1.5rem -1.25rem 1.4rem;
+  padding: .5rem 1.25rem;
+  background: color-mix(in srgb, var(--ttm-bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--ttm-border);
+}
+.ttm-sitebar__inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+.ttm-sitebar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 44px;
+  text-decoration: none;
+  color: var(--ttm-text);
+  border-radius: var(--radius-sm);
+}
+.ttm-sitebar__logo { font-family: var(--ttm-font-serif); font-size: 1.2rem; line-height: 1; }
+.ttm-sitebar__name {
+  font: 600 var(--ttm-fs-caption)/1 var(--ttm-font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ttm-text-muted);
+}
+.ttm-sitebar__nav { display: flex; gap: .15rem; }
+.ttm-sitebar__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 .65rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid transparent;
+  font: 600 var(--ttm-fs-caption)/1 var(--ttm-font-mono);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--ttm-text-secondary);
+  text-decoration: none;
+}
+.ttm-sitebar__nav a:hover { background: var(--ttm-wash-hover); color: var(--ttm-text); }
+.ttm-sitebar__nav a[aria-current="page"] { color: var(--ttm-control); border-color: var(--ttm-control); }
+.ttm-sitebar__tools { margin-left: auto; display: inline-flex; align-items: center; gap: .5rem; }
+@media (max-width: 700px) {
+  /* the burger menu carries every route; the wordmark glyph stays */
+  .ttm-sitebar__nav { display: none; }
+  .ttm-sitebar__name { display: none; }
+}
 
 /* ── visual pop — glow where the data is alive, gradients where it moves ── */
 .ttm-badge--live {
@@ -871,7 +922,6 @@ details.ttm-hw > summary:hover { background: var(--ttm-wash); border-radius: var
 
 /* ── mobile scale — one standard pass, no page improvises its own ── */
 @media (max-width: 560px) {
-  .ttm-header { padding-right: 6.75rem; }
   .ttm-header h1 { font-size: var(--ttm-fs-h4); }
   .ttm-card { padding: .9rem 1rem; }
   .ttm-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }

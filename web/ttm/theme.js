@@ -1,6 +1,7 @@
 // TTM theme + navigation controller.
-// Injects one accessible hamburger (fixed, top-right, every page that loads
-// this script) collapsing: site routes in hierarchy order, then theme choice.
+// Injects the universal site header (brand · primary nav · mode toggle ·
+// hamburger) on every page that loads this script; the hamburger collapses
+// the full sitemap in hierarchy order, then theme choice.
 // A11y per the TTM spec + ARIA disclosure/menu practices: aria-expanded /
 // aria-controls, focus moves in on open, Tab is trapped, Escape and backdrop
 // close and return focus, aria-current marks the page you are on, 44px
@@ -125,11 +126,47 @@
     });
   }
 
-  function buildMenu() {
-    // current-page key includes the demo flag, so Dashboard (/) and
-    // Demo feed (/?demo=1) mark aria-current distinctly
-    var here = location.pathname.replace(/index\.html$/, '') +
+  // current-page key includes the demo flag, so Dashboard (/) and
+  // Demo feed (/?demo=1) mark aria-current distinctly
+  function hereKey() {
+    return location.pathname.replace(/index\.html$/, '') +
       (new URLSearchParams(location.search).has('demo') ? '?demo=1' : '');
+  }
+
+  // Universal site header: brand wordmark, the primary routes inline
+  // (desktop; the burger carries the full sitemap everywhere), and the
+  // tools cluster the mode toggle + burger mount into. Sits after the
+  // skip link so that stays the first tab stop on every page.
+  function buildSitebar() {
+    if (document.querySelector('.ttm-sitebar')) return;
+    var here = hereKey();
+    var PRIMARY = [
+      { href: '/',       name: 'Dashboard' },
+      { href: '/rfq/',   name: 'RFQ' },
+      { href: '/admin/', name: 'Mission Control' },
+    ];
+    var bar = document.createElement('header');
+    bar.className = 'ttm-sitebar';
+    var html = '<div class="ttm-sitebar__inner">' +
+      '<a class="ttm-sitebar__brand" href="/">' +
+      '<span class="ttm-sitebar__logo gradient-text-rainbow">ttm</span>' +
+      '<span class="ttm-sitebar__name" data-brand-sitename>hardware monitor</span></a>' +
+      '<nav class="ttm-sitebar__nav" aria-label="Primary">';
+    PRIMARY.forEach(function (r) {
+      html += '<a href="' + r.href + '"' +
+        (here === r.href ? ' aria-current="page"' : '') + '>' + r.name + '</a>';
+    });
+    html += '</nav><span class="ttm-sitebar__tools"></span></div>';
+    bar.innerHTML = html;
+    var skip = document.querySelector('.ttm-skip');
+    document.body.insertBefore(bar, skip ? skip.nextSibling : document.body.firstChild);
+  }
+  function chromeTools() {
+    return document.querySelector('.ttm-sitebar__tools') || document.body;
+  }
+
+  function buildMenu() {
+    var here = hereKey();
     var burger = document.createElement('button');
     burger.className = 'ttm-burger';
     burger.type = 'button';
@@ -306,7 +343,7 @@
     });
 
     document.body.appendChild(backdrop);
-    document.body.appendChild(burger);
+    chromeTools().appendChild(burger);
     document.body.appendChild(panel);
 
     // ── Keyboard shortcuts: ? lands you in the menu; g-then-key navigates ──
@@ -358,8 +395,8 @@
     };
   }
 
-  // Universal chrome: the mode toggle is fixed beside the burger on every
-  // page — part of the site shell, not any page's header markup.
+  // Universal chrome: the mode toggle sits beside the burger in the
+  // sitebar's tools cluster — part of the site shell, not any page's markup.
   function buildModeToggle() {
     if (document.querySelector('.ttm-modetoggle')) return;
     var b = document.createElement('button');
@@ -371,7 +408,7 @@
       setMode(next);
       if (window.TTMStack) window.TTMStack.track('mode_change', { mode: next });
     });
-    document.body.appendChild(b);
+    chromeTools().appendChild(b);
     apply(currentTheme()); // paint the glyph
   }
 
@@ -394,6 +431,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    buildSitebar();
     buildModeToggle();
     buildFooter();
     buildMenu();
