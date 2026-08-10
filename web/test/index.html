@@ -14,6 +14,7 @@
 <script src="../ttm/stack.js"></script>
 <script src="../parse.js"></script>
 <script src="../bridge.js"></script>
+<script src="../gui-core.js"></script>
 <script src="../demo-data.js"></script>
 <script src="fixtures/data.sample.js"></script>
 </head>
@@ -413,6 +414,42 @@ window.addEventListener('load', function () {
            P.meterPct({ cat: 'clock', value: '50 MHz', n: 50, nMin: 0, nMax: 100 }) === 50 &&
            P.meterPct({ cat: 'clock', value: '', n: null }) === null ? true : 'bad meter';
   });
+  // ── GUI core (gui-core.js) — the desktop features as pure logic ──────────
+  var G = window.OHMGui;
+  t('gui: Fahrenheit is a display transform on temperature strings only', function () {
+    return G.toDisplay('52.0 °C', 'f') === '125.6 °F' &&
+           G.toDisplay('-10.0 °C', 'f') === '14.0 °F' &&
+           G.toDisplay('1,234 RPM', 'f') === '1,234 RPM' &&
+           G.toDisplay('52.0 °C', 'c') === '52.0 °C'
+      ? true : 'bad conversion';
+  });
+  t('gui: report is deterministic and carries values with min/max', function () {
+    var r1 = G.report(window.OHM_DEMO(42), 'T0');
+    var r2 = G.report(window.OHM_DEMO(42), 'T0');
+    return r1 === r2 && r1.indexOf('Open Hardware Monitor Report') === 0 &&
+           /\+- .+ : .+ \(min .+ \/ max .+\)/.test(r1)
+      ? true : 'report unstable or missing columns';
+  });
+  t('gui: prefs round-trip through an injected store; toggleIn flips membership', function () {
+    var fake = (function () { var m = {}; return {
+      getItem: function (k) { return m[k] || null; },
+      setItem: function (k, v) { m[k] = String(v); } }; })();
+    var p = G.makePrefs(fake);
+    p.set({ unit: 'f', cols: { value: true, min: false, max: true } });
+    var on = p.toggleIn('plotted', 'a/b/c');
+    var off = p.toggleIn('hidden', 'x') && !p.toggleIn('hidden', 'x');
+    var g = p.get();
+    return g.unit === 'f' && g.cols.min === false && on === true &&
+           g.plotted.indexOf('a/b/c') === 0 && off && g.hidden.length === 0
+      ? true : JSON.stringify(g);
+  });
+  t('gui: column class maps visible columns to the grid template', function () {
+    return G.colsClass({ value: true, min: true, max: true }) === 'gui-cols-6' &&
+           G.colsClass({ value: true, min: false, max: false }) === 'gui-cols-4' &&
+           G.colsClass({ value: false, min: false, max: false }) === 'gui-cols-3'
+      ? true : 'bad mapping';
+  });
+
   t('parse: app fidelity — min/max carried, ungrouped leaf sensors kept', function () {
     var carried = demoBlocks.every(function (b) {
       return b.sensors.every(function (s) { return 'min' in s && 'max' in s; });

@@ -516,6 +516,8 @@ html[data-ttm-theme] .topbar { overflow: visible; }
    (spec: layout lives in the component library; pages carry no inline
    styles and no duplicated <style> blocks) */
 * { box-sizing: border-box; }
+/* focus and scroll-into-view targets clear the sticky sitebar */
+html { scroll-padding-top: 4.5rem; }
 body.ttm-page {
   margin: 0;
   background: var(--ttm-bg);
@@ -712,6 +714,90 @@ textarea.ttm-input { height: auto; min-height: 6rem; padding: .55rem .7rem; resi
 .ttm-sensor--hot .meterbar i { background: var(--ttm-danger); }
 .ttm-sensor--warn .val { color: var(--ttm-warning); }
 .ttm-sensor--hot .val { color: var(--ttm-danger); }
+
+/* ── GUI feature parity (dashboard) — the desktop application's View menu ──
+   column variants: name+spark+meter always render; value/min/max toggle
+   (View → Columns), the body class picks the matching grid template */
+.gui-cols-3 .ttm-sensor { grid-template-columns: 1fr 4.5rem 5rem; }
+.gui-cols-4 .ttm-sensor { grid-template-columns: 1fr 4.5rem 5rem 5.8rem; }
+.gui-cols-5 .ttm-sensor { grid-template-columns: 1fr 4.5rem 5rem 5.8rem 4.6rem; }
+
+/* hidden sensors render dimmed when View → Show Hidden Sensors is on */
+.ttm-sensor.is-hidden { opacity: .45; }
+
+/* manage mode — the desktop context menu folded into the name cell
+   (scoped: outside manage mode the name keeps its ellipsis behavior) */
+.gui-manage .ttm-sensor .nm { display: flex; align-items: center; gap: .35rem; min-width: 0; white-space: normal; }
+.ttm-sensor .ctl { display: inline-flex; gap: 2px; flex: none; margin-left: auto; }
+.ttm-minibtn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--ttm-border);
+  border-radius: var(--radius-sm);
+  color: var(--ttm-text-muted);
+  cursor: pointer;
+}
+.ttm-minibtn svg { width: 15px; height: 15px; display: block; }
+.ttm-minibtn:hover { background: var(--ttm-wash-hover); color: var(--ttm-text); }
+.ttm-minibtn[aria-pressed="true"] { color: var(--ttm-control); border-color: var(--ttm-control); }
+.ttm-sensor .ttm-rename { height: 32px; flex: 1; min-width: 0; }
+
+/* toolbar option cluster (°F · hidden · columns) */
+.ttm-gui-opts { display: inline-flex; align-items: center; gap: .45rem; flex-wrap: wrap; margin-left: auto; }
+.ttm-gui-opts .ttm-note { margin-right: .35rem; }
+
+/* plot (GUI/PlotPanel.cs) — series in the brand hues, normalized per range */
+.ttm-plot {
+  width: 100%;
+  height: 200px;
+  margin-top: .5rem;
+  background: var(--ttm-bg-alt);
+  border: 1px solid var(--ttm-border-subtle);
+  border-radius: var(--radius-sm);
+}
+.plot-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.ttm-plotchip { display: inline-flex; align-items: center; gap: .4rem; font: 400 var(--ttm-fs-caption) var(--ttm-font-mono); color: var(--ttm-text-secondary); }
+.ttm-plotchip i { width: .65rem; height: .65rem; border-radius: 50%; background: currentColor; }
+/* series hues after the chip base so the legend wears its series color */
+.plot-s0 { stroke: var(--ttm-pink); color: var(--ttm-pink); }
+.plot-s1 { stroke: var(--ttm-cyan); color: var(--ttm-cyan); }
+.plot-s2 { stroke: var(--ttm-lime); color: var(--ttm-lime); }
+.plot-s3 { stroke: var(--ttm-goldenrod); color: var(--ttm-goldenrod); }
+.plot-s4 { stroke: var(--ttm-hot-red); color: var(--ttm-hot-red); }
+
+/* gadget (GUI/SensorGadget.cs) — compact always-visible readout */
+.ttm-gadget {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: var(--z-header);
+  width: min(92vw, 16rem);
+  background: var(--ttm-surface);
+  border: 1.5px solid var(--ttm-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--ttm-shadow);
+  padding: .6rem .8rem .7rem;
+  font-family: var(--ttm-font-sans);
+}
+.ttm-gadget__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .2rem; }
+.ttm-gadget__head .ttm-card__title { margin: 0; }
+.ttm-gadget__close {
+  width: 32px;
+  height: 32px;
+  margin: -.3rem -.4rem -.3rem 0;
+  background: none;
+  border: none;
+  color: var(--ttm-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.ttm-gadget__close:hover { color: var(--ttm-text); background: var(--ttm-wash-hover); }
 
 /* fresh reading: one soft flash, token-timed; reduced motion collapses it */
 @keyframes ttm-val-fresh { from { background: var(--ttm-wash-hover); } to { background: transparent; } }

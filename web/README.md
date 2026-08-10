@@ -50,6 +50,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 |---|---|
 | `index.html` | the page: source bar, sensor grid, map-bridge receipt |
 | `parse.js` | **pure sensor core** (`window.OHMParse`): display-string parsing, tree flattening, thresholds, meter scaling |
+| `gui-core.js` | **pure GUI core** (`window.OHMGui`): the desktop application's features — Fahrenheit display, Save Report, hide/rename/plot prefs, column layout |
 | `bridge.js` | **map bridge** (`window.OHMBridge`): SpaceAPI v14 fragment for Maps of Making |
 | `dashboard.js` | rendering + data flow: polling, status, toasts, shortcuts |
 | `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape |
@@ -77,6 +78,28 @@ warn / ≥ 85 °C hot; load ≥ 80 % warn / ≥ 95 % hot.
 CORS note: the embedded server sends no `Access-Control-Allow-Origin`
 header, so a deployed dashboard cannot poll a machine cross-origin. Serve
 the page from the same origin, use a local proxy, or use demo data.
+
+## GUI parity
+
+The desktop application's GUI runs through this skin (View card on the
+dashboard; pure logic in `gui-core.js`, bench-proven):
+
+- **Plot** (`PlotPanel.cs`) — plot any sensors from Manage mode; series
+  draw in the brand hues from the poll history, normalized to their own
+  range, legend carries the live values.
+- **Gadget** (`SensorGadget.cs`) — a compact floating readout of the
+  plotted sensors (falls back to hottest + peak load).
+- **Manage sensors** — the desktop context menu as a mode: hide/unhide
+  (with View → *show hidden* rendering them dimmed), rename inline, add
+  to plot. All persisted on the device.
+- **Columns** (View → Columns) — Value / Min / Max each toggleable; the
+  grid re-lays per visible set.
+- **Units** (`UnitManager.cs`) — Celsius ↔ Fahrenheit as a display
+  transform on the server's own strings (<kbd>u</kbd>).
+- **Save Report** (`ReportForm.cs`) — a plain-text report of the whole
+  tree, downloaded client-side.
+- **Reset Min/Max** — clears the local reading history; live min/max
+  columns come from the server and reset with it.
 
 ## UX
 
@@ -108,6 +131,8 @@ in a field.
 |---|---|
 | <kbd>d</kbd> | load / restart the demo feed |
 | <kbd>/</kbd> | focus the machine-URL field |
+| <kbd>u</kbd> | Celsius ↔ Fahrenheit display |
+| <kbd>p</kbd> | show / hide the plot |
 | <kbd>t</kbd> | cycle the theme world (site-wide, all ten presets) |
 | <kbd>m</kbd> | flip light/dark mode (site-wide) |
 | <kbd>Esc</kbd> | pause polling |
