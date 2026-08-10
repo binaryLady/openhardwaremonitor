@@ -90,6 +90,33 @@
       </details>
     </section>
 
+    <section class="ttm-card" aria-labelledby="c-gui">
+      <h2 class="ttm-card__title" id="c-gui">GUI — manage · plot</h2>
+      <div class="ttm-row" aria-label="Manage-mode row controls">
+        <button type="button" class="ttm-minibtn" aria-pressed="true" title="Show in plot" aria-label="Show in plot"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 12 6 8l3 2 5-6"/><circle cx="14" cy="4" r="1.4" fill="currentColor" stroke="none"/></svg></button>
+        <button type="button" class="ttm-minibtn" title="Hide sensor" aria-label="Hide sensor"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4S1.5 8 1.5 8Z"/><path d="M3 13 13 3"/></svg></button>
+        <button type="button" class="ttm-minibtn" title="Rename sensor" aria-label="Rename sensor"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m3 13 .8-3L11 2.8l2.2 2.2L6 12.2 3 13Z"/></svg></button>
+      </div>
+      <svg class="ttm-plot" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+        <path class="plot-line plot-s0" d="M6 160 L106 120 L206 140 L306 60 L406 90 L506 40 L594 70"/>
+        <path class="plot-line plot-s1" d="M6 60 L106 90 L206 70 L306 130 L406 110 L506 150 L594 120"/>
+      </svg>
+      <div class="ttm-row">
+        <span class="ttm-plotchip plot-s0"><i></i><span>GPU Core · 74.8 °C</span></span>
+        <span class="ttm-plotchip plot-s1"><i></i><span>CPU Package · 63.4 °C</span></span>
+      </div>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="c-gadget">
+      <h2 class="ttm-card__title" id="c-gadget">Gadget — floating readout, shown in flow</h2>
+      <aside class="ttm-gadget ttm-gadget--inline" aria-label="Sensor gadget demo">
+        <div class="ttm-gadget__head"><span class="ttm-card__title">Gadget</span>
+          <button type="button" class="ttm-gadget__close" aria-label="Close gadget">×</button></div>
+        <div class="ttm-kv"><span class="k">GPU Core</span><span class="v">74.8 °C</span></div>
+        <div class="ttm-kv"><span class="k">CPU Total</span><span class="v">64.1 %</span></div>
+      </aside>
+    </section>
+
     <section class="ttm-card full" aria-labelledby="c-tiles">
       <h2 class="ttm-card__title" id="c-tiles">Stat tiles (dashboard hero · admin)</h2>
       <div class="ttm-tiles">
