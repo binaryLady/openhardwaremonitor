@@ -29,15 +29,24 @@ no Visual Studio required):
 **macOS / Linux — the agent** (`agent/serve.js`, no dependencies): the
 desktop application's driver and WinForms layers are Windows-only, so
 other platforms run a small Node agent that serves the same dashboard
-and speaks the same `/data.json` contract from what the OS exposes
-without privileges (CPU load per core, clocks, memory):
+and speaks the same `/data.json` contract:
 
 ```sh
-node agent/serve.js        # http://localhost:8085/
+node agent/serve.js            # http://localhost:8085/
+node agent/serve.js --open     # …and open the browser
+node agent/serve.js install    # start at login (launchd / systemd user unit)
 ```
 
-Temperatures and fans aren't faked when the platform gates them behind
-root; the dashboard renders what the tree carries.
+Sensors arrive in **honesty tiers** — each additive, none faked; the
+dashboard renders what the tree carries:
+
+1. *Out of the box, no privileges* — per-core CPU load, clocks, memory
+   everywhere; on a Mac laptop also battery temperature and charge
+   (`ioreg`); on Linux every `/sys/class/hwmon` temperature and fan.
+2. *Helper tool on PATH* (macOS) — `brew install smctemp` (or
+   `osx-cpu-temp` on Intel) adds CPU/GPU temperatures and fans.
+3. *Root* (macOS) — `sudo node agent/serve.js` adds `powermetrics`
+   fidelity: CPU die temperature, fan RPM, package power.
 
 Ten theme worlds × light and dark modes — twenty variants, one token
 layer, all WCAG-AA-checked by the in-browser bench. A sample:

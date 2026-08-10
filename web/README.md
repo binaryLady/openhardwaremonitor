@@ -71,7 +71,8 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 ## Data contract
 
 The embedded server's `/data.json` (`Utilities/HttpServer.cs`,
-`GenerateJSON`) is a pre-order tree of
+`GenerateJSON`) — also produced by the cross-platform agent
+(`agent/serve.js`) on macOS/Linux — is a pre-order tree of
 `{id, Text, Children[], Min, Value, Max, ImageURL}` where **every value is a
 preformatted display string** — `"52.0 °C"`, `"1,234 RPM"`. The dashboard
 parses numbers back out for meters and thresholds but always shows the
