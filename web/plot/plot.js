@@ -111,29 +111,37 @@
   }
 
   var pickerDrawn = false;
-  window.OHMFeed.start(function (root) {
-    gui = prefs.get();
-    var blocks = flatten(root);
-    blocks.forEach(function (b) {
-      b.sensors.forEach(function (s) {
-        var key = b.name + '/' + s.group + '/' + s.name;
-        remember(key, s.n);
-        lastVal.set(key, s.value);
-        names.set(key, s.name);
+  window.OHMFeed.wire({
+    urlInput: $('#src-url'),
+    connectBtn: $('#connect'),
+    demoBtn: $('#demo'),
+    onData: function (root) {
+      gui = prefs.get();
+      var blocks = flatten(root);
+      blocks.forEach(function (b) {
+        b.sensors.forEach(function (s) {
+          var key = b.name + '/' + s.group + '/' + s.name;
+          remember(key, s.n);
+          lastVal.set(key, s.value);
+          names.set(key, s.name);
+        });
       });
-    });
-    // the picker re-renders per poll for live values; focus on a toggle
-    // survives because rows rebuild only when the shape changes
-    if (!pickerDrawn || !document.activeElement ||
-        !$('#picker').contains(document.activeElement)) {
-      renderPicker(blocks);
-      pickerDrawn = true;
-    }
-    draw();
-  }, function (txt, tone) {
-    var st = $('#status');
-    st.textContent = txt;
-    st.className = 'ttm-badge' +
-      (tone === 'ok' ? ' ttm-badge--live' : tone === 'bad' ? ' ttm-badge--danger' : '');
+      // the picker re-renders per poll for live values; focus on a toggle
+      // survives because rows rebuild only when the shape changes
+      if (!pickerDrawn || !document.activeElement ||
+          !$('#picker').contains(document.activeElement)) {
+        renderPicker(blocks);
+        pickerDrawn = true;
+      }
+      draw();
+    },
+    onStatus: function (txt, tone) {
+      var st = $('#status');
+      st.textContent = txt;
+      st.className = 'ttm-badge' +
+        (tone === 'ok' ? ' ttm-badge--live' : tone === 'bad' ? ' ttm-badge--danger' : '');
+      if (txt === 'no machine') $('#picker').innerHTML =
+        '<p class="ttm-note">Not connected — enter your machine’s data.json URL above, or load demo data.</p>';
+    },
   });
 })();

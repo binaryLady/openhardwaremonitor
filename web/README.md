@@ -51,7 +51,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `index.html` | the page: source bar, sensor grid, map-bridge receipt |
 | `parse.js` | **pure sensor core** (`window.OHMParse`): display-string parsing, tree flattening, thresholds, meter scaling |
 | `gui-core.js` | **pure GUI core** (`window.OHMGui`): the desktop application's features — Fahrenheit display, Save Report, hide/rename/plot prefs, column layout |
-| `feed.js` | **shared satellite feed** (`window.OHMFeed`): resolves the dashboard's source (demo/live), polls, pauses when hidden |
+| `feed.js` | **shared app feed** (`window.OHMFeed`): the saved machine loads live, demo only when explicitly chosen, otherwise the route asks to connect; wires the srcbar every route carries |
 | `plot/` · `gadget/` · `report/` | the desktop windows as routes: PlotPanel, SensorGadget, ReportForm — same feed, shared preferences |
 | `bridge.js` | **map bridge** (`window.OHMBridge`): SpaceAPI v14 fragment for Maps of Making |
 | `dashboard.js` | rendering + data flow: polling, status, toasts, shortcuts |

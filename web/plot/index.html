@@ -22,8 +22,14 @@
   <header class="ttm-header">
     <h1>Plot <span class="gradient-text-rainbow">· time series</span></h1>
     <span class="ttm-crumb">the app's plot window — pick sensors, watch them move</span>
-    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
   </header>
+
+  <div class="ttm-srcbar">
+    <input type="url" class="ttm-input" id="src-url" placeholder="http://machine:8085/data.json" aria-label="Open Hardware Monitor data URL">
+    <button class="ttm-btn-primary" id="connect">Connect</button>
+    <button class="ttm-btn-outline" id="demo">Demo data</button>
+    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
+  </div>
 
   <div class="ttm-grid ttm-grid--wide">
     <section class="ttm-card full" aria-labelledby="h-plot">

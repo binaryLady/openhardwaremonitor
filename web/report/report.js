@@ -6,14 +6,22 @@
   var toast = function (m, o) { if (window.TTMToast) TTMToast.show(m, o || {}); };
   var text = '';
 
-  window.OHMFeed.start(function (root) {
-    text = window.OHMGui.report(root, new Date().toISOString());
-    $('#report').textContent = text;
-  }, function (txt, tone) {
-    var st = $('#status');
-    st.textContent = txt;
-    st.className = 'ttm-badge' +
-      (tone === 'ok' ? ' ttm-badge--live' : tone === 'bad' ? ' ttm-badge--danger' : '');
+  window.OHMFeed.wire({
+    urlInput: $('#src-url'),
+    connectBtn: $('#connect'),
+    demoBtn: $('#demo'),
+    onData: function (root) {
+      text = window.OHMGui.report(root, new Date().toISOString());
+      $('#report').textContent = text;
+    },
+    onStatus: function (txt, tone) {
+      var st = $('#status');
+      st.textContent = txt;
+      st.className = 'ttm-badge' +
+        (tone === 'ok' ? ' ttm-badge--live' : tone === 'bad' ? ' ttm-badge--danger' : '');
+      if (txt === 'no machine') $('#report').textContent =
+        '— not connected — enter your machine’s data.json URL above, or load demo data —';
+    },
   });
 
   $('#download').addEventListener('click', function () {

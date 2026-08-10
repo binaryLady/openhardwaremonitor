@@ -22,8 +22,14 @@
   <header class="ttm-header">
     <h1>Report <span class="gradient-text-rainbow">· hardware snapshot</span></h1>
     <span class="ttm-crumb">the app's Save Report — the whole tree as plain text</span>
-    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
   </header>
+
+  <div class="ttm-srcbar">
+    <input type="url" class="ttm-input" id="src-url" placeholder="http://machine:8085/data.json" aria-label="Open Hardware Monitor data URL">
+    <button class="ttm-btn-primary" id="connect">Connect</button>
+    <button class="ttm-btn-outline" id="demo">Demo data</button>
+    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
+  </div>
 
   <section class="ttm-card full" aria-labelledby="h-report">
     <h2 class="ttm-card__title" id="h-report">Report</h2>
