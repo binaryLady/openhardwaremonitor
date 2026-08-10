@@ -406,7 +406,13 @@
     function toHex(c){
       if (/^#([0-9a-f]{6})$/i.test(c)) return c;
       var m = c.match(/\d+/g);
-      if (!m) return '#000000';
+      // parse failure falls back to the ink token, not a hardcoded hex,
+      // so even this path stays token-sourced (no recursion: only a
+      // known-hex token value is accepted)
+      if (!m) {
+        var ink = cssVar('--ttm-text');
+        return /^#([0-9a-f]{6})$/i.test(ink) ? ink : '#000000';
+      }
       return '#' + m.slice(0,3).map(function(v){ return (+v).toString(16).padStart(2,'0'); }).join('');
     }
 
