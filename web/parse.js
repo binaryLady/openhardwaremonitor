@@ -47,6 +47,14 @@
             }));
           } else if (child.Children && child.Children.length) {
             walkHw(child); // sub-hardware (e.g. SuperIO chip under mainboard)
+          } else if (categoryOf(child)) {
+            // leaf sensor sitting directly under the hardware node — the
+            // app's tree renders every node, so the skin drops none either
+            block.sensors.push({
+              name: child.Text, cat: categoryOf(child), group: '',
+              value: child.Value, min: child.Min, max: child.Max,
+              n: num(child.Value), nMin: num(child.Min), nMax: num(child.Max)
+            });
           }
         });
         if (block.sensors.length) blocks.push(block);
