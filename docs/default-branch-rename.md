@@ -1,9 +1,10 @@
 # Default branch: `main` (migrated from `master`)
 
 `main` was created 2026-08-10 at the identical tip of `master`
-(d7010e9); open PRs were retargeted to `main`. The tree itself has no
-hard references to the branch name (no CI workflows; `build-web.sh` and
-`vercel.json` are branch-agnostic), so the migration is settings-only.
+(d7010e9); open PRs were retargeted to `main`. At migration time the
+tree had no hard references to the branch name, so the switch was
+settings-only. (The CI workflows added since — `web-tests.yml`,
+`windows-build.yml` — already target `main`.)
 
 ## Remaining steps (repo admin, in order)
 
