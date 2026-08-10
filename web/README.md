@@ -36,7 +36,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
   sensors from a seeded generator; the same seed gives every student the
   same bytes for reproducible exercises.
 - **Design-system reference** — `/components/` shows the whole TTM stack
-  end to end; `/test/` proves it (109 checks, incl. WCAG contrast across
+  end to end; `/test/` proves it (117 checks, incl. WCAG contrast across
   all twenty theme variants); the token layer whitelabels from Mission
   Control's editor — live preview, save on device, or publish site-wide
   via `ohm_site_config`.
@@ -57,10 +57,9 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `dashboard.js` | rendering, GUI features, shortcuts — it owns no poll path of its own; data arrives from `feed.js` |
 | `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape, read through the same path a machine is |
 | `ttm/` | the TTM stack: tokens, components, site chrome + theme switcher (`theme.js`), whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
-| `rfq/` | Generate RFQ: job form → composed RFQ document → email/copy. Carries the workshop's real machine from the feed; a demo-backed RFQ says so in the document |
 | `admin/` | Mission Control: tiered operator page (visitor/operator) |
 | `components/` | end-to-end gallery of the component stack (unlisted) |
-| `test/` | the bench: 109 assertions, runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
+| `test/` | the bench: 117 assertions, runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
 | `404.html` / `500.html` | error surfaces, same stack and chrome |
 
 ## Data contract
@@ -150,7 +149,8 @@ in a field.
 | <kbd>m</kbd> | flip light/dark mode (site-wide) |
 | <kbd>Esc</kbd> | pause polling |
 | <kbd>?</kbd> | open / close the site menu (focus moves in) |
-| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>r</kbd>/<kbd>p</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / RFQ / plot / test bench / mission control / Maps of Making |
+| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>p</kbd>/<kbd>g</kbd>/<kbd>r</kbd> | go to dashboard / plot / gadget / report |
+| <kbd>g</kbd> then <kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to test bench / mission control / Maps of Making |
 | <kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>j</kbd>/<kbd>k</kbd> | move between device cards in the sensor tree |
 | <kbd>Home</kbd>/<kbd>End</kbd> | first / last device card |
 | <kbd>←</kbd>/<kbd>→</kbd> | collapse / expand the focused card |
@@ -236,7 +236,7 @@ at the top of `bridge.js`):
 
 ## Tests
 
-Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 109
+Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 117
 assertions: the TTM stack (tokens incl. the full theme-able vocabulary,
 the whitelabel loader and runtime, legacy theme selectors, toasts, gate,
 telemetry), WCAG 2.1 contrast computed from live tokens across all

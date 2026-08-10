@@ -26,7 +26,6 @@
   var ROUTES = [
     { href: '/',         name: 'Dashboard',       desc: 'live hardware sensors' },
     { href: '/?demo=1',  name: 'Demo feed',       desc: 'animated mock sensor data' },
-    { href: '/rfq/',     name: 'Generate RFQ',    desc: 'request a quote from this workshop' },
     { group: 'App views' },
     { href: '/plot/',    name: 'Plot',            desc: 'time series of chosen sensors' },
     { href: '/gadget/',  name: 'Gadget',          desc: 'compact readout — kiosk friendly' },
@@ -227,8 +226,10 @@
     html += '<div class="ttm-menu__keys" aria-label="Keyboard shortcuts">' +
       '<kbd>?</kbd> open this menu &nbsp; <kbd>Esc</kbd> close &nbsp; ' +
       '<kbd>t</kbd> next theme &nbsp; <kbd>m</kbd> light/dark<br>' +
-      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>r</kbd> RFQ · <kbd>p</kbd> plot · ' +
-      '<kbd>t</kbd> test bench · <kbd>a</kbd> mission control · <kbd>m</kbd> maps of making<br>' +
+      '<kbd>g</kbd> then <kbd>d</kbd> dashboard · <kbd>p</kbd> plot · <kbd>g</kbd> gadget · ' +
+      '<kbd>r</kbd> report<br>' +
+      '<kbd>g</kbd> then <kbd>t</kbd> test bench · <kbd>a</kbd> mission control · ' +
+      '<kbd>m</kbd> maps of making<br>' +
       'dashboard: <kbd>d</kbd> demo · <kbd>/</kbd> connect · <kbd>Esc</kbd> pause · ' +
       '<kbd>\u2191</kbd><kbd>\u2193</kbd> sensor cards<br>' +
       '<kbd>Tab</kbd> from the top reaches a skip-to-content link on every page</div>';
@@ -341,8 +342,8 @@
     // a consumed chord key (g-then-t) arrives at page handlers with
     // defaultPrevented set, and they must skip it (dashboard.js does).
     var pendingG = 0;
-    var CHORD_ROUTES = { d: '/', r: '/rfq/', t: '/test/', a: '/admin/',
-      p: '/plot/', m: 'https://maps.thetechmargin.com/' };
+    var CHORD_ROUTES = { d: '/', p: '/plot/', g: '/gadget/', r: '/report/',
+      t: '/test/', a: '/admin/', m: 'https://maps.thetechmargin.com/' };
     document.addEventListener('keydown', function (e) {
       var tag = (document.activeElement && document.activeElement.tagName) || '';
       if (/INPUT|TEXTAREA|SELECT/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
