@@ -110,6 +110,17 @@ pause outlives a tab switch.
   transform on the server's own strings (<kbd>u</kbd>).
 - **Save Report** (`ReportForm.cs`) — a plain-text report of the whole
   tree, downloaded client-side.
+- **Submit Report** (`ReportForm.cs` → `sendButton_Click`, on `/report/`) —
+  the application's own submission to the project: the report plus an
+  optional comment and email, posted form-urlencoded to
+  `openhardwaremonitor.org/report.php` as `type=hardware` with the app's
+  version. The payload is byte-for-byte what the desktop app posts
+  (bench-pinned). Two honest limits: the endpoint is http-only, so an
+  https page says the browser blocks it and offers the submission to copy
+  rather than a button that cannot work; and the endpoint sends no CORS
+  headers, so a completed request is reported as *sent*, never as
+  confirmed-delivered. Reports carry a `Source:` line noting they were
+  built from `data.json` by the web dashboard.
 - **Reset Min/Max** — clears the local reading history; live min/max
   columns come from the server and reset with it.
 

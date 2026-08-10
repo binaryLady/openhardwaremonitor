@@ -40,6 +40,27 @@
     <pre class="ttm-receipt ttm-gap-top" id="report">— waiting for the feed —</pre>
   </section>
 
+  <section class="ttm-card full" aria-labelledby="h-submit">
+    <h2 class="ttm-card__title" id="h-submit">Submit to the project</h2>
+    <p class="ttm-note">The application's own <b>File → Submit Report</b>: sends the report
+    above to the Open Hardware Monitor project at
+    <code id="submit-endpoint">openhardwaremonitor.org</code>, which is how unrecognised
+    hardware gets support added. Both fields are optional — the email is only so the
+    project can reply to you.</p>
+    <div class="ttm-form">
+      <label class="ttm-note" for="submit-comment">additional information (optional)</label>
+      <textarea class="ttm-input" id="submit-comment" maxlength="2000" rows="3"
+        placeholder="what hardware is missing or misreported, what you expected…"></textarea>
+      <label class="ttm-note" for="submit-email">your email (optional)</label>
+      <input class="ttm-input" id="submit-email" type="email" maxlength="200" autocomplete="email">
+    </div>
+    <div class="ttm-row">
+      <button class="ttm-btn-primary" id="submit-send">Send report</button>
+      <button class="ttm-btn-outline" id="submit-copy">Copy submission</button>
+    </div>
+    <p class="ttm-note" id="submit-note"></p>
+  </section>
+
   <footer class="ttm-footer">the report window, served as a route · regenerated on every poll</footer>
 </main>
 

@@ -445,6 +445,28 @@ window.addEventListener('load', function () {
            /\+- .+ : .+ \(min .+ \/ max .+\)/.test(r1)
       ? true : 'report unstable or missing columns';
   });
+  t('gui: submit payload matches the app (GUI/ReportForm.cs sendButton_Click)', function () {
+    var p = G.submitPayload('REPORT', 'hi', 'a@b.c');
+    var keys = Object.keys(p).sort().join(',');
+    // the five fields the application posts, and its own endpoint/version
+    return keys === 'comment,email,report,type,version' &&
+      p.type === 'hardware' && p.version === '0.9.6.0' &&
+      p.report === 'REPORT' && p.comment === 'hi' && p.email === 'a@b.c' &&
+      G.SUBMIT_ENDPOINT === 'http://openhardwaremonitor.org/report.php'
+      ? true : keys + ' / ' + p.version + ' / ' + G.SUBMIT_ENDPOINT;
+  });
+  t('gui: submission encodes as form-urlencoded, empty optionals included', function () {
+    var enc = G.encodeForm(G.submitPayload('a b&c', '', ''));
+    return enc.indexOf('type=hardware') === 0 &&
+      enc.indexOf('report=a%20b%26c') !== -1 &&
+      enc.indexOf('comment=') !== -1 && enc.indexOf('email=') !== -1
+      ? true : enc;
+  });
+  t('gui: an https page reports the http endpoint as blocked, not broken', function () {
+    var r = G.submitBlockedReason();
+    var expect = location.protocol === 'https:' ? 'mixed-content' : null;
+    return r === expect ? true : 'got ' + r + ' on ' + location.protocol;
+  });
   t('gui: prefs round-trip through an injected store; toggleIn flips membership', function () {
     var fake = (function () { var m = {}; return {
       getItem: function (k) { return m[k] || null; },
