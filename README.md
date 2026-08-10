@@ -2,8 +2,10 @@
 
 This fork adds a static web dashboard for Open Hardware Monitor's embedded
 sensor server, together with a tokenized design system, a whitelabel layer,
-and a SpaceAPI publishing bridge. All additions live under [`web/`](web/);
-the C# application is unmodified.
+and a SpaceAPI publishing bridge. All additions live under [`web/`](web/).
+The desktop application embeds and serves this dashboard itself (replacing
+the legacy jQuery web UI), so `http://localhost:<port>/` opens the TTM app
+with live data; the C# sensor code and `/data.json` contract are unchanged.
 
 Demo deployment: **https://ohm.thetechmargin.com** — `?demo=1` loads a
 generated 32-sensor feed, so no hardware or install is required to evaluate
@@ -39,7 +41,7 @@ layer, all WCAG-AA-checked by the in-browser bench. A sample:
   [OKW](https://github.com/iop-alliance/OpenKnowWhere) manufacturing
   capabilities, for registration on
   [Maps of Making](https://maps.thetechmargin.com).
-- **Test bench** (`web/test/`) — 100 in-browser assertions covering the
+- **Test bench** (`web/test/`) — 120 in-browser assertions covering the
   sensor core, the bridge (including the extension contracts), theming,
   the whitelabel runtime, and WCAG contrast computed from live token
   values. Runs from `file://` or the deployed site; no build step.

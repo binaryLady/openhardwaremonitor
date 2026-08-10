@@ -59,9 +59,11 @@ Two layers, personal always winning:
 
 ## Brand reference
 
-Brand colors, radius (`0.7rem`), and the Poppins / Pacifico / Geist Mono
+Brand colors, radius (`0.7rem`), and the Poppins / Pacifico / mono
 stacks are identical across all worlds and match
-`brand-globals-export.css` (brand.thetechmargin.com). Only surfaces and
+`brand-globals-export.css` (brand.thetechmargin.com). Geist Mono leads
+the mono token stack, but the chrome loads JetBrains Mono (`theme.js`)
+as the fetched face, so that is what usually renders. Only surfaces and
 inks differ per world; component shapes never change with the theme.
 
 ## Accessibility

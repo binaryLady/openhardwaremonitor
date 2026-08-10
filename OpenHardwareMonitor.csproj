@@ -255,47 +255,98 @@
     <EmbeddedResource Include="Resources\factor.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\js\jquery-ui-1.8.16.custom.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\jquery.tmpl.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\jquery.treeTable.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\ohm_web.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\images\toggle-collapse-dark.png" />
-    <EmbeddedResource Include="Resources\Web\images\toggle-collapse-light.png" />
-    <EmbeddedResource Include="Resources\Web\images\toggle-expand-dark.png" />
-    <EmbeddedResource Include="Resources\Web\images\toggle-expand-light.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_75_dadada_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_glass_75_ffffff_1x400.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-bg_inset-soft_95_fef1ec_1x100.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_222222_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_2e83ff_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_454545_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_888888_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\images\ui-icons_cd0a0a_256x240.png" />
-    <EmbeddedResource Include="Resources\Web\css\custom-theme\jquery-ui-1.8.16.custom.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\css\jquery.treeTable.css" />
-    <EmbeddedResource Include="Resources\Web\css\ohm_web.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\index.html" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Web\images\transparent.png" />
   </ItemGroup>
+  <!-- The TTM web dashboard (web/) embedded as the served UI. LogicalName
+       mirrors each file's URL path so HttpServer can look resources up
+       verbatim (hyphens included). web/ stays the single source of truth;
+       test/ and admin/ are site-ops surfaces and are not embedded. -->
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Web\js\jquery-1.7.2.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\knockout-2.1.0.min.js" />
-    <EmbeddedResource Include="Resources\Web\js\knockout.mapping-latest.min.js" />
+    <EmbeddedResource Include="web\index.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.index.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\404.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.404.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\500.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.500.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\dashboard.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.dashboard.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\feed.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.feed.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\parse.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.parse.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\gui-core.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.gui-core.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\bridge.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.bridge.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\demo-data.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.demo-data.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\favicon.ico">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.favicon.ico</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\icon.svg">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.icon.svg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\apple-icon.png">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.apple-icon.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="web\ttm\tokens.css">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.ttm.tokens.css</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\components.css">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.ttm.components.css</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\config.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.ttm.config.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\theme.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.ttm.theme.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\brand.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.ttm.brand.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\toast.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.ttm.toast.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\ttm\stack.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.ttm.stack.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\vendor\supabase.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.vendor.supabase.js</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="web\plot\index.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.plot.index.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\plot\plot.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.plot.plot.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\gadget\index.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.gadget.index.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\gadget\gadget.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.gadget.gadget.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\report\index.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.report.index.html</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\report\report.js">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.report.report.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="web\components\index.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.components.index.html</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ram.png" />
