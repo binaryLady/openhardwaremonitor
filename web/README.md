@@ -66,6 +66,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `admin/` | Mission Control: tiered operator page (visitor/operator) |
 | `components/` | end-to-end gallery of the component stack (unlisted) |
 | `test/` | the bench: 120 assertions at runtime (81 registered cases; the contrast suite expands across all 20 theme×mode variants), runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
+| `get/` | per-platform install page: Windows build artifact, macOS/Linux agent commands |
 | `404.html` / `500.html` | error surfaces, same stack and chrome |
 
 ## Data contract
@@ -236,10 +237,14 @@ the full RPC surface.
 
 ## Publishing to open maps (SpaceAPI · Four Corners · IIIF)
 
-The map-bridge fragment (`bridge.js`) is a SpaceAPI v14 document: register
-its URL on Maps of Making and the machine appears as a space signal —
-activity as `state.open`, temperatures and fans as `sensors`, refreshed by
-the heartbeat. Two open protocols ride along as `ext_*` extensions,
+The map-bridge fragment (`bridge.js`) is a SpaceAPI v14 document —
+activity as `state.open`, temperatures and fans as `sensors`. Two ways to
+publish: the cross-platform agent serves it **live** at `/spaceapi`
+(`agent/serve.js` runs the same pure `bridge.js` server-side, fresh
+sensors on every request; optional `agent/bridge-meta.json` supplies the
+meta) — register that URL on Maps of Making. Or *Copy JSON* on the
+dashboard for a static snapshot to host anywhere; a snapshot does not
+update itself. Two open protocols ride along as `ext_*` extensions,
 configured per site via `window.OHM_BRIDGE_META` (see the shape documented
 at the top of `bridge.js`):
 

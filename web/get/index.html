@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" data-ttm-theme="ttm">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Get the app — Hardware</title>
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" href="/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-icon.png" />
+<link rel="stylesheet" href="/ttm/tokens.css" />
+<link rel="stylesheet" href="/ttm/components.css" />
+<script src="/ttm/config.js"></script>
+<script src="/vendor/supabase.js"></script>
+<script src="/ttm/theme.js"></script>
+<script src="/ttm/brand.js"></script>
+<script src="/ttm/toast.js"></script>
+<script src="/ttm/stack.js"></script>
+</head>
+<body class="ttm-page">
+<a class="ttm-skip" href="#main">Skip to content</a>
+<main class="ttm-main" id="main" tabindex="-1">
+  <header class="ttm-header">
+    <h1>Get the app <span class="gradient-text-rainbow">· run it on your machine</span></h1>
+    <span class="ttm-crumb">live sensors need the app beside the hardware — pick your platform</span>
+  </header>
+
+  <div class="ttm-grid">
+    <section class="ttm-card" aria-labelledby="h-win">
+      <h2 class="ttm-card__title" id="h-win">Windows — the full application</h2>
+      <p class="ttm-note">The desktop app: WinForms GUI, ring-0 sensor drivers
+        (temperatures, fans, voltages, clocks, loads), and this dashboard served
+        built-in at <code>localhost:8085</code>.</p>
+      <ol class="ttm-note">
+        <li>Download the <strong>OpenHardwareMonitor</strong> artifact from the
+          latest <a href="https://github.com/binaryLady/openhardwaremonitor/actions/workflows/windows-build.yml">windows
+          build</a> run (GitHub sign-in required for artifact downloads).</li>
+        <li>Unzip and run <code>OpenHardwareMonitor.exe</code> as Administrator.</li>
+        <li>Enable <strong>Options → Remote Web Server → Run</strong>.</li>
+        <li>Open <code>http://localhost:8085/</code> — this dashboard, live.</li>
+      </ol>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="h-mac">
+      <h2 class="ttm-card__title" id="h-mac">macOS — the agent</h2>
+      <p class="ttm-note">A dependency-free Node agent serves this dashboard and
+        your Mac's sensors. Out of the box: CPU load, clocks, memory, battery
+        temperature &amp; charge. <code>brew install smctemp</code> adds CPU/GPU
+        temperatures; <code>sudo</code> adds powermetrics fidelity (die
+        temperature, fans, package power). Nothing is faked — each tier reports
+        only what it can read.</p>
+      <pre class="ttm-receipt" id="cmd-mac">git clone https://github.com/binaryLady/openhardwaremonitor.git
+cd openhardwaremonitor
+node agent/serve.js --open</pre>
+      <div class="ttm-row">
+        <button class="ttm-btn-outline" data-copy="cmd-mac">Copy commands</button>
+      </div>
+      <p class="ttm-note">Start at login: <code>node agent/serve.js install</code>
+        (writes a launchd agent; <code>uninstall</code> reverses it).</p>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="h-linux">
+      <h2 class="ttm-card__title" id="h-linux">Linux — the agent</h2>
+      <p class="ttm-note">The same agent, reading every temperature and fan the
+        kernel exposes in <code>/sys/class/hwmon</code> — no root needed.</p>
+      <pre class="ttm-receipt" id="cmd-linux">git clone https://github.com/binaryLady/openhardwaremonitor.git
+cd openhardwaremonitor
+node agent/serve.js --open</pre>
+      <div class="ttm-row">
+        <button class="ttm-btn-outline" data-copy="cmd-linux">Copy commands</button>
+      </div>
+      <p class="ttm-note">Start at login: <code>node agent/serve.js install</code>
+        (systemd user unit).</p>
+    </section>
+
+    <section class="ttm-card" aria-labelledby="h-map">
+      <h2 class="ttm-card__title" id="h-map">On the map</h2>
+      <p class="ttm-note">The agent also serves a live SpaceAPI fragment at
+        <code>/spaceapi</code> — activity as <code>state.open</code>,
+        temperatures and fans as sensors, fresh on every request. Register that
+        URL on <a href="https://maps.thetechmargin.com/">Maps of Making</a> and
+        the machine is a living space signal.</p>
+    </section>
+  </div>
+
+  <footer class="ttm-footer">one contract everywhere · the dashboard is the same
+    file on Windows, macOS, Linux, and this site</footer>
+</main>
+<script>
+  (function () {
+    'use strict';
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var src = document.getElementById(btn.getAttribute('data-copy'));
+        navigator.clipboard.writeText(src.textContent).then(function () {
+          if (window.TTMToast) TTMToast.show('Commands copied.', { type: 'success' });
+        }, function () {
+          if (window.TTMToast) TTMToast.show('Copy failed — select the text instead.', { type: 'error' });
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

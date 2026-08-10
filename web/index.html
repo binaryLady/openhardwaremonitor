@@ -92,8 +92,10 @@
       <details class="ttm-details">
         <summary><h2 class="ttm-card__title" id="h-map">Map bridge — publish this machine as a space signal</h2></summary>
         <p class="ttm-note">Generates a SpaceAPI-style fragment from the live sensors: the machine's activity
-        becomes <code>state.open</code>, temperatures and fans become <code>sensors</code>. Host it at a URL
-        you control and register it on Maps of Making — the heartbeat does the rest.</p>
+        becomes <code>state.open</code>, temperatures and fans become <code>sensors</code>. Two ways to
+        publish: the cross-platform agent serves it <em>live</em> at <code>/spaceapi</code> — register that
+        URL on Maps of Making and every request reads fresh sensors — or <em>Copy JSON</em> below for a
+        snapshot to host anywhere (a static copy doesn't update itself).</p>
         <pre class="ttm-receipt" id="bridge">— connect or load demo data first —</pre>
         <div class="ttm-row">
           <button class="ttm-btn-outline" id="copy-bridge" disabled>Copy JSON</button>

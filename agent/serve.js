@@ -160,6 +160,30 @@ function renumber(n, next) {
   return next;
 }
 
+// ---- live SpaceAPI fragment -------------------------------------------
+
+// The dashboard's map bridge (web/bridge.js, pure and DOM-free) runs
+// server-side here, so /spaceapi is a *living* signal — fresh sensors on
+// every request — instead of a copied snapshot. Optional agent/
+// bridge-meta.json supplies location/contact/imagery/capabilities meta.
+let BRIDGE;
+function loadBridge() {
+  if (BRIDGE !== undefined) return BRIDGE;
+  try {
+    const w = {};
+    for (const f of ['parse.js', 'bridge.js'])
+      new Function('window', fs.readFileSync(path.join(ROOT, f), 'utf8'))(w);
+    BRIDGE = w.OHMBridge || null;
+  } catch (e) { BRIDGE = null; }
+  return BRIDGE;
+}
+
+function bridgeMeta() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'bridge-meta.json'), 'utf8'));
+  } catch (e) { return {}; }
+}
+
 // ---- lifecycle: start at login ----------------------------------------
 
 const PLIST = path.join(os.homedir(), 'Library', 'LaunchAgents',
@@ -236,6 +260,17 @@ function serve() {
         'Access-Control-Allow-Origin': '*',
       });
       res.end(body);
+      return;
+    }
+    if (p === '/spaceapi') {
+      const bridge = loadBridge();
+      if (!bridge) { res.writeHead(404); res.end(); return; }
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+      });
+      res.end(bridge.json(buildTree(), bridgeMeta()));
       return;
     }
     if (p.endsWith('/')) p += 'index.html';

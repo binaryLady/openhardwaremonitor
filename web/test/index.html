@@ -792,7 +792,7 @@ window.addEventListener('load', function () {
   var standardizationSweep = Promise.all(
     ['/index.html', '/admin/index.html', '/components/index.html',
      '/plot/index.html', '/gadget/index.html', '/report/index.html',
-     '/404.html', '/500.html']
+     '/get/index.html', '/404.html', '/500.html']
     .map(function (u) { return fetch(u).then(function (r) { return r.text(); })
       .then(function (html) {
         var styleBlocks = (html.match(/<style>/g) || []).length;

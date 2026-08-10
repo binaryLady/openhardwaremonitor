@@ -347,6 +347,9 @@
     <EmbeddedResource Include="web\components\index.html">
       <LogicalName>OpenHardwareMonitor.Resources.Web.components.index.html</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="web\get\index.html">
+      <LogicalName>OpenHardwareMonitor.Resources.Web.get.index.html</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ram.png" />
