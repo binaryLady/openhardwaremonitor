@@ -21,8 +21,15 @@
   let mode = 'idle'; // idle | demo | live
   let lastTree = null;
 
-  // parsing + thresholds live in parse.js (window.OHMParse)
+  // parsing + thresholds live in parse.js (window.OHMParse);
+  // the desktop GUI's features (units, report, hide/rename/plot, columns)
+  // live in gui-core.js (window.OHMGui) as pure logic
   const { flatten, stateOf, meterPct } = window.OHMParse;
+  const GUI = window.OHMGui;
+  const prefs = GUI.makePrefs(localStorage);
+  let gui = prefs.get();
+  let manage = false; // manage mode is a session posture, not a preference
+  const unit = s => GUI.toDisplay(s, gui.unit);
 
   // ---- history + sparklines ----------------------------------------------
   // Ring buffer of the last N numeric readings per sensor — polling already
@@ -98,6 +105,9 @@
       card.appendChild(sum);
       let lastGroup = null;
       block.sensors.forEach(s => {
+        const key = block.name + '/' + s.group + '/' + s.name;
+        const hidden = gui.hidden.indexOf(key) !== -1;
+        if (hidden && !gui.showHidden) return; // View → Show Hidden Sensors
         if (s.group !== lastGroup) {
           lastGroup = s.group;
           if (s.group) {
@@ -109,25 +119,39 @@
         }
         const row = document.createElement('div');
         const st = stateOf(s);
-        row.className = 'ttm-sensor' + (st ? ' ttm-sensor--' + st : '');
+        row.className = 'ttm-sensor' + (st ? ' ttm-sensor--' + st : '') +
+          (hidden ? ' is-hidden' : '');
         if (st) row.title = st === 'hot' ? 'above critical threshold' : 'above warning threshold';
         const pct = meterPct(s);
-        const key = block.name + '/' + s.group + '/' + s.name;
         const h = remember(key, s.n);
         const range = h && h.length > 1
           ? ' · last ' + h.length + ' readings ' + Math.min.apply(null, h) + '–' + Math.max.apply(null, h)
           : '';
+        const shown = gui.renames[key] || s.name; // custom name, original in title
+        const plotted = gui.plotted.indexOf(key) !== -1;
+        // manage mode folds the desktop's context menu into the name cell —
+        // inline SVG in currentColor (text glyphs render as emoji on mobile)
+        const ctl = !manage ? '' :
+          '<span class="ctl">' +
+          '<button type="button" class="ttm-minibtn" data-act="plot" data-key="' + esc(key) + '"' +
+            ' aria-pressed="' + plotted + '" title="Show in plot" aria-label="Show in plot">' + ICO.plot + '</button>' +
+          '<button type="button" class="ttm-minibtn" data-act="hide" data-key="' + esc(key) + '"' +
+            ' title="' + (hidden ? 'Unhide sensor' : 'Hide sensor') + '"' +
+            ' aria-label="' + (hidden ? 'Unhide sensor' : 'Hide sensor') + '">' +
+            (hidden ? ICO.eye : ICO.eyeOff) + '</button>' +
+          '<button type="button" class="ttm-minibtn" data-act="rename" data-key="' + esc(key) + '"' +
+            ' title="Rename sensor" aria-label="Rename sensor">' + ICO.pen + '</button></span>';
         row.innerHTML =
-          '<span class="nm" title="' + esc(s.name + range) + '">' + esc(s.name) + '</span>' +
+          '<span class="nm" title="' + esc(s.name + range) + '">' + esc(shown) + ctl + '</span>' +
           '<svg class="spark" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true"></svg>' +
           '<span class="meterbar" aria-hidden="true">' +
             (pct == null ? '' : '<i style="width:' + pct.toFixed(1) + '%"></i>') +
           '</span>' +
-          '<span class="val' + (lastVal.get(key) !== s.value ? ' is-fresh' : '') + '">' +
-            esc(s.value || '—') + '</span>' +
-          // the app's other two data columns, from the server's own strings
-          '<span class="mn" title="session minimum">' + esc(s.min || '—') + '</span>' +
-          '<span class="mx" title="session maximum">' + esc(s.max || '—') + '</span>';
+          // the app's toggleable data columns (View → Columns), server strings
+          (gui.cols.value ? '<span class="val' + (lastVal.get(key) !== s.value ? ' is-fresh' : '') + '">' +
+            esc(unit(s.value) || '—') + '</span>' : '') +
+          (gui.cols.min ? '<span class="mn" title="session minimum">' + esc(unit(s.min) || '—') + '</span>' : '') +
+          (gui.cols.max ? '<span class="mx" title="session maximum">' + esc(unit(s.max) || '—') + '</span>' : '');
         lastVal.set(key, s.value);
         sparkline(row.querySelector('.spark'), h, st);
         card.appendChild(row);
@@ -144,6 +168,14 @@
     return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/["\\]/g, '\\$&');
   }
 
+  // manage-mode icons — stroke/fill follow currentColor
+  const ICO = {
+    plot: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 12 6 8l3 2 5-6"/><circle cx="14" cy="4" r="1.4" fill="currentColor" stroke="none"/></svg>',
+    eye: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4S1.5 8 1.5 8Z"/><circle cx="8" cy="8" r="1.8"/></svg>',
+    eyeOff: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 8s2.5-4 6.5-4 6.5 4 6.5 4-2.5 4-6.5 4S1.5 8 1.5 8Z"/><path d="M3 13 13 3"/></svg>',
+    pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="m3 13 .8-3L11 2.8l2.2 2.2L6 12.2 3 13Z"/></svg>',
+  };
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g,
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -151,12 +183,16 @@
 
   // ---- data flow ----------------------------------------------------------
 
+  let lastSummary = null;
   function apply(root) {
     lastTree = root;
     render(root);
-    renderSummary(window.OHMParse.summarize(root));
+    lastSummary = window.OHMParse.summarize(root);
+    renderSummary(lastSummary);
     els.bridge.textContent = window.OHMBridge.json(root);
     els.copy.disabled = false;
+    drawPlot();
+    renderGadget();
   }
 
   function renderSummary(m) {
@@ -166,7 +202,7 @@
     st.textContent = m.active ? 'active' : 'idle';
     st.className = 'ttm-badge' + (m.active ? ' ttm-badge--success' : '');
     const hot = $('#m-hot');
-    hot.textContent = m.hottest ? m.hottest.value : '—';
+    hot.textContent = m.hottest ? unit(m.hottest.value) : '—';
     hot.className = 'ttm-tile__value' + (m.hottest && m.hottest.state ? ' ' + m.hottest.state : '');
     hot.title = m.hottest ? m.hottest.hw + ' / ' + m.hottest.name : '';
     const load = $('#m-load');
@@ -242,6 +278,224 @@
     timer = setInterval(() => poll(url), POLL_MS);
   }
 
+  // ---- GUI: the desktop application's features, TTM-dressed ---------------
+  const NS = 'http://www.w3.org/2000/svg';
+  const gels = {
+    plot: $('#gui-plot'), gadget: $('#gui-gadget'), manage: $('#gui-manage'),
+    reset: $('#gui-reset'), report: $('#gui-report'), unit: $('#gui-unit'),
+    hidden: $('#gui-hidden'), colV: $('#gui-col-value'),
+    colMin: $('#gui-col-min'), colMax: $('#gui-col-max'),
+    plotCard: $('#plot-card'), plotSvg: $('#plot'), legend: $('#plot-legend'),
+    gadgetBox: $('#gadget'), gadgetBody: $('#gadget-body'), gadgetClose: $('#gadget-close'),
+  };
+
+  function syncGui() {
+    document.body.classList.remove('gui-cols-3', 'gui-cols-4', 'gui-cols-5', 'gui-cols-6');
+    document.body.classList.add(GUI.colsClass(gui.cols));
+    document.body.classList.toggle('gui-manage', manage);
+    gels.plot.setAttribute('aria-pressed', String(gui.plot));
+    gels.plot.textContent = gui.plot ? 'Hide plot' : 'Show plot';
+    gels.gadget.setAttribute('aria-pressed', String(gui.gadget));
+    gels.gadget.textContent = gui.gadget ? 'Hide gadget' : 'Show gadget';
+    gels.manage.setAttribute('aria-pressed', String(manage));
+    gels.manage.textContent = manage ? 'Done managing' : 'Manage sensors';
+    gels.unit.checked = gui.unit === 'f';
+    gels.hidden.checked = !!gui.showHidden;
+    gels.colV.checked = !!gui.cols.value;
+    gels.colMin.checked = !!gui.cols.min;
+    gels.colMax.checked = !!gui.cols.max;
+    gels.plotCard.hidden = !gui.plot;
+    gels.gadgetBox.hidden = !gui.gadget;
+  }
+
+  function refresh() { if (lastTree) apply(lastTree); }
+
+  // resume polling without the demo toast (rename pauses, then resumes)
+  function resume() {
+    if (timer || mode === 'idle') return;
+    if (mode === 'demo') timer = setInterval(() => apply(window.OHM_DEMO()), POLL_MS);
+    else if (mode === 'live') {
+      const url = normalizeUrl(els.url.value);
+      if (url) timer = setInterval(() => poll(url), POLL_MS);
+    }
+  }
+
+  function sensorLabel(key) {
+    return gui.renames[key] || key.split('/').pop();
+  }
+
+  // Plot (GUI/PlotPanel.cs): every plotted sensor's ring buffer as a line;
+  // series normalize to their own range, the legend carries real values.
+  function drawPlot() {
+    if (!gels.plotSvg || !gui.plot) return;
+    const keys = gui.plotted.filter(k => hist.has(k) && hist.get(k).length > 1);
+    gels.plotSvg.replaceChildren();
+    gels.legend.textContent = '';
+    if (!keys.length) {
+      const note = document.createElement('span');
+      note.className = 'ttm-note';
+      note.textContent = gui.plotted.length
+        ? 'Waiting for readings…'
+        : 'No sensors plotted yet — use Manage sensors, then the chart button on a row.';
+      gels.legend.appendChild(note);
+      return;
+    }
+    const W = 600, H = 200, pad = 6;
+    keys.slice(0, 8).forEach((k, i) => {
+      const h = hist.get(k);
+      let min = Math.min.apply(null, h), max = Math.max.apply(null, h);
+      if (min === max) { min -= 1; max += 1; }
+      const x = j => pad + (W - 2 * pad) * (j / (h.length - 1));
+      const y = v => H - pad - (H - 2 * pad) * ((v - min) / (max - min));
+      const d = h.map((v, j) => (j ? 'L' : 'M') + x(j).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', d);
+      p.setAttribute('class', 'plot-line plot-s' + (i % 5));
+      gels.plotSvg.appendChild(p);
+      const chip = document.createElement('span');
+      chip.className = 'ttm-plotchip plot-s' + (i % 5);
+      const dot = document.createElement('i');
+      const label = document.createElement('span');
+      label.textContent = sensorLabel(k) + ' · ' + (unit(lastVal.get(k)) || '—');
+      chip.appendChild(dot); chip.appendChild(label);
+      gels.legend.appendChild(chip);
+    });
+  }
+
+  // Gadget (GUI/SensorGadget.cs): a compact always-visible readout of the
+  // plotted sensors — falls back to the view's hero figures.
+  function renderGadget() {
+    if (!gels.gadgetBody || !gui.gadget) return;
+    gels.gadgetBody.textContent = '';
+    const rows = [];
+    gui.plotted.forEach(k => {
+      const v = unit(lastVal.get(k));
+      if (v) rows.push([sensorLabel(k), v]);
+    });
+    if (!rows.length && lastSummary) {
+      if (lastSummary.hottest) rows.push([lastSummary.hottest.name, unit(lastSummary.hottest.value)]);
+      if (lastSummary.maxLoad) rows.push([lastSummary.maxLoad.name, lastSummary.maxLoad.value]);
+    }
+    if (!rows.length) {
+      const note = document.createElement('p');
+      note.className = 'ttm-note';
+      note.textContent = 'Connect or load demo data.';
+      gels.gadgetBody.appendChild(note);
+      return;
+    }
+    rows.slice(0, 8).forEach(r => {
+      const kv = document.createElement('div');
+      kv.className = 'ttm-kv';
+      const k = document.createElement('span'); k.className = 'k'; k.textContent = r[0];
+      const v = document.createElement('span'); v.className = 'v'; v.textContent = r[1];
+      kv.appendChild(k); kv.appendChild(v);
+      gels.gadgetBody.appendChild(kv);
+    });
+  }
+
+  function setUnit(u) {
+    gui = prefs.set({ unit: u });
+    syncGui(); refresh();
+    toast(u === 'f' ? 'Temperatures in Fahrenheit.' : 'Temperatures in Celsius.', { timeout: 2000 });
+  }
+  function togglePlotCard() {
+    gui = prefs.set({ plot: !gui.plot });
+    syncGui(); drawPlot();
+  }
+
+  gels.plot.addEventListener('click', togglePlotCard);
+  gels.gadget.addEventListener('click', () => {
+    gui = prefs.set({ gadget: !gui.gadget });
+    syncGui(); renderGadget();
+  });
+  gels.gadgetClose.addEventListener('click', () => {
+    gui = prefs.set({ gadget: false });
+    syncGui();
+  });
+  gels.manage.addEventListener('click', () => {
+    manage = !manage;
+    syncGui(); refresh();
+    if (manage) toast('Manage mode — plot, hide, or rename any sensor row.', { timeout: 3500 });
+  });
+  gels.reset.addEventListener('click', () => {
+    hist.clear();
+    refresh();
+    toast('Reading history reset. Live min/max columns come from the server and reset with it.',
+      { timeout: 4000 });
+  });
+  gels.report.addEventListener('click', () => {
+    if (!lastTree) { toast('Connect or load demo data first.', { type: 'warning' }); return; }
+    const text = GUI.report(lastTree, new Date().toISOString());
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    a.download = 'open-hardware-monitor-report.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    toast('Report saved.', { type: 'success' });
+  });
+  gels.unit.addEventListener('change', () => setUnit(gels.unit.checked ? 'f' : 'c'));
+  gels.hidden.addEventListener('change', () => {
+    gui = prefs.set({ showHidden: gels.hidden.checked });
+    refresh();
+  });
+  [['colV', 'value'], ['colMin', 'min'], ['colMax', 'max']].forEach(pair => {
+    gels[pair[0]].addEventListener('change', () => {
+      const cols = { value: gels.colV.checked, min: gels.colMin.checked, max: gels.colMax.checked };
+      gui = prefs.set({ cols: cols });
+      syncGui(); refresh();
+    });
+  });
+
+  // manage-mode row actions (event delegation survives poll re-renders)
+  els.tree.addEventListener('click', e => {
+    const btn = e.target.closest('.ttm-minibtn');
+    if (!btn) return;
+    const key = btn.dataset.key;
+    if (btn.dataset.act === 'plot') {
+      const added = prefs.toggleIn('plotted', key);
+      gui = prefs.get();
+      if (added && !gui.plot) gui = prefs.set({ plot: true });
+      syncGui(); refresh();
+      toast(added ? 'Plotting ' + sensorLabel(key) + '.' : 'Removed from plot.', { timeout: 2000 });
+    } else if (btn.dataset.act === 'hide') {
+      prefs.toggleIn('hidden', key);
+      gui = prefs.get();
+      refresh();
+    } else if (btn.dataset.act === 'rename') {
+      const row = btn.closest('.ttm-sensor');
+      const nm = row && row.querySelector('.nm');
+      if (!nm) return;
+      stop(); // hold the poll re-render while the name is being edited
+      const input = document.createElement('input');
+      input.className = 'ttm-input ttm-rename';
+      input.value = sensorLabel(key);
+      input.setAttribute('aria-label', 'Sensor name');
+      nm.replaceChildren(input);
+      input.focus(); input.select();
+      let closed = false;
+      const done = save => {
+        if (closed) return; // Enter triggers blur — settle once
+        closed = true;
+        if (save) {
+          const v = input.value.trim();
+          const renames = Object.assign({}, gui.renames);
+          if (v && v !== key.split('/').pop()) renames[key] = v;
+          else delete renames[key];
+          gui = prefs.set({ renames: renames });
+        }
+        // defer past the settling keystroke: re-rendering inside the Enter
+        // keydown moves focus onto a summary, which the same key then toggles
+        setTimeout(() => { resume(); refresh(); }, 0);
+      };
+      input.addEventListener('keydown', ev => {
+        ev.stopPropagation();
+        if (ev.key === 'Enter') done(true);
+        else if (ev.key === 'Escape') done(false);
+      });
+      input.addEventListener('blur', () => done(true));
+    }
+  });
+
   // ---- wiring -------------------------------------------------------------
 
   els.connect.addEventListener('click', startLive);
@@ -288,6 +542,8 @@
     if (/^(input|textarea|select)$/i.test(e.target.tagName)) return;
     if (e.key === 'd') { startDemo(); }
     else if (e.key === '/') { e.preventDefault(); els.url.focus(); }
+    else if (e.key === 'u') { setUnit(gui.unit === 'f' ? 'c' : 'f'); }
+    else if (e.key === 'p') { togglePlotCard(); }
     else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }
   });
 
@@ -302,6 +558,8 @@
     const saved = localStorage.getItem('ohm_src_url');
     if (saved && !els.url.value) els.url.value = saved;
   } catch (e) {}
+
+  syncGui(); // paint the persisted GUI state before any data arrives
 
   // ?demo=1 auto-loads demo data (handy for the deployed preview)
   if (new URLSearchParams(location.search).has('demo')) startDemo();

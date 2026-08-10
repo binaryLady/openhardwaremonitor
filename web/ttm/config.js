@@ -1,5 +1,5 @@
 // TTM stack configuration. The %...% placeholders are replaced at build time
-// (build.sh) from Vercel environment variables SUPABASE_URL and
+// (build-web.sh) from Vercel environment variables SUPABASE_URL and
 // SUPABASE_ANON_KEY. Unreplaced or empty values → the stack runs in local-only
 // mode: the gate stores the visitor in localStorage, telemetry logs to console,
 // and the admin panel says so. Nothing breaks without Supabase.
