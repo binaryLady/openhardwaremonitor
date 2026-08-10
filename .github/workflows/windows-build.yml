@@ -1,0 +1,32 @@
+name: windows build
+
+# Builds the full desktop application — the WinForms GUI, the sensor
+# library, and the embedded TTM dashboard (web/ compiled in as resources)
+# — on a Windows runner, and uploads the runnable app as an artifact.
+# Download it from the run's Artifacts, unzip, run OpenHardwareMonitor.exe
+# as Administrator, enable Options → Remote Web Server, and open
+# http://localhost:8085/ for the dashboard with live sensors.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md', 'supabase/**', 'vercel.json']
+  pull_request:
+    paths-ignore: ['docs/**', '**/*.md', 'supabase/**', 'vercel.json']
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+      - name: Build solution (Release)
+        run: msbuild OpenHardwareMonitor.sln /p:Configuration=Release /p:Platform="Any CPU" /m /verbosity:minimal
+      - name: Upload the app
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenHardwareMonitor
+          path: Bin/Release/
+          if-no-files-found: error

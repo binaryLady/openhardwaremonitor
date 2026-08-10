@@ -11,6 +11,34 @@ Demo deployment: **https://ohm.thetechmargin.com** — `?demo=1` loads a
 generated 32-sensor feed, so no hardware or install is required to evaluate
 it.
 
+## Run the app
+
+**Windows — the full application** (WinForms GUI, ring-0 sensor drivers;
+no Visual Studio required):
+
+1. Download the **OpenHardwareMonitor** artifact from the latest
+   [windows build](../../actions/workflows/windows-build.yml) run
+   (or build `OpenHardwareMonitor.sln` yourself — VS 2022, .NET
+   Framework 4.8).
+2. Unzip and run `OpenHardwareMonitor.exe` **as Administrator** (the
+   sensor drivers need it).
+3. Enable **Options → Remote Web Server → Run** (default port 8085).
+4. Open `http://localhost:8085/` — the TTM dashboard, served by the app
+   itself, connects to live sensors automatically.
+
+**macOS / Linux — the agent** (`agent/serve.js`, no dependencies): the
+desktop application's driver and WinForms layers are Windows-only, so
+other platforms run a small Node agent that serves the same dashboard
+and speaks the same `/data.json` contract from what the OS exposes
+without privileges (CPU load per core, clocks, memory):
+
+```sh
+node agent/serve.js        # http://localhost:8085/
+```
+
+Temperatures and fans aren't faked when the platform gates them behind
+root; the dashboard renders what the tree carries.
+
 Ten theme worlds × light and dark modes — twenty variants, one token
 layer, all WCAG-AA-checked by the in-browser bench. A sample:
 
