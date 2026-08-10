@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" data-ttm-theme="ttm">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plot — Hardware</title>
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" href="/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-icon.png" />
+<link rel="stylesheet" href="/ttm/tokens.css" />
+<link rel="stylesheet" href="/ttm/components.css" />
+<script src="/ttm/config.js"></script>
+<script src="/vendor/supabase.js"></script>
+<script src="/ttm/theme.js"></script>
+<script src="/ttm/brand.js"></script>
+<script src="/ttm/toast.js"></script>
+<script src="/ttm/stack.js"></script>
+</head>
+<body class="ttm-page">
+<a class="ttm-skip" href="#main">Skip to content</a>
+<main class="ttm-main" id="main" tabindex="-1">
+  <header class="ttm-header">
+    <h1>Plot <span class="gradient-text-rainbow">· time series</span></h1>
+    <span class="ttm-crumb">the app's plot window — pick sensors, watch them move</span>
+    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
+  </header>
+
+  <div class="ttm-grid ttm-grid--wide">
+    <section class="ttm-card full" aria-labelledby="h-plot">
+      <h2 class="ttm-card__title" id="h-plot">Plot</h2>
+      <p class="ttm-note">Each series is normalized to its own range — the legend carries the
+      real values. Selection is shared with the dashboard and persists on this device.</p>
+      <svg id="plot" class="ttm-plot" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="ttm-row" id="plot-legend"></div>
+    </section>
+
+    <section class="ttm-card full" aria-labelledby="h-pick">
+      <h2 class="ttm-card__title" id="h-pick">Sensors</h2>
+      <div id="picker" class="ttm-grid ttm-grid--wide"><p class="ttm-note">Waiting for the feed…</p></div>
+    </section>
+  </div>
+
+  <footer class="ttm-footer">the plot window, served as a route · selection persists on this device</footer>
+</main>
+
+<script src="/parse.js"></script>
+<script src="/gui-core.js"></script>
+<script src="/demo-data.js"></script>
+<script src="/feed.js"></script>
+<script src="/plot/plot.js"></script>
+</body>
+</html>

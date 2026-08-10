@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-ttm-theme="ttm">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gadget — Hardware</title>
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" href="/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-icon.png" />
+<link rel="stylesheet" href="/ttm/tokens.css" />
+<link rel="stylesheet" href="/ttm/components.css" />
+<script src="/ttm/config.js"></script>
+<script src="/vendor/supabase.js"></script>
+<script src="/ttm/theme.js"></script>
+<script src="/ttm/brand.js"></script>
+<script src="/ttm/toast.js"></script>
+<script src="/ttm/stack.js"></script>
+</head>
+<body class="ttm-page">
+<a class="ttm-skip" href="#main">Skip to content</a>
+<main class="ttm-main" id="main" tabindex="-1">
+  <header class="ttm-header">
+    <h1>Gadget <span class="gradient-text-rainbow">· compact readout</span></h1>
+    <span class="ttm-crumb">the app's gadget window — full-screen it beside the machine</span>
+    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
+  </header>
+
+  <section class="ttm-card full" aria-labelledby="h-gadget">
+    <h2 class="ttm-card__title" id="h-gadget">Readout</h2>
+    <p class="ttm-note">Shows the plotted sensors (pick them on the
+    <a href="/plot/">plot</a> or in the dashboard's manage mode); with none
+    chosen it falls back to the hottest sensor and peak load.</p>
+    <div class="ttm-tiles" id="tiles"></div>
+  </section>
+
+  <footer class="ttm-footer">the gadget window, served as a route · readable across the room</footer>
+</main>
+
+<script src="/parse.js"></script>
+<script src="/gui-core.js"></script>
+<script src="/demo-data.js"></script>
+<script src="/feed.js"></script>
+<script src="/gadget/gadget.js"></script>
+</body>
+</html>

@@ -153,6 +153,7 @@
           (gui.cols.min ? '<span class="mn" title="session minimum">' + esc(unit(s.min) || '—') + '</span>' : '') +
           (gui.cols.max ? '<span class="mx" title="session maximum">' + esc(unit(s.max) || '—') + '</span>' : '');
         lastVal.set(key, s.value);
+        keyName.set(key, s.name);
         sparkline(row.querySelector('.spark'), h, st);
         card.appendChild(row);
       });
@@ -230,6 +231,7 @@
   function startDemo() {
     stop();
     mode = 'demo';
+    try { localStorage.setItem('ohm_mode', 'demo'); } catch (e) {} // satellites follow
     setStatus('demo', 'ok');
     apply(window.OHM_DEMO());
     timer = setInterval(() => apply(window.OHM_DEMO()), POLL_MS);
@@ -273,7 +275,10 @@
     mode = 'live';
     failStreak = 0;
     setStatus('connecting…');
-    try { localStorage.setItem('ohm_src_url', els.url.value.trim()); } catch (e) {}
+    try {
+      localStorage.setItem('ohm_src_url', els.url.value.trim());
+      localStorage.setItem('ohm_mode', 'live'); // satellites follow
+    } catch (e) {}
     poll(url);
     timer = setInterval(() => poll(url), POLL_MS);
   }
@@ -320,8 +325,9 @@
     }
   }
 
+  const keyName = new Map(); // key → server name (names may contain '/')
   function sensorLabel(key) {
-    return gui.renames[key] || key.split('/').pop();
+    return gui.renames[key] || keyName.get(key) || key.split('/').pop();
   }
 
   // Plot (GUI/PlotPanel.cs): every plotted sensor's ring buffer as a line;
