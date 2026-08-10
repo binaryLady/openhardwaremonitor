@@ -4,3 +4,4 @@ Bin/
 Obj/
 .vs/
 public/
+node_modules/

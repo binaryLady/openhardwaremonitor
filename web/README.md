@@ -15,7 +15,7 @@ https://openhardwaremonitor.vercel.app.
 | **Terminal** | ![Terminal dark (CRT phosphor)](../docs/screenshots/dashboard-terminal-dark.png) | ![Terminal light (paper)](../docs/screenshots/dashboard-terminal.png) |
 | **Zine** | ![Zine dark (inverted photocopy)](../docs/screenshots/dashboard-zine-dark.png) | ![Zine light (photocopy)](../docs/screenshots/dashboard-zine.png) |
 
-Mode follows the OS until you touch the ☀/☾ toggle in the page header;
+Mode follows the OS until you touch the ☀/☾ toggle in the site header;
 every combination is WCAG-AA-verified by `/test/` on each run.
 
 ## Use cases
@@ -36,9 +36,10 @@ every combination is WCAG-AA-verified by `/test/` on each run.
   sensors from a seeded generator; the same seed gives every student the
   same bytes for reproducible exercises.
 - **Design-system reference** — `/components/` shows the whole TTM stack
-  end to end; `/test/` proves it (48 checks, incl. WCAG contrast); the
-  token layer whitelabels from Mission Control's editor — live preview,
-  save on device, or publish site-wide via `ohm_site_config`.
+  end to end; `/test/` proves it (109 checks, incl. WCAG contrast across
+  all twenty theme variants); the token layer whitelabels from Mission
+  Control's editor — live preview, save on device, or publish site-wide
+  via `ohm_site_config`.
 - **Fork it for your own feed** — `parse.js`/`bridge.js` are pure and
   DOM-free: point them at any display-string sensor tree and the rest of
   the stack comes along.
@@ -52,10 +53,12 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `bridge.js` | **map bridge** (`window.OHMBridge`): SpaceAPI v14 fragment for Maps of Making |
 | `dashboard.js` | rendering + data flow: polling, status, toasts, shortcuts |
 | `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape |
-| `ttm/` | the TTM stack: tokens, components, theme switcher, whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
-| `admin/` | operator page; renders only for visitors flagged `is_admin` |
-| `components/` | end-to-end gallery of the component stack |
-| `test/` | the bench: 48 assertions, runs from `file://` or `/test/` |
+| `ttm/` | the TTM stack: tokens, components, site chrome + theme switcher (`theme.js`), whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
+| `rfq/` | Generate RFQ: job form → composed RFQ document → email/copy |
+| `admin/` | Mission Control: tiered operator page (visitor/operator) |
+| `components/` | end-to-end gallery of the component stack (unlisted) |
+| `test/` | the bench: 109 assertions, runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |
+| `404.html` / `500.html` | error surfaces, same stack and chrome |
 
 ## Data contract
 
@@ -81,10 +84,15 @@ the page from the same origin, use a local proxy, or use demo data.
   one hero figure of the view), peak load, sensor count — each with a
   40-point trend sparkline built from the poll history the page already
   collects.
-- **Sensor rows** carry an inline sparkline (2px line in de-emphasis ink,
-  no axes; the status color appears only on the "now" dot). The meter's
-  unfilled track tints with the row's state so warn/hot reads across the
-  whole bar. Fresh readings flash once, token-timed.
+- **Sensor rows** carry the app's full data set — Value plus session Min
+  and Max (always the server's own strings, min/max muted so the value
+  leads; they cede with the sparkline on narrow screens) — and an inline
+  sparkline (2px line in de-emphasis ink, no axes; the status color
+  appears only on the "now" dot). The meter's unfilled track tints with
+  the row's state so warn/hot reads across the whole bar. Fresh readings
+  flash once, token-timed. Hardware blocks surface the app's type
+  taxonomy (`cpu`, `nvidia`, `mainboard`, …) beside the sensor count, and
+  no node the server emits is ever dropped.
 - **Signs of life** — the live badge carries a heartbeat dot; device
   cards get a hover wash. All motion wears `--ttm-anim-*` tokens.
 - **Frictionless return** — the machine URL persists in localStorage;
@@ -190,18 +198,25 @@ at the top of `bridge.js`):
 
 ## Tests
 
-Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 48
+Open `test/index.html` (append `?nogate=1` to skip the visitor gate). 109
 assertions: the TTM stack (tokens incl. the full theme-able vocabulary,
-the whitelabel loader,
-theming across all three terminal selectors, whitelabel runtime, toasts,
-gate, telemetry), WCAG 2.1 contrast computed from live tokens in both
-themes, the sensor core, seeded demo/fixture data, and the map bridge
-with its Four Corners and IIIF extensions. Results land in
-`window.__TTM_TEST_RESULTS` for headless harnesses:
+the whitelabel loader and runtime, legacy theme selectors, toasts, gate,
+telemetry), WCAG 2.1 contrast computed from live tokens across all
+twenty theme×mode combinations, the chrome contract (pure-chrome
+sitebar, consolidated menu, keyboard/nav), the standardization sweep
+(zero inline styles, zero page-local CSS on any route), the sensor core
+(incl. app fidelity: min/max carried, no node dropped), seeded
+demo/fixture data, and the map bridge with its Four Corners and IIIF
+extensions. Results land in `window.__TTM_TEST_RESULTS`.
+
+**CI runs the same bench** — `.github/workflows/web-tests.yml` executes
+`web/test/run-headless.js` (Playwright Chromium against a throwaway
+static server) on every push and pull request touching `web/`, and fails
+the build on any failed assertion or page error. Run it locally:
 
 ```bash
-chromium --headless --dump-dom "file://$PWD/web/test/index.html?nogate=1" \
-  | grep -o 'id="summary">[^<]*'
+npm install playwright && npx playwright install --with-deps chromium
+node web/test/run-headless.js
 ```
 
 ## Deploy

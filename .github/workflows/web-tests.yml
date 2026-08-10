@@ -1,0 +1,30 @@
+name: web tests
+
+# The web stack proves itself: the in-browser bench (web/test/) carries
+# every assertion — WCAG contrast across all twenty theme variants, the
+# keyboard/nav contract, tokenization and standardization guards, the
+# sensor core. CI just runs it headless and honors its exit code.
+# The C# application is not built here.
+
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', '.github/workflows/web-tests.yml']
+  pull_request:
+    paths: ['web/**', '.github/workflows/web-tests.yml']
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Run the bench headless
+        run: node web/test/run-headless.js
