@@ -57,7 +57,7 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `dashboard.js` | rendering, GUI features, shortcuts — it owns no poll path of its own; data arrives from `feed.js` |
 | `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape, read through the same path a machine is |
 | `ttm/` | the TTM stack: tokens, components, site chrome + theme switcher (`theme.js`), whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
-| `rfq/` | Generate RFQ: job form → composed RFQ document → email/copy |
+| `rfq/` | Generate RFQ: job form → composed RFQ document → email/copy. Carries the workshop's real machine from the feed; a demo-backed RFQ says so in the document |
 | `admin/` | Mission Control: tiered operator page (visitor/operator) |
 | `components/` | end-to-end gallery of the component stack (unlisted) |
 | `test/` | the bench: 109 assertions, runs from `file://` or `/test/`; `run-headless.js` is the CI entry point |

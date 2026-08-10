@@ -24,6 +24,13 @@
     <span class="ttm-crumb">describe the job · the workshop quotes it</span>
   </header>
 
+  <div class="ttm-srcbar">
+    <input type="url" class="ttm-input" id="src-url" placeholder="http://machine:8085/data.json" aria-label="Open Hardware Monitor data URL">
+    <button class="ttm-btn-primary" id="connect">Connect</button>
+    <button class="ttm-btn-outline" id="demo">Demo data</button>
+    <span class="ttm-badge" id="status" role="status" aria-live="polite">idle</span>
+  </div>
+
   <div class="ttm-grid">
     <section class="ttm-card full" aria-labelledby="h-shop">
       <h2 class="ttm-card__title" id="h-shop">This workshop</h2>
@@ -40,6 +47,28 @@
         <div class="ttm-tile">
           <span class="ttm-tile__label">RFQ status</span>
           <b class="ttm-tile__value"><span class="ttm-badge" id="rfq-state">draft</span></b>
+        </div>
+      </div>
+    </section>
+
+    <section class="ttm-card full" id="machine-card" aria-labelledby="h-machine" hidden>
+      <h2 class="ttm-card__title" id="h-machine">The machine quoting this job</h2>
+      <p class="ttm-note" id="m-note">Read live from this workshop's monitor and attached to the RFQ,
+      so the shop's capacity travels with the request.</p>
+      <div class="ttm-tiles">
+        <div class="ttm-tile">
+          <span class="ttm-tile__label">Machine</span>
+          <b class="ttm-tile__value" id="m-name">—</b>
+          <span class="ttm-tile__sub" id="m-state">—</span>
+        </div>
+        <div class="ttm-tile">
+          <span class="ttm-tile__label">Sensors</span>
+          <b class="ttm-tile__value" id="m-count">—</b>
+          <span class="ttm-tile__sub" id="m-count-sub"></span>
+        </div>
+        <div class="ttm-tile">
+          <span class="ttm-tile__label">Hottest now</span>
+          <b class="ttm-tile__value" id="m-hot">—</b>
         </div>
       </div>
     </section>
@@ -98,22 +127,68 @@
   </div>
 </main>
 
+<script src="/parse.js"></script>
+<script src="/demo-data.js"></script>
+<script src="/feed.js"></script>
 <script>
-// RFQ generator — pure client-side. Reads the workshop identity and contact
-// from the whitelabel config (TTMBrand), prefills the requester from the
-// gate sign-in, and composes a structured RFQ the visitor sends themselves
-// (mailto or clipboard). Nothing is stored server-side.
+// RFQ generator — pure client-side, and every part of it real. The workshop
+// identity and contact come from the whitelabel config (TTMBrand), the
+// requester from the gate sign-in, and the machine block from the app's own
+// feed (feed.js) — the workshop's live monitor, or the demo feed when the
+// visitor explicitly picks it, in which case the document says so rather
+// than passing sample data off as a machine. With no source connected the
+// machine block is simply absent. The visitor sends the RFQ themselves
+// (mailto or clipboard); nothing is stored server-side.
 (function(){
   'use strict';
   var $ = function(sel){ return document.querySelector(sel); };
   var toast = function(m,o){ window.TTMToast && TTMToast.show(m, o || {}); };
   var esc = function(s){ return String(s == null ? '' : s); };
 
+  // ── the machine: real evidence, read from the app's own feed ─────────────
+  // The RFQ carries the shop's actual monitored machine. Nothing here is
+  // invented: with no source connected the block is absent from the
+  // document, and a demo-backed RFQ says so in the document itself.
+  var machine = null;  // { name, state, sensors, devices, fans, hottest, source }
+  var feed = null;
+  function readMachine(root, mode){
+    var m = window.OHMParse.summarize(root);
+    machine = {
+      name: m.machine,
+      state: m.active ? 'active' : 'idle',
+      sensors: m.sensors,
+      devices: m.blocks,
+      fans: m.fans,
+      hottest: m.hottest ? { name: m.hottest.name, value: m.hottest.value } : undefined,
+      source: mode === 'demo' ? 'demo' : 'live',
+    };
+    paintMachine();
+    render();
+  }
+  function paintMachine(){
+    var card = $('#machine-card');
+    if (!machine) { card.hidden = true; return; }
+    card.hidden = false;
+    $('#m-name').textContent = machine.name;
+    $('#m-state').textContent = machine.state +
+      (machine.source === 'demo' ? ' · demo feed' : ' · live');
+    $('#m-count').textContent = machine.sensors;
+    $('#m-count-sub').textContent = machine.devices + ' devices · ' + machine.fans + ' fans';
+    $('#m-hot').textContent = machine.hottest ? machine.hottest.value : '—';
+    $('#m-note').textContent = machine.source === 'demo'
+      ? 'Demo feed — this machine block is sample data, and the RFQ says so. ' +
+        'Connect the workshop’s monitor above to attach the real machine.'
+      : 'Read live from this workshop’s monitor and attached to the RFQ, ' +
+        'so the shop’s capacity travels with the request.';
+  }
+
   function shop(){
     var b = (window.TTMBrand && TTMBrand.get('brand')) || {};
     var c = (window.TTMBrand && TTMBrand.get('contact')) || {};
     return {
-      name: b.name || b.page_title || 'this workshop',
+      // published brand name, else the machine's own name — never a stand-in
+      name: b.name || b.page_title ||
+        (machine && machine.source === 'live' ? machine.name : '') || 'this workshop',
       email: (c.email || '').trim(),
       website: (c.website || '').trim(),
     };
@@ -141,12 +216,15 @@
         name: $('#rfq-name').value.trim() || undefined,
         email: $('#rfq-email').value.trim() || undefined,
       },
+      // present only when a source is connected; 'source' keeps a demo-backed
+      // document from ever reading as a real machine
+      machine: machine || undefined,
       'x-source': location.origin + '/rfq/',
     };
   }
 
   function text(d){
-    var r = d.request, q = d.requester;
+    var r = d.request, q = d.requester, m = d.machine;
     return 'Request for quote — ' + d.workshop.name + '\n' +
       'process:   ' + r.process + '\n' +
       (r.material ? 'material:  ' + r.material + '\n' : '') +
@@ -154,6 +232,10 @@
       (r.needed_by ? 'needed by: ' + r.needed_by + '\n' : '') +
       (r.budget ? 'budget:    ' + r.budget + '\n' : '') +
       (r.notes ? '\n' + r.notes + '\n' : '') +
+      (m ? '\nmachine:   ' + m.name + ' (' + m.state + ', ' + m.sensors +
+        ' sensors' + (m.hottest ? ', hottest ' + m.hottest.value : '') + ')' +
+        (m.source === 'demo' ? '\n           ⚠ demo feed — sample data, not this shop’s machine' : '') +
+        '\n' : '') +
       '\nfrom: ' + (q.name || 'anonymous') + (q.email ? ' <' + q.email + '>' : '') +
       '\nvia:  ' + d['x-source'];
   }
@@ -188,6 +270,21 @@
     document.addEventListener('ttm:brand', paintShop);
     ['input', 'change'].forEach(function(ev){
       document.querySelector('main').addEventListener(ev, render);
+    });
+
+    // the same source pipeline every page uses (feed.js): the workshop's
+    // real machine, or the demo feed when explicitly chosen — never mock
+    // data standing in for a machine that was never connected
+    feed = window.OHMFeed.wire({
+      urlInput: $('#src-url'), connectBtn: $('#connect'), demoBtn: $('#demo'),
+      onData: function(root){ readMachine(root, feed.mode()); },
+      onStatus: function(txt, tone){
+        var st = $('#status');
+        st.textContent = txt;
+        st.className = 'ttm-badge' +
+          (tone === 'ok' ? ' ttm-badge--live' : tone === 'bad' ? ' ttm-badge--danger' : '');
+        if (txt === 'no machine' || tone === 'bad') { machine = null; paintMachine(); render(); }
+      },
     });
 
     $('#rfq-copy-json').addEventListener('click', function(){
