@@ -600,6 +600,21 @@ body.ttm-page {
 .ttm-gap-top { margin-top: var(--ttm-spacing-md); }
 .ttm-gap-top-sm { margin-top: var(--ttm-spacing-sm); }
 .ttm-gap-bottom { margin-bottom: var(--ttm-spacing-md); }
+.ttm-grow { flex: 1; }
+.ttm-sans { font-family: var(--ttm-font-sans); }
+.ttm-serif { font-family: var(--ttm-font-serif); }
+.ttm-mono { font-family: var(--ttm-font-mono); }
+
+/* badge accent modifiers — brand hue as data, not inline style */
+.ttm-badge[data-ttm-accent="pink"] { color: var(--ttm-pink); border-color: var(--ttm-pink); }
+.ttm-badge[data-ttm-accent="lime"] { color: var(--ttm-lime); border-color: var(--ttm-lime); }
+.ttm-badge[data-ttm-accent="cyan"] { color: var(--ttm-cyan); border-color: var(--ttm-cyan); }
+.ttm-badge[data-ttm-accent="hot-red"] { color: var(--ttm-hot-red); border-color: var(--ttm-hot-red); }
+.ttm-badge[data-ttm-accent="goldenrod"] { color: var(--ttm-goldenrod); border-color: var(--ttm-goldenrod); }
+
+/* verdict inks (test bench) — part of the system, not page-local CSS */
+.ttm-pass { color: var(--ttm-success); font-weight: 700; }
+.ttm-fail { color: var(--ttm-danger); font-weight: 700; }
 .ttm-form label.ttm-note { display: block; margin: .55rem 0 .15rem; }
 .ttm-form .ttm-input { width: 100%; box-sizing: border-box; }
 .ttm-swatch-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ttm-spacing-sm); }

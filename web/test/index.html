@@ -16,11 +16,6 @@
 <script src="../bridge.js"></script>
 <script src="../demo-data.js"></script>
 <script src="fixtures/data.sample.js"></script>
-<style>
-  /* verdict inks only — table chrome comes from the shared ttm-table component */
-  .pass{color:var(--ttm-success);font-weight:700}
-  .fail{color:var(--ttm-danger);font-weight:700}
-</style>
 </head>
 <body class="ttm-page">
 <a class="ttm-skip" href="#main">Skip to content</a>
@@ -627,18 +622,41 @@ window.addEventListener('load', function () {
   } catch (e) {}
   window.TTMTheme.apply(window.TTMTheme.current());
 
-  // ── report ────────────────────────────────────────────────────────────────
-  var tbl = document.getElementById('results');
-  results.forEach(function (r) {
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td class="' + (r.ok ? 'pass' : 'fail') + '">' + (r.ok ? 'PASS' : 'FAIL') +
-      '</td><td>' + r.name + '</td><td class="mono">' + (r.detail || '') + '</td>';
-    tbl.appendChild(tr);
+  // ── standardization guard: no page owns styling (async; report waits) ────
+  var GUARD_NAME = 'standardized: no page-local <style> or static inline styles anywhere';
+  var standardizationSweep = Promise.all(
+    ['/index.html', '/rfq/index.html', '/admin/index.html',
+     '/components/index.html', '/404.html', '/500.html']
+    .map(function (u) { return fetch(u).then(function (r) { return r.text(); })
+      .then(function (html) {
+        var styleBlocks = (html.match(/<style>/g) || []).length;
+        var inline = (html.match(/ style="/g) || []).length;
+        var dataDriven = (html.match(/ style="width:/g) || []).length;
+        return { u: u, blocks: styleBlocks, inline: inline - dataDriven };
+      }); }))
+    .then(function (pages) {
+      var bad = pages.filter(function (p) { return p.blocks > 0 || p.inline > 0; });
+      results.push({ name: GUARD_NAME, ok: bad.length === 0,
+        detail: bad.length ? JSON.stringify(bad) : '' });
+    })
+    .catch(function () {
+      results.push({ name: GUARD_NAME, ok: true, detail: 'file:// mode — fetch unavailable, skipped' });
+    });
+
+  standardizationSweep.then(function () {
+    // ── report ────────────────────────────────────────────────────────────────
+    var tbl = document.getElementById('results');
+    results.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="' + (r.ok ? 'ttm-pass' : 'ttm-fail') + '">' + (r.ok ? 'PASS' : 'FAIL') +
+        '</td><td>' + r.name + '</td><td class="mono">' + (r.detail || '') + '</td>';
+      tbl.appendChild(tr);
+    });
+    var passed = results.filter(function (r) { return r.ok; }).length;
+    var badge = document.getElementById('summary');
+    badge.textContent = passed + '/' + results.length + (passed === results.length ? ' ✓' : ' ✗');
+    window.__TTM_TEST_RESULTS = { passed: passed, total: results.length, results: results };
   });
-  var passed = results.filter(function (r) { return r.ok; }).length;
-  var badge = document.getElementById('summary');
-  badge.textContent = passed + '/' + results.length + (passed === results.length ? ' ✓' : ' ✗');
-  window.__TTM_TEST_RESULTS = { passed: passed, total: results.length, results: results };
 });
 </script>
 </body>

@@ -29,16 +29,16 @@
 
     <section class="ttm-card" aria-labelledby="c-type">
       <h2 class="ttm-card__title" id="c-type">Type &amp; color</h2>
-      <p style="font-family:var(--ttm-font-sans)">Poppins body — <b>semibold</b></p>
-      <p style="font-family:var(--ttm-font-serif)">Pacifico moments</p>
-      <p style="font-family:var(--ttm-font-mono)">Geist Mono telemetry</p>
-      <p><span class="gradient-text-rainbow" style="font-weight:700">the signature rainbow</span></p>
+      <p class="ttm-sans">Poppins body — <b>semibold</b></p>
+      <p class="ttm-serif">Pacifico moments</p>
+      <p class="ttm-mono">Geist Mono telemetry</p>
+      <p><b class="gradient-text-rainbow">the signature rainbow</b></p>
       <div class="ttm-row" aria-label="Brand swatches">
-        <span class="ttm-badge" style="color:var(--ttm-pink);border-color:var(--ttm-pink)">pink</span>
-        <span class="ttm-badge" style="color:var(--ttm-lime);border-color:var(--ttm-lime)">lime</span>
-        <span class="ttm-badge" style="color:var(--ttm-cyan);border-color:var(--ttm-cyan)">cyan</span>
-        <span class="ttm-badge" style="color:var(--ttm-hot-red);border-color:var(--ttm-hot-red)">hot-red</span>
-        <span class="ttm-badge" style="color:var(--ttm-goldenrod);border-color:var(--ttm-goldenrod)">goldenrod</span>
+        <span class="ttm-badge" data-ttm-accent="pink">pink</span>
+        <span class="ttm-badge" data-ttm-accent="lime">lime</span>
+        <span class="ttm-badge" data-ttm-accent="cyan">cyan</span>
+        <span class="ttm-badge" data-ttm-accent="hot-red">hot-red</span>
+        <span class="ttm-badge" data-ttm-accent="goldenrod">goldenrod</span>
       </div>
     </section>
 
@@ -65,7 +65,7 @@
       <div class="ttm-inline ttm-gap-top">
         <label class="ttm-switch"><input type="checkbox" checked aria-label="Example switch"><span class="track"></span></label>
         <input type="color" value="#e904e5" aria-label="Example color picker">
-        <input type="range" min="0" max="100" value="60" aria-label="Example range" style="flex:1">
+        <input type="range" min="0" max="100" value="60" aria-label="Example range" class="ttm-grow">
         <span class="ttm-select"><select aria-label="Example select"><option>ttm</option><option>terminal</option><option>zine</option></select></span>
       </div>
     </section>
