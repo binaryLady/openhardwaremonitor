@@ -30,6 +30,7 @@
     { href: '/plot/',    name: 'Plot',            desc: 'time series of chosen sensors' },
     { href: '/gadget/',  name: 'Gadget',          desc: 'compact readout — kiosk friendly' },
     { href: '/report/',  name: 'Report',          desc: 'the whole tree as plain text' },
+    { href: '/get/',     name: 'Get the app',     desc: 'run it on your machine — Windows · macOS · Linux' },
     { group: 'Operator tools' },
     { href: '/admin/',      name: 'Mission Control', desc: 'telemetry · visitors (admin)' },
     { href: '/test/',       name: 'Test bench',      desc: 'the stack proves itself in-browser' },
