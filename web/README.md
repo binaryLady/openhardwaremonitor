@@ -51,11 +51,11 @@ every combination is WCAG-AA-verified by `/test/` on each run.
 | `index.html` | the page: source bar, sensor grid, map-bridge receipt |
 | `parse.js` | **pure sensor core** (`window.OHMParse`): display-string parsing, tree flattening, thresholds, meter scaling |
 | `gui-core.js` | **pure GUI core** (`window.OHMGui`): the desktop application's features — Fahrenheit display, Save Report, hide/rename/plot prefs, column layout |
-| `feed.js` | **shared app feed** (`window.OHMFeed`): the saved machine loads live, demo only when explicitly chosen, otherwise the route asks to connect; wires the srcbar every route carries |
+| `feed.js` | **the app's one feed** (`window.OHMFeed`): resolves the source, reads it, wires the srcbar and tab-visibility. Every page — dashboard included — enters here; demo is a *source*, not a branch |
 | `plot/` · `gadget/` · `report/` | the desktop windows as routes: PlotPanel, SensorGadget, ReportForm — same feed, shared preferences |
 | `bridge.js` | **map bridge** (`window.OHMBridge`): SpaceAPI v14 fragment for Maps of Making |
-| `dashboard.js` | rendering + data flow: polling, status, toasts, shortcuts |
-| `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape |
+| `dashboard.js` | rendering, GUI features, shortcuts — it owns no poll path of its own; data arrives from `feed.js` |
+| `demo-data.js` | `window.OHM_DEMO()` — a jittered tree in the server's exact shape, read through the same path a machine is |
 | `ttm/` | the TTM stack: tokens, components, site chrome + theme switcher (`theme.js`), whitelabel loader (`brand.js`), toasts, gate/telemetry (see `/THEMING.md`) |
 | `rfq/` | Generate RFQ: job form → composed RFQ document → email/copy |
 | `admin/` | Mission Control: tiered operator page (visitor/operator) |
@@ -86,8 +86,16 @@ the page from the same origin, use a local proxy, or use demo data.
 The desktop application's GUI runs through this skin (View card on the
 dashboard; pure logic in `gui-core.js`, bench-proven). The app's separate
 windows are also **served as routes** — `/plot/`, `/gadget/`, `/report/` —
-riding the same feed (`feed.js` resolves the dashboard's source) and the
-same on-device preferences:
+riding the same feed and the same on-device preferences.
+
+Every page shares one source pipeline (`feed.js`): resolve → read → render.
+A live machine and the demo feed are both *sources* read through that one
+path, so there is a single place data enters the app, a single status path,
+and a single failure path. Precedence is explicit demo (`?demo=1`, the Demo
+button, or the last mode chosen) → the saved machine → nothing, in which
+case the page shows its connect posture rather than substituting mock data.
+Connect from any page and every page follows; <kbd>Esc</kbd> pauses, and the
+pause outlives a tab switch.
 
 - **Plot** (`PlotPanel.cs`) — plot any sensors from Manage mode; series
   draw in the brand hues from the poll history, normalized to their own

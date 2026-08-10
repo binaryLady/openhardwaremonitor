@@ -14,11 +14,6 @@
   };
   const toast = (msg, opts) => window.TTMToast && TTMToast.show(msg, opts || {});
 
-  // under reduced motion, poll gently: values stop fluttering every 5s
-  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const POLL_MS = REDUCED ? 20000 : 5000;
-  let timer = null;
-  let mode = 'idle'; // idle | demo | live
   let lastTree = null;
 
   // parsing + thresholds live in parse.js (window.OHMParse);
@@ -224,64 +219,27 @@
       (tone === 'ok' ? ' ttm-badge--live' : tone === 'bad' ? ' ttm-badge--danger' : '');
   }
 
-  function stop() {
-    if (timer) { clearInterval(timer); timer = null; }
-  }
-
-  function startDemo() {
-    stop();
-    mode = 'demo';
-    try { localStorage.setItem('ohm_mode', 'demo'); } catch (e) {} // satellites follow
-    setStatus('demo', 'ok');
-    apply(window.OHM_DEMO());
-    timer = setInterval(() => apply(window.OHM_DEMO()), POLL_MS);
-    toast('Demo data loaded — values animate like a live feed.', { type: 'success' });
-  }
-
-  function normalizeUrl(raw) {
-    let u = (raw || '').trim();
-    if (!u) return null;
-    if (!/^https?:\/\//i.test(u)) u = 'http://' + u;
-    if (!/data\.json(\?|$)/.test(u)) u = u.replace(/\/?$/, '/') + 'data.json';
-    return u;
-  }
-
-  let failStreak = 0;
-  async function poll(url) {
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const root = await res.json();
-      failStreak = 0;
-      setStatus('live', 'ok');
-      apply(root);
-    } catch (err) {
-      failStreak++;
-      setStatus('unreachable', 'bad');
-      if (failStreak === 1) {
-        toast('Could not reach ' + url + ' — ' + err.message +
-          '. If the monitor is running, this is likely CORS: the embedded ' +
-          'server sends no Access-Control-Allow-Origin header, so browsers ' +
-          'block cross-origin reads. Open this page from the same origin, ' +
-          'use a local proxy, or load demo data.', { type: 'error', timeout: 12000 });
-      }
-    }
-  }
-
-  function startLive() {
-    const url = normalizeUrl(els.url.value);
-    if (!url) { toast('Enter the machine URL first, e.g. http://machine:8085', { type: 'warning' }); return; }
-    stop();
-    mode = 'live';
-    failStreak = 0;
-    setStatus('connecting…');
-    try {
-      localStorage.setItem('ohm_src_url', els.url.value.trim());
-      localStorage.setItem('ohm_mode', 'live'); // satellites follow
-    } catch (e) {}
-    poll(url);
-    timer = setInterval(() => poll(url), POLL_MS);
-  }
+  // The source pipeline is shared with the app's routes (feed.js): demo and
+  // a live machine are both *sources* read the same way, so the dashboard
+  // keeps no private poll path — one place data enters the app, one status
+  // path, one failure path. feed.js also wires the srcbar and visibility.
+  const feed = window.OHMFeed.wire({
+    urlInput: els.url, connectBtn: els.connect, demoBtn: els.demo,
+    onData: apply,
+    onStatus: setStatus,
+    onDemo: () => toast('Demo data loaded — values animate like a live feed.',
+      { type: 'success' }),
+    onNoUrl: () => toast('Enter the machine URL first, e.g. http://machine:8085',
+      { type: 'warning' }),
+    onError: (err, src, fails) => {
+      if (fails !== 1 || src.mode !== 'live') return;
+      toast('Could not reach ' + src.url + ' — ' + err.message +
+        '. If the monitor is running, this is likely CORS: the embedded ' +
+        'server sends no Access-Control-Allow-Origin header, so browsers ' +
+        'block cross-origin reads. Open this page from the same origin, ' +
+        'use a local proxy, or load demo data.', { type: 'error', timeout: 12000 });
+    },
+  });
 
   // ---- GUI: the desktop application's features, TTM-dressed ---------------
   const NS = 'http://www.w3.org/2000/svg';
@@ -314,16 +272,6 @@
   }
 
   function refresh() { if (lastTree) apply(lastTree); }
-
-  // resume polling without the demo toast (rename pauses, then resumes)
-  function resume() {
-    if (timer || mode === 'idle') return;
-    if (mode === 'demo') timer = setInterval(() => apply(window.OHM_DEMO()), POLL_MS);
-    else if (mode === 'live') {
-      const url = normalizeUrl(els.url.value);
-      if (url) timer = setInterval(() => poll(url), POLL_MS);
-    }
-  }
 
   const keyName = new Map(); // key → server name (names may contain '/')
   function sensorLabel(key) {
@@ -471,7 +419,7 @@
       const row = btn.closest('.ttm-sensor');
       const nm = row && row.querySelector('.nm');
       if (!nm) return;
-      stop(); // hold the poll re-render while the name is being edited
+      feed.hold(); // hold the poll re-render while the name is being edited
       const input = document.createElement('input');
       input.className = 'ttm-input ttm-rename';
       input.value = sensorLabel(key);
@@ -491,7 +439,7 @@
         }
         // defer past the settling keystroke: re-rendering inside the Enter
         // keydown moves focus onto a summary, which the same key then toggles
-        setTimeout(() => { resume(); refresh(); }, 0);
+        setTimeout(() => { feed.release(); refresh(); }, 0);
       };
       input.addEventListener('keydown', ev => {
         ev.stopPropagation();
@@ -504,9 +452,13 @@
 
   // ---- wiring -------------------------------------------------------------
 
-  els.connect.addEventListener('click', startLive);
-  els.url.addEventListener('keydown', e => { if (e.key === 'Enter') startLive(); });
-  els.demo.addEventListener('click', startDemo);
+  // Connect and Demo are wired by feed.js (the shared srcbar); Enter in the
+  // URL field is the dashboard's own affordance onto the same call
+  els.url.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (!feed.useLive(els.url.value))
+      toast('Enter the machine URL first, e.g. http://machine:8085', { type: 'warning' });
+  });
 
   els.copy.addEventListener('click', async () => {
     try {
@@ -546,27 +498,19 @@
     if (e.defaultPrevented) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (/^(input|textarea|select)$/i.test(e.target.tagName)) return;
-    if (e.key === 'd') { startDemo(); }
+    if (e.key === 'd') { feed.useDemo(); }
     else if (e.key === '/') { e.preventDefault(); els.url.focus(); }
     else if (e.key === 'u') { setUnit(gui.unit === 'f' ? 'c' : 'f'); }
     else if (e.key === 'p') { togglePlotCard(); }
-    else if (e.key === 'Escape' && timer) { stop(); setStatus('paused'); toast('Polling paused — d or Connect to resume.', { timeout: 2500 }); }
+    else if (e.key === 'Escape' && feed.running()) {
+      feed.pause();
+      setStatus('paused');
+      toast('Polling paused — d or Connect to resume.', { timeout: 2500 });
+    }
   });
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { stop(); }
-    else if (mode === 'demo') startDemo();
-    else if (mode === 'live') startLive();
-  });
-
-  // the machine URL survives reloads — monitors are revisited, not retyped
-  try {
-    const saved = localStorage.getItem('ohm_src_url');
-    if (saved && !els.url.value) els.url.value = saved;
-  } catch (e) {}
-
+  // feed.js owns the rest of the boot: it restores the saved machine URL
+  // into the srcbar, resolves the source (?demo=1 · last mode · saved
+  // machine · none), starts polling, and pauses while the tab is hidden.
   syncGui(); // paint the persisted GUI state before any data arrives
-
-  // ?demo=1 auto-loads demo data (handy for the deployed preview)
-  if (new URLSearchParams(location.search).has('demo')) startDemo();
 })();

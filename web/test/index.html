@@ -15,6 +15,7 @@
 <script src="../parse.js"></script>
 <script src="../bridge.js"></script>
 <script src="../gui-core.js"></script>
+<script src="../feed.js"></script>
 <script src="../demo-data.js"></script>
 <script src="fixtures/data.sample.js"></script>
 </head>
@@ -40,9 +41,23 @@ window.addEventListener('load', function () {
   try { prevMode = localStorage.getItem('ttm_mode'); } catch (e) {}
   window.TTMTheme.setMode('dark');
   // strict: only `true` passes; any other return value is the failure detail
+  // Assertions are synchronous by default; a test may return a promise
+  // (the feed's read path is inherently async) and the report waits for it.
+  var pending = [];
   function t(name, fn) {
-    try { var v = fn(); results.push({ name: name, ok: v === true, detail: v === true ? '' : String(v) }); }
-    catch (e) { results.push({ name: name, ok: false, detail: e.message }); }
+    try {
+      var v = fn();
+      if (v && typeof v.then === 'function') {
+        var rec = { name: name, ok: false, detail: 'pending' };
+        results.push(rec);
+        pending.push(v.then(function (r) {
+          rec.ok = r === true;
+          rec.detail = r === true ? '' : String(r);
+        }, function (e) { rec.ok = false; rec.detail = e.message; }));
+        return;
+      }
+      results.push({ name: name, ok: v === true, detail: v === true ? '' : String(v) });
+    } catch (e) { results.push({ name: name, ok: false, detail: e.message }); }
   }
   function cssVar(name, el) {
     return getComputedStyle(el || document.documentElement).getPropertyValue(name).trim();
@@ -449,6 +464,48 @@ window.addEventListener('load', function () {
            G.colsClass({ value: false, min: false, max: false }) === 'gui-cols-3'
       ? true : 'bad mapping';
   });
+  // ── feed (feed.js) — demo is a source on the app's own path ──────────────
+  t('feed: read() resolves demo and live through one promise contract', function () {
+    var F = window.OHMFeed;
+    if (!F || typeof F.read !== 'function') return 'OHMFeed.read missing';
+    var demo = F.read({ mode: 'demo' });
+    var none = F.read({ mode: 'none' });
+    var isPromise = demo && typeof demo.then === 'function' &&
+      none && typeof none.then === 'function';
+    none.catch(function () {}); // handled: this assertion only checks the shape
+    return isPromise ? true : 'read() must always return a promise';
+  });
+  t('feed: demo reads the app tree parse.js consumes (no separate shape)', function () {
+    return window.OHMFeed.read({ mode: 'demo' }).then(function (root) {
+      var blocks = window.OHMParse.flatten(root);
+      return blocks.length >= 1 && blocks[0].sensors.length >= 1;
+    });
+  });
+  t('feed: source precedence — explicit demo, else saved machine, else none', function () {
+    var F = window.OHMFeed, prevMode = null, prevUrl = null;
+    try {
+      prevMode = localStorage.getItem('ohm_mode');
+      prevUrl = localStorage.getItem('ohm_src_url');
+      localStorage.removeItem('ohm_mode');
+      localStorage.removeItem('ohm_src_url');
+      var none = F.resolve().mode;
+      localStorage.setItem('ohm_src_url', 'machine:8085');
+      var live = F.resolve();
+      localStorage.setItem('ohm_mode', 'demo');
+      var demo = F.resolve().mode;
+      return none === 'none' && live.mode === 'live' &&
+        live.url === 'http://machine:8085/data.json' && demo === 'demo'
+        ? true : none + '/' + live.mode + '/' + live.url + '/' + demo;
+    } finally {
+      try {
+        prevMode === null ? localStorage.removeItem('ohm_mode')
+          : localStorage.setItem('ohm_mode', prevMode);
+        prevUrl === null ? localStorage.removeItem('ohm_src_url')
+          : localStorage.setItem('ohm_src_url', prevUrl);
+      } catch (e) {}
+    }
+  });
+
   t('gui: family is shared components — inline gadget modifier, series ink', function () {
     var g = document.createElement('aside');
     g.className = 'ttm-gadget ttm-gadget--inline';
@@ -725,7 +782,7 @@ window.addEventListener('load', function () {
       results.push({ name: GUARD_NAME, ok: true, detail: 'file:// mode — fetch unavailable, skipped' });
     });
 
-  standardizationSweep.then(function () {
+  Promise.all([standardizationSweep].concat(pending)).then(function () {
     // ── report ────────────────────────────────────────────────────────────────
     var tbl = document.getElementById('results');
     results.forEach(function (r) {
