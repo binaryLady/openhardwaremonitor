@@ -875,15 +875,18 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
   z-index: var(--z-header);
   width: 44px;
   height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border-radius: 50%;
   border: 1.5px solid var(--ttm-border);
   background: var(--ttm-surface);
   color: var(--ttm-text);
-  font-size: 1.05rem;
-  line-height: 1;
   cursor: pointer;
   transition: background var(--ttm-transition-fast), transform var(--ttm-transition-fast);
 }
+.ttm-modetoggle svg { width: 20px; height: 20px; display: block; }
 .ttm-modetoggle:hover { background: var(--ttm-wash-hover); transform: rotate(15deg); }
 
 /* ── visual pop — glow where the data is alive, gradients where it moves ── */
@@ -923,3 +926,15 @@ details.ttm-hw:hover { background: var(--ttm-wash); }
 details.ttm-hw > summary:hover { background: var(--ttm-wash); border-radius: var(--radius-sm); }
 .ttm-card { transition: border-color var(--ttm-transition-fast); }
 .ttm-card:hover { border-color: color-mix(in srgb, var(--ttm-control) 35%, var(--ttm-border)); }
+
+/* ── mobile scale — one standard pass, no page improvises its own ── */
+@media (max-width: 560px) {
+  .ttm-header { padding-right: 6.75rem; }
+  .ttm-header h1 { font-size: var(--ttm-fs-h4); }
+  .ttm-card { padding: .9rem 1rem; }
+  .ttm-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+  .ttm-tile { padding: .7rem .8rem; }
+  .ttm-tile__value { font-size: var(--ttm-fs-h3); }
+  .ttm-tile--hero { grid-column: 1 / -1; }
+  .ttm-tile--hero .ttm-tile__value { font-size: var(--ttm-fs-h2); }
+}

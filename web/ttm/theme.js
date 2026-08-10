@@ -77,8 +77,14 @@
       r.checked = r.value === theme;
     });
     var mode = resolveMode();
+    // inline SVG in currentColor — text glyphs render as emoji on mobile
+    var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="4.2"/>' +
+      '<path d="M12 2.6v2.4M12 19v2.4M2.6 12H5M19 12h2.4M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6"/></svg>';
+    var MOON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="M20.4 14.2A8.5 8.5 0 0 1 9.8 3.6a8.5 8.5 0 1 0 10.6 10.6Z"/></svg>';
     document.querySelectorAll('.ttm-modetoggle').forEach(function (b) {
-      b.textContent = mode === 'dark' ? '\u2600' : '\u263E';
+      b.innerHTML = mode === 'dark' ? SUN : MOON;
       b.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     });
   }
