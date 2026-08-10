@@ -441,12 +441,7 @@
   .ttm-toast--out { transition: none; }
 }
 
-/* ── Bernard's greeting in the menu ── */
-@font-face {
-  font-family: 'Special Elite';
-  src: url('/fonts/SpecialElite-Regular.woff2') format('woff2');
-  font-display: swap;
-}
+/* ── Bernard's greeting in the menu (Special Elite loads via theme.js) ── */
 .ttm-menu__bernard {
   display: block;
   margin: 0 0 var(--ttm-spacing-md);
@@ -489,22 +484,15 @@
 }
 
 /* ── ttm-footer badge (required brand footer, TTM modes only) ── */
+/* sits in the universal footer flow — never floats over content */
 .ttm-footer-badge {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 6px;
-  z-index: var(--z-content);
+  display: block;
+  margin-top: .6rem;
   font: 400 11px/1 var(--ttm-font-mono);
   color: var(--ttm-text-muted);
-  background: color-mix(in srgb, var(--ttm-bg) 82%, transparent);
-  border-radius: var(--radius-md);
-  padding: 4px 10px;
-  pointer-events: none;
 }
 .ttm-footer-badge .heart { color: var(--ttm-hot-red); }
 .ttm-footer-badge .brand-name { font-family: var(--ttm-font-serif); }
-html:not([data-ttm-theme]) .ttm-footer-badge { display: none; }
 
 /* ── ttm-gate (stack.js) — spec dialog pattern ── */
 .ttm-gate {
@@ -596,7 +584,8 @@ body.ttm-page {
   padding: 1.5rem 1.25rem 4rem;
 }
 .ttm-main { max-width: 64rem; margin: 0 auto; }
-.ttm-header { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+/* every page title clears the fixed chrome cluster (mode toggle + burger) */
+.ttm-header { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; padding-right: 7rem; }
 /* iridescent rule under the header — the brand shimmer as a themed border */
 .ttm-header::after {
   content: "";
@@ -880,19 +869,24 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 
 /* ── ttm-modetoggle — light/dark flip in the page header (brand pattern) ── */
 .ttm-modetoggle {
-  margin-left: auto;
-  align-self: center;
+  position: fixed;
+  top: 14px;
+  right: 68px;   /* burger is at right:14px, 44px wide — 10px gutter */
+  z-index: var(--z-header);
   width: 44px;
   height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border-radius: 50%;
   border: 1.5px solid var(--ttm-border);
-  background: transparent;
+  background: var(--ttm-surface);
   color: var(--ttm-text);
-  font-size: 1.05rem;
-  line-height: 1;
   cursor: pointer;
   transition: background var(--ttm-transition-fast), transform var(--ttm-transition-fast);
 }
+.ttm-modetoggle svg { width: 20px; height: 20px; display: block; }
 .ttm-modetoggle:hover { background: var(--ttm-wash-hover); transform: rotate(15deg); }
 
 /* ── visual pop — glow where the data is alive, gradients where it moves ── */
@@ -932,3 +926,15 @@ details.ttm-hw:hover { background: var(--ttm-wash); }
 details.ttm-hw > summary:hover { background: var(--ttm-wash); border-radius: var(--radius-sm); }
 .ttm-card { transition: border-color var(--ttm-transition-fast); }
 .ttm-card:hover { border-color: color-mix(in srgb, var(--ttm-control) 35%, var(--ttm-border)); }
+
+/* ── mobile scale — one standard pass, no page improvises its own ── */
+@media (max-width: 560px) {
+  .ttm-header { padding-right: 6.75rem; }
+  .ttm-header h1 { font-size: var(--ttm-fs-h4); }
+  .ttm-card { padding: .9rem 1rem; }
+  .ttm-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+  .ttm-tile { padding: .7rem .8rem; }
+  .ttm-tile__value { font-size: var(--ttm-fs-h3); }
+  .ttm-tile--hero { grid-column: 1 / -1; }
+  .ttm-tile--hero .ttm-tile__value { font-size: var(--ttm-fs-h2); }
+}

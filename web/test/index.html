@@ -148,12 +148,12 @@ window.addEventListener('load', function () {
     probe.remove();
     return fails.length === 0 ? true : fails.join('; ');
   });
-  t('modes: TTMTheme exposes mode/setMode/MODES; header carries the toggle', function () {
+  t('modes: TTMTheme exposes mode/setMode/MODES; chrome carries the toggle', function () {
     var T = window.TTMTheme;
     return typeof T.mode === 'function' && typeof T.setMode === 'function' &&
       Array.isArray(T.MODES) && T.MODES.length === 2 &&
-      document.querySelector('.ttm-header .ttm-modetoggle') !== null
-      ? true : 'mode API or header toggle missing';
+      document.querySelector('.ttm-modetoggle') !== null
+      ? true : 'mode API or chrome toggle missing';
   });
   t('modes: the header toggle flips the resolved mode', function () {
     var root = document.documentElement;

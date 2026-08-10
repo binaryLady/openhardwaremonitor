@@ -77,8 +77,14 @@
       r.checked = r.value === theme;
     });
     var mode = resolveMode();
+    // inline SVG in currentColor — text glyphs render as emoji on mobile
+    var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="4.2"/>' +
+      '<path d="M12 2.6v2.4M12 19v2.4M2.6 12H5M19 12h2.4M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6"/></svg>';
+    var MOON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="M20.4 14.2A8.5 8.5 0 0 1 9.8 3.6a8.5 8.5 0 1 0 10.6 10.6Z"/></svg>';
     document.querySelectorAll('.ttm-modetoggle').forEach(function (b) {
-      b.textContent = mode === 'dark' ? '\u2600' : '\u263E';
+      b.innerHTML = mode === 'dark' ? SUN : MOON;
       b.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     });
   }
@@ -88,6 +94,27 @@
     apply(currentTheme());
     return true;
   }
+
+  // Brand faces, loaded as universal chrome — the token stacks name
+  // Poppins/Pacifico/Special Elite/JetBrains Mono, but no page ever loaded
+  // them, so every surface silently fell back to system fonts.
+  (function loadFonts() {
+    if (document.querySelector('link[data-ttm-fonts]')) return;
+    [['preconnect', 'https://fonts.googleapis.com', false],
+     ['preconnect', 'https://fonts.gstatic.com', true]].forEach(function (p) {
+      var l = document.createElement('link');
+      l.rel = p[0]; l.href = p[1];
+      if (p[2]) l.crossOrigin = 'anonymous';
+      document.head.appendChild(l);
+    });
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.setAttribute('data-ttm-fonts', '');
+    css.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700' +
+      '&family=Pacifico&family=Special+Elite' +
+      '&family=JetBrains+Mono:wght@400;600;700&display=swap';
+    document.head.appendChild(css);
+  })();
 
   apply(currentTheme());
   applyCustom(getCustom());
@@ -308,9 +335,10 @@
     };
   }
 
+  // Universal chrome: the mode toggle is fixed beside the burger on every
+  // page — part of the site shell, not any page's header markup.
   function buildModeToggle() {
-    var header = document.querySelector('.ttm-header');
-    if (!header || header.querySelector('.ttm-modetoggle')) return;
+    if (document.querySelector('.ttm-modetoggle')) return;
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'ttm-modetoggle';
@@ -319,17 +347,37 @@
       setMode(next);
       if (window.TTMStack) window.TTMStack.track('mode_change', { mode: next });
     });
-    header.appendChild(b);
+    document.body.appendChild(b);
     apply(currentTheme()); // paint the glyph
+  }
+
+  // Universal footer: every page carries the same closing line — pages keep
+  // their own first line; missing footers are created.
+  function buildFooter() {
+    var footer = document.querySelector('footer.ttm-footer');
+    if (!footer) {
+      footer = document.createElement('footer');
+      footer.className = 'ttm-footer';
+      (document.querySelector('.ttm-main') || document.body).appendChild(footer);
+    }
+    if (footer.querySelector('.ttm-kbd-hints')) return;
+    var hints = document.createElement('span');
+    hints.className = 'ttm-kbd-hints';
+    hints.innerHTML = '<kbd>?</kbd> menu · <kbd>g</kbd> chords navigate · ' +
+      '\u2600/\u263E mode · <kbd>Tab</kbd> skip link';
+    footer.appendChild(document.createElement('br'));
+    footer.appendChild(hints);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     buildModeToggle();
+    buildFooter();
     buildMenu();
     var badge = document.createElement('div');
     badge.className = 'ttm-footer-badge';
-    badge.innerHTML = 'made with <span class="heart">❤</span> · <span class="brand-name gradient-text-rainbow">open source</span>';
-    document.body.appendChild(badge);
+    badge.innerHTML = 'made with <span class="heart">❤</span> <span class="brand-name gradient-text-rainbow">open source</span>';
+    // in the footer flow — buildFooter guarantees one exists on every page
+    (document.querySelector('footer.ttm-footer') || document.body).appendChild(badge);
   });
 
   // set() persists then applies — apply() alone is for previews
