@@ -67,6 +67,11 @@
     padding: .6rem 1rem;
     min-height: 44px;
     cursor: pointer;
+    /* anchors dressed as buttons: no underline, centered label */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
 
   .ttm-btn-primary { background: var(--ttm-accent-cta); color: var(--ttm-on-accent); border: none; }

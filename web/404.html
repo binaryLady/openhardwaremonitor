@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-ttm-theme="ttm">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>404 — Hardware</title>
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" href="/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-icon.png" />
+<link rel="stylesheet" href="/ttm/tokens.css" />
+<link rel="stylesheet" href="/ttm/components.css" />
+<script src="/ttm/config.js"></script>
+<script src="/vendor/supabase.js"></script>
+<script src="/ttm/theme.js"></script>
+<script src="/ttm/brand.js"></script>
+<script src="/ttm/toast.js"></script>
+<script src="/ttm/stack.js"></script>
+</head>
+<body class="ttm-page">
+<a class="ttm-skip" href="#main">Skip to content</a>
+<main class="ttm-main" id="main" tabindex="-1">
+  <header class="ttm-header">
+    <h1>Hardware <span class="gradient-text-rainbow">· open monitor</span></h1>
+    <span class="ttm-crumb">open hardware monitor · live sensors</span>
+  </header>
+
+  <section class="ttm-card full ttm-hero" aria-labelledby="h-err">
+    <h2 class="ttm-card__title" id="h-err">Signal lost</h2>
+    <div class="ttm-tiles">
+      <div class="ttm-tile ttm-tile--hero">
+        <span class="ttm-tile__label">No sensor at this address</span>
+        <b class="ttm-tile__value">404</b>
+        <svg class="ttm-tile__trend" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true">
+          <path class="spark__line" d="M3 16 L58 16 L64 6 L70 26 L76 16 L117 16"/>
+          <circle class="spark__dot spark__dot--hot" cx="117" cy="16" r="2.5"/>
+        </svg>
+      </div>
+    </div>
+    <p class="ttm-note">The page you asked for reads nothing — it may have moved, or never existed. The menu (?) lists every live route.</p>
+    <div class="ttm-row">
+      <a class="ttm-btn-primary" href="/">Back to the dashboard</a>
+      <a class="ttm-btn-outline" href="/?demo=1">Demo feed</a>
+    </div>
+  </section>
+</main>
+</body>
+</html>
