@@ -4,7 +4,7 @@ name: web tests
 # every assertion — WCAG contrast across all twenty theme variants, the
 # keyboard/nav contract, tokenization and standardization guards, the
 # sensor core. CI just runs it headless and honors its exit code.
-# The C# application is not built here.
+# The C# application is not built here — windows-build.yml does that.
 
 on:
   push:

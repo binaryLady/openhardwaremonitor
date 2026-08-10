@@ -1,11 +1,13 @@
 # Open Hardware Monitor — fork with a web dashboard
 
-This fork adds a static web dashboard for Open Hardware Monitor's embedded
-sensor server, together with a tokenized design system, a whitelabel layer,
-and a SpaceAPI publishing bridge. All additions live under [`web/`](web/).
-The desktop application embeds and serves this dashboard itself (replacing
-the legacy jQuery web UI), so `http://localhost:<port>/` opens the TTM app
-with live data; the C# sensor code and `/data.json` contract are unchanged.
+This fork gives Open Hardware Monitor a modern, tokenized web UI and makes
+the app runnable on any desk: the browser dashboard under [`web/`](web/)
+(design system, whitelabel layer, SpaceAPI publishing bridge), a
+cross-platform sensor agent under [`agent/`](agent/) for macOS/Linux, and a
+CI-built Windows executable. The desktop application embeds and serves the
+dashboard itself (replacing the legacy jQuery web UI), so
+`http://localhost:<port>/` opens the app with live data; the C# sensor code
+and `/data.json` contract are unchanged.
 
 Demo deployment: **https://ohm.thetechmargin.com** — `?demo=1` loads a
 generated 32-sensor feed, so no hardware or install is required to evaluate
@@ -77,7 +79,17 @@ layer, all WCAG-AA-checked by the in-browser bench. A sample:
   [IIIF Image API 3](https://iiif.io) imagery, and Wikidata-anchored
   [OKW](https://github.com/iop-alliance/OpenKnowWhere) manufacturing
   capabilities, for registration on
-  [Maps of Making](https://maps.thetechmargin.com).
+  [Maps of Making](https://maps.thetechmargin.com). The agent serves it
+  **live** at `/spaceapi` — fresh sensors on every request.
+- **Cross-platform agent** (`agent/serve.js`) — a dependency-free Node
+  server for macOS/Linux: same dashboard, same `/data.json` contract,
+  sensors in honesty tiers (see *Run the app*), start-at-login via
+  `install`, live `/spaceapi`.
+- **Embedded serving + CI** — the dashboard is compiled into the Windows
+  executable (`Utilities/HttpServer.cs` serves it same-origin, CORS open
+  on `/data.json`); the `windows build` workflow compiles the solution on
+  every push and uploads the runnable app as an artifact; the `web tests`
+  workflow runs the bench headless.
 - **Test bench** (`web/test/`) — 120 in-browser assertions covering the
   sensor core, the bridge (including the extension contracts), theming,
   the whitelabel runtime, and WCAG contrast computed from live token
@@ -85,7 +97,7 @@ layer, all WCAG-AA-checked by the in-browser bench. A sample:
 
 | Component gallery (`/components/`) | Test bench (`/test/`) |
 |---|---|
-| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows with sparklines, stat tiles](docs/screenshots/components.png) | ![Test bench with 100 passing assertions](docs/screenshots/test-bench.png) |
+| ![Component gallery: type, color, buttons, forms, data primitives, sensor rows with sparklines, stat tiles](docs/screenshots/components.png) | ![Test bench with 120 passing assertions](docs/screenshots/test-bench.png) |
 
 ## Keyboard & accessibility
 
@@ -106,6 +118,7 @@ polling. The full table lives in [`web/README.md`](web/README.md).
 | [/?demo=1](https://ohm.thetechmargin.com/?demo=1) | dashboard on generated demo data |
 | [/components/](https://ohm.thetechmargin.com/components/) | component gallery |
 | [/test/?nogate=1](https://ohm.thetechmargin.com/test/?nogate=1) | test bench |
+| [/get/](https://ohm.thetechmargin.com/get/) | install the app — Windows · macOS · Linux |
 | [/admin/](https://ohm.thetechmargin.com/admin/) | operator panel: telemetry, visitors, whitelabel editor (token-gated) |
 
 Keyboard: <kbd>d</kbd> demo · <kbd>t</kbd> theme · <kbd>?</kbd> menu ·
@@ -117,9 +130,10 @@ navigates.
 ```bash
 git clone https://github.com/binaryLady/openhardwaremonitor.git
 cd openhardwaremonitor
-python3 -m http.server 8080 --directory web
-# http://localhost:8080/?demo=1, or point the source bar at a machine
-# running Open Hardware Monitor's remote web server
+node agent/serve.js --open
+# serves the dashboard *and* this machine's sensors at :8085,
+# plus a live SpaceAPI fragment at /spaceapi; ?demo=1 for demo data.
+# Static-only alternative: python3 -m http.server 8080 --directory web
 ```
 
 Deployment: `vercel.json` + `build-web.sh` stage `web/` into `public/`
