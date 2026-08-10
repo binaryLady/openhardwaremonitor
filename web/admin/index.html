@@ -53,7 +53,7 @@
         <input type="password" class="ttm-input" id="op-token" placeholder="operator token" aria-label="Operator token" autocomplete="off">
         <button class="ttm-btn-primary" id="op-unlock">Unlock</button>
       </div>
-      <p class="ttm-note" id="op-status">token held in this tab only</p>
+      <p class="ttm-note" id="op-status">verified server-side · held in this tab only</p>
     </section>
 
     <section class="ttm-card full" aria-labelledby="h-visitors">
@@ -157,6 +157,35 @@
   var me = null;      // signed-in visitor {name, email}
   var token = null;   // operator token once verified
 
+  // Raw Postgres/PostgREST errors never reach the UI — map to plain language.
+  function friendly(err){
+    var m = (err && err.message) || String(err || '');
+    if (/unauthorized/i.test(m)) return 'Invalid or expired admin token.';
+    if (/sign in first/i.test(m)) return 'Sign in through the gate first.';
+    if (/schema cache|could not find the function/i.test(m))
+      return 'Server functions not installed yet — run supabase/schema.sql in the Supabase SQL editor, then retry.';
+    if (/failed to fetch|network|timeout/i.test(m)) return 'Server unavailable — check your connection and retry.';
+    return 'Something went wrong — please retry.';
+  }
+  // A rotated or revoked token fails mid-session: clear it, drop to the
+  // viewer tier, and reopen the unlock card so re-auth is one step.
+  function deauth(){
+    token = null;
+    try { sessionStorage.removeItem('ohm_admin_token'); } catch(e){}
+    setTier('viewer');
+    $('#purge-row').hidden = true;
+    $('#wl-publish').hidden = true;
+    $('#op-card').hidden = false;
+    $('#op-status').textContent = 'Invalid or expired admin token — enter it again.';
+    toast('Invalid or expired admin token.', { type: 'error' });
+    loadMasked();
+    $('#op-token').focus();
+  }
+  function opError(err){
+    if (/unauthorized/i.test((err && err.message) || '')) { deauth(); return true; }
+    return false;
+  }
+
   function setTier(t){
     $('#tier-badge').textContent = t;
     $('#tier-badge').className = 'ttm-badge' + (t === 'operator' ? ' ttm-badge--success' : '');
@@ -204,7 +233,7 @@
   // ── viewer tier: masked, view-only ──
   function loadMasked(){
     sb.rpc('ohm_visitors_masked', { p_email: me.email }).then(function(r){
-      if (r.error) { $('#visitors').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
+      if (r.error) { $('#visitors').innerHTML = '<p class="ttm-note">' + esc(friendly(r.error)) + '</p>'; return; }
       var rows = r.data || [];
       if (!rows.length) { $('#visitors').innerHTML = '<p class="ttm-note">no sign-ins yet</p>'; return; }
       var html = '<table class="ttm-table"><thead><tr><th>name</th><th>email</th><th>last seen</th><th>admin</th></tr></thead><tbody>';
@@ -216,7 +245,7 @@
       $('#visitors').innerHTML = html + '</tbody></table>';
     });
     sb.rpc('ohm_events_masked', { p_email: me.email, p_limit: 200 }).then(function(r){
-      if (r.error) { $('#events').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
+      if (r.error) { $('#events').innerHTML = '<p class="ttm-note">' + esc(friendly(r.error)) + '</p>'; return; }
       var rows = r.data || [];
       renderStats(rows, null);
       if (!rows.length) { $('#events').innerHTML = '<p class="ttm-note">no events yet</p>'; return; }
@@ -246,7 +275,7 @@
       };
       if (!sb) { local(); return; }
       sb.rpc('ohm_update_own_name', { p_email: me.email, p_name: name }).then(function(r){
-        if (r.error) { toast('Save failed: ' + r.error.message, { type: 'error' }); return; }
+        if (r.error) { toast('Save failed: ' + friendly(r.error), { type: 'error' }); return; }
         local();
         if (token) loadFull(); else loadMasked();
       });
@@ -259,7 +288,7 @@
       };
       if (!sb) { done(); return; }
       sb.rpc('ohm_delete_own', { p_email: me.email }).then(function(r){
-        if (r.error) { toast('Erase failed: ' + r.error.message, { type: 'error' }); return; }
+        if (r.error) { toast('Erase failed: ' + friendly(r.error), { type: 'error' }); return; }
         done();
       });
     });
@@ -280,8 +309,8 @@
     sb.rpc('ohm_admin_stats', { p_token: t }).then(function(r){
       if (r.error) {
         try { sessionStorage.removeItem('ohm_admin_token'); } catch(e){}
-        $('#op-status').textContent = 'token not accepted';
-        if (!silent) toast('That token was not accepted.', { type: 'error' });
+        $('#op-status').textContent = friendly(r.error);
+        if (!silent) { toast(friendly(r.error), { type: 'error' }); $('#op-token').focus(); }
         return;
       }
       token = t;
@@ -300,7 +329,7 @@
 
   function loadFull(){
     sb.rpc('ohm_admin_visitors', { p_token: token }).then(function(r){
-      if (r.error) { $('#visitors').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
+      if (r.error) { if (!opError(r.error)) $('#visitors').innerHTML = '<p class="ttm-note">' + esc(friendly(r.error)) + '</p>'; return; }
       var rows = r.data || [];
       if (!rows.length) { $('#visitors').innerHTML = '<p class="ttm-note">no sign-ins yet</p>'; return; }
       var html = '<table class="ttm-table"><thead><tr><th>name</th><th>email</th><th>last seen</th><th>admin</th><th>actions</th></tr></thead><tbody>';
@@ -323,7 +352,7 @@
       });
     });
     sb.rpc('ohm_admin_events', { p_token: token, p_limit: 1000 }).then(function(r){
-      if (r.error) { $('#events').innerHTML = '<p class="ttm-note">' + esc(r.error.message) + '</p>'; return; }
+      if (r.error) { if (!opError(r.error)) $('#events').innerHTML = '<p class="ttm-note">' + esc(friendly(r.error)) + '</p>'; return; }
       var rows = r.data || [];
       renderStats(rows, $('#st-total').textContent);
       if (!rows.length) { $('#events').innerHTML = '<p class="ttm-note">no events yet</p>'; return; }
@@ -343,14 +372,14 @@
       var name = prompt('New display name for ' + email + ':');
       if (name === null || !name.trim()) return;
       sb.rpc('ohm_admin_update_visitor', { p_token: token, p_email: email, p_name: name.trim() })
-        .then(function(r){ r.error ? toast(r.error.message, { type: 'error' }) : loadFull(); });
+        .then(function(r){ if (r.error) { if (!opError(r.error)) toast(friendly(r.error), { type: 'error' }); } else loadFull(); });
     } else if (act === 'promote' || act === 'demote') {
       sb.rpc('ohm_admin_update_visitor', { p_token: token, p_email: email, p_is_admin: act === 'promote' })
-        .then(function(r){ r.error ? toast(r.error.message, { type: 'error' }) : loadFull(); });
+        .then(function(r){ if (r.error) { if (!opError(r.error)) toast(friendly(r.error), { type: 'error' }); } else loadFull(); });
     } else if (act === 'delete') {
       if (!confirm('Delete ' + email + ' and all their telemetry? This cannot be undone.')) return;
       sb.rpc('ohm_admin_delete_visitor', { p_token: token, p_email: email })
-        .then(function(r){ r.error ? toast(r.error.message, { type: 'error' }) : loadFull(); });
+        .then(function(r){ if (r.error) { if (!opError(r.error)) toast(friendly(r.error), { type: 'error' }); } else loadFull(); });
     }
   }
 
@@ -452,7 +481,7 @@
         })()
       };
       sb.rpc('ohm_publish_config', { p_token: token, p_config: config }).then(function(r){
-        if (r.error) { toast('Publish failed: ' + r.error.message, { type: 'error' }); return; }
+        if (r.error) { if (!opError(r.error)) toast('Publish failed: ' + friendly(r.error), { type: 'error' }); return; }
         TTMBrand.refresh().then(function(){ toast('Published site-wide.', { type: 'success' }); });
         window.TTMStack.track('whitelabel_publish', {});
       });
