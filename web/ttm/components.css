@@ -679,6 +679,7 @@ body.ttm-page {
   height: 40px;
 }
 .ttm-srcbar .ttm-input { flex: 1 1 18rem; min-width: 0; }
+textarea.ttm-input { height: auto; min-height: 6rem; padding: .55rem .7rem; resize: vertical; width: 100%; box-sizing: border-box; }
 
 /* ── ttm-kv — label/value rows inside cards ── */
 .ttm-kv { display: flex; justify-content: space-between; gap: .8rem; padding: .3rem 0; border-bottom: 1px solid var(--ttm-border-subtle); }

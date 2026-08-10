@@ -104,7 +104,7 @@ in a field.
 | <kbd>m</kbd> | flip light/dark mode (site-wide) |
 | <kbd>Esc</kbd> | pause polling |
 | <kbd>?</kbd> | open / close the site menu (focus moves in) |
-| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>c</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / components / test bench / mission control / Maps of Making |
+| <kbd>g</kbd> then <kbd>d</kbd>/<kbd>r</kbd>/<kbd>t</kbd>/<kbd>a</kbd>/<kbd>m</kbd> | go to dashboard / RFQ / test bench / mission control / Maps of Making |
 | <kbd>↑</kbd>/<kbd>↓</kbd> or <kbd>j</kbd>/<kbd>k</kbd> | move between device cards in the sensor tree |
 | <kbd>Home</kbd>/<kbd>End</kbd> | first / last device card |
 | <kbd>←</kbd>/<kbd>→</kbd> | collapse / expand the focused card |

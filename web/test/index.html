@@ -521,7 +521,7 @@ window.addEventListener('load', function () {
   });
   t('nav: TTMNav API surface complete', function () {
     var N = window.TTMNav;
-    return N && ['d', 'c', 't', 'a', 'm'].every(function (k) { return k in N.routes; }) &&
+    return N && ['d', 'r', 't', 'a', 'm'].every(function (k) { return k in N.routes; }) &&
            typeof N.chordPending === 'function' && typeof N.openMenu === 'function' &&
            typeof N.closeMenu === 'function' && typeof N.menuOpen === 'function'
       ? true : 'missing keys';
