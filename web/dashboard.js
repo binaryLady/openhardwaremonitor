@@ -93,16 +93,19 @@
       sum.innerHTML = '<span class="dot' + (worst ? ' ' + worst : '') +
         '" aria-hidden="true"></span>' +
         '<h3>' + esc(block.name) + '</h3>' +
-        '<span class="n">' + block.sensors.length + ' sensors</span>';
+        '<span class="n">' + block.sensors.length + ' sensors' +
+        (block.icon ? ' · ' + esc(block.icon) : '') + '</span>';
       card.appendChild(sum);
       let lastGroup = null;
       block.sensors.forEach(s => {
         if (s.group !== lastGroup) {
           lastGroup = s.group;
-          const g = document.createElement('div');
-          g.className = 'ttm-sensor ttm-sensor--group';
-          g.innerHTML = '<span class="nm">' + esc(s.group) + '</span><span></span><span></span>';
-          card.appendChild(g);
+          if (s.group) {
+            const g = document.createElement('div');
+            g.className = 'ttm-sensor ttm-sensor--group';
+            g.innerHTML = '<span class="nm">' + esc(s.group) + '</span><span></span><span></span>';
+            card.appendChild(g);
+          }
         }
         const row = document.createElement('div');
         const st = stateOf(s);
@@ -121,7 +124,10 @@
             (pct == null ? '' : '<i style="width:' + pct.toFixed(1) + '%"></i>') +
           '</span>' +
           '<span class="val' + (lastVal.get(key) !== s.value ? ' is-fresh' : '') + '">' +
-            esc(s.value || '—') + '</span>';
+            esc(s.value || '—') + '</span>' +
+          // the app's other two data columns, from the server's own strings
+          '<span class="mn" title="session minimum">' + esc(s.min || '—') + '</span>' +
+          '<span class="mx" title="session maximum">' + esc(s.max || '—') + '</span>';
         lastVal.set(key, s.value);
         sparkline(row.querySelector('.spark'), h, st);
         card.appendChild(row);

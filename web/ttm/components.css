@@ -672,7 +672,8 @@ textarea.ttm-input { height: auto; min-height: 6rem; padding: .55rem .7rem; resi
 }
 .ttm-sensor {
   display: grid;
-  grid-template-columns: 1fr 4.5rem 5rem 5.8rem;
+  /* name · spark · meter · value · min · max — the app's data columns */
+  grid-template-columns: 1fr 4.5rem 5rem 5.8rem 4.6rem 4.6rem;
   gap: .6rem;
   align-items: center;
   padding: .28rem 0;
@@ -682,6 +683,12 @@ textarea.ttm-input { height: auto; min-height: 6rem; padding: .55rem .7rem; resi
 .ttm-sensor:last-child { border-bottom: none; }
 .ttm-sensor .nm { color: var(--ttm-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ttm-sensor .val { font-family: var(--ttm-font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.ttm-sensor .mn, .ttm-sensor .mx {
+  font: 400 var(--ttm-fs-caption) var(--ttm-font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ttm-text-faint);
+}
 /* the unfilled track is a lighter step of the fill's own ramp, so state
    reads across the whole bar, not just the filled part */
 .ttm-sensor .meterbar {
@@ -710,10 +717,11 @@ textarea.ttm-input { height: auto; min-height: 6rem; padding: .55rem .7rem; resi
 @keyframes ttm-val-fresh { from { background: var(--ttm-wash-hover); } to { background: transparent; } }
 .ttm-sensor .val.is-fresh { animation: ttm-val-fresh var(--ttm-anim-flash) ease-out 1; border-radius: var(--radius-sm); }
 
-/* narrow screens: the sparkline cedes its column before anything truncates */
+/* narrow screens: sparkline and min/max cede their columns before anything
+   truncates — the value column is the one that always survives */
 @media (max-width: 560px) {
   .ttm-sensor { grid-template-columns: 1fr 4rem 5.4rem; }
-  .ttm-sensor .spark { display: none; }
+  .ttm-sensor .spark, .ttm-sensor .mn, .ttm-sensor .mx { display: none; }
   .ttm-sensor--group { grid-template-columns: 1fr; }
 }
 
@@ -823,8 +831,9 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
 .ttm-modetoggle:hover { background: var(--ttm-wash-hover); transform: rotate(15deg); }
 
 /* ── ttm-sitebar — the universal site header (theme.js, every page):
-      brand wordmark · tools (mode toggle + burger). All navigation is
-      consolidated in the hamburger menu — the bar itself stays quiet.
+      pure chrome, tools only (mode toggle + burger). No text — each
+      page's hero header is the identity, and all navigation lives in
+      the hamburger menu.
       Sticky; bleeds across body.ttm-page's padding so it spans full width. ── */
 .ttm-sitebar {
   position: sticky;
@@ -844,17 +853,7 @@ details.ttm-hw > summary:focus-visible { outline: 2px solid var(--ttm-focus); ou
   align-items: center;
   gap: .9rem;
 }
-.ttm-sitebar__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
-  min-height: 44px;
-  text-decoration: none;
-  color: var(--ttm-text);
-  border-radius: var(--radius-sm);
-  font: 600 1rem/1 var(--ttm-font-sans);
-}
-.ttm-sitebar__tools { margin-left: auto; display: inline-flex; align-items: center; gap: .5rem; }
+.ttm-sitebar__tools { margin-left: auto; display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; }
 
 /* ── visual pop — glow where the data is alive, gradients where it moves ── */
 .ttm-badge--live {

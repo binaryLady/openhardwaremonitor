@@ -190,14 +190,14 @@ window.addEventListener('load', function () {
     return document.querySelector('.ttm-burger') !== null &&
            document.querySelectorAll('.ttm-menu__theme input').length >= 2;
   });
-  t('chrome: universal sitebar — brand link + tools only; nav lives in the menu', function () {
+  t('chrome: universal sitebar is pure chrome — no text, nav lives in the menu', function () {
     var bar = document.querySelector('.ttm-sitebar');
     if (!bar) return 'no .ttm-sitebar';
-    var brand = bar.querySelector('.ttm-sitebar__brand');
+    var barText = bar.textContent.trim();
     var inlineNav = bar.querySelector('nav');
     var menuRoutes = document.querySelectorAll('.ttm-menu nav a.ttm-menu__item[href]');
-    return brand && brand.getAttribute('href') === '/' && !inlineNav && menuRoutes.length >= 5
-      ? true : 'brand=' + !!brand + ' inlineNav=' + !!inlineNav + ' menuRoutes=' + menuRoutes.length;
+    return barText === '' && !inlineNav && menuRoutes.length >= 5
+      ? true : 'barText="' + barText + '" inlineNav=' + !!inlineNav + ' menuRoutes=' + menuRoutes.length;
   });
   t('chrome: mode toggle and burger live in the sitebar, after the skip link', function () {
     var tools = document.querySelector('.ttm-sitebar__tools');
@@ -412,6 +412,19 @@ window.addEventListener('load', function () {
     return P.meterPct({ cat: 'load', value: '120 %', n: 120 }) === 100 &&
            P.meterPct({ cat: 'clock', value: '50 MHz', n: 50, nMin: 0, nMax: 100 }) === 50 &&
            P.meterPct({ cat: 'clock', value: '', n: null }) === null ? true : 'bad meter';
+  });
+  t('parse: app fidelity — min/max carried, ungrouped leaf sensors kept', function () {
+    var carried = demoBlocks.every(function (b) {
+      return b.sensors.every(function (s) { return 'min' in s && 'max' in s; });
+    });
+    // a leaf sensor directly under hardware (no type group) must not drop
+    var loose = P.flatten({ Children: [{ Text: 'M', Children: [{
+      Text: 'HW', ImageURL: 'images_icon/cpu.png', Children: [{
+        Text: 'Direct', ImageURL: 'images_icon/temperature.png', Children: [],
+        Min: '1.0 V', Value: '1.2 V', Max: '1.3 V' }] }] }] });
+    var kept = loose.length === 1 && loose[0].sensors.length === 1 &&
+      loose[0].sensors[0].min === '1.0 V' && loose[0].sensors[0].group === '';
+    return carried && kept ? true : 'carried=' + carried + ' kept=' + kept;
   });
 
   // ── demo data + fixtures ──────────────────────────────────────────────────
